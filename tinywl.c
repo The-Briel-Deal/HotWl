@@ -170,6 +170,8 @@ static void keyboard_handle_modifiers(
 }
 
 static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
+	static char *newargv[] = { NULL };
+	static char *newenv[] = {"WAYLAND_DISPLAY=wayland-0", "DISPLAY=:0", "XDG_RUNTIME_DIR=/run/user/1000", NULL };
 	/*
 	 * Here we handle compositor keybindings. This is when the compositor is
 	 * processing keys, rather than passing them on to the client for its own
@@ -180,6 +182,14 @@ static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
 	switch (sym) {
 	case XKB_KEY_Escape:
 		wl_display_terminate(server->wl_display);
+		break;
+	case XKB_KEY_q:
+		printf("test\n");
+		pid_t pid = fork();
+		if (pid == 0) {
+		    printf("test child\n");
+		    execve("/usr/bin/kitty", newargv, newenv);
+		}
 		break;
 	case XKB_KEY_F1:
 		/* Cycle to the next toplevel */
@@ -214,7 +224,7 @@ static void keyboard_handle_key(
 
 	bool handled = false;
 	uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
-	if ((modifiers & WLR_MODIFIER_ALT) &&
+	if ((modifiers & WLR_MODIFIER_CTRL) &&
 			event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
 		/* If alt is held down and this button was _pressed_, we attempt to
 		 * process it as a compositor keybinding. */
