@@ -171,7 +171,7 @@ static void keyboard_handle_modifiers(
 
 static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
 	static char *newargv[] = { NULL };
-	static char *newenv[] = {"WAYLAND_DISPLAY=wayland-0", "DISPLAY=:0", "XDG_RUNTIME_DIR=/run/user/1000", NULL };
+	pid_t pid;
 	/*
 	 * Here we handle compositor keybindings. This is when the compositor is
 	 * processing keys, rather than passing them on to the client for its own
@@ -184,11 +184,9 @@ static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
 		wl_display_terminate(server->wl_display);
 		break;
 	case XKB_KEY_q:
-		printf("test\n");
-		pid_t pid = fork();
+		pid = fork();
 		if (pid == 0) {
-		    printf("test child\n");
-		    execve("/usr/bin/kitty", newargv, newenv);
+		    execv("/usr/bin/kitty", newargv);
 		}
 		break;
 	case XKB_KEY_F1:
