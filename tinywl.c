@@ -22,6 +22,7 @@
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 
@@ -32,10 +33,17 @@ enum tinywl_cursor_mode {
   TINYWL_CURSOR_RESIZE,
 };
 
+// This server struct is for holding our compositors state.
 struct tinywl_server {
+  // This is the core object in wayland. Its a special singleton.
   struct wl_display *wl_display;
+  // Provides a set of input and output devices. Has signals for when inputs
+  // and outputs are added.
   struct wlr_backend *backend;
+  // A struct to access the renderer. Can give you a file descriptor pointing
+  // to the DRM device.
   struct wlr_renderer *renderer;
+  // The allocator allocates memory for pixel buffers.
   struct wlr_allocator *allocator;
   struct wlr_scene *scene;
   struct wlr_scene_output_layout *scene_layout;
@@ -44,6 +52,9 @@ struct tinywl_server {
   struct wl_listener new_xdg_toplevel;
   struct wl_listener new_xdg_popup;
   struct wl_list toplevels;
+
+  struct wlr_layer_shell_v1 *layer_shell;
+  struct wl_listener new_layer_shell_surface;
 
   struct wlr_cursor *cursor;
   struct wlr_xcursor_manager *cursor_mgr;
@@ -899,10 +910,19 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
   wl_signal_add(&xdg_popup->events.destroy, &popup->destroy);
 }
 
+
+
+void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
+	wlr_log(WLR_INFO, "HI GABRIEL IT WORKED I WAS CALLED");
+}
+
 int main(int argc, char *argv[]) {
+  // Setup wlroots logging.
   wlr_log_init(WLR_DEBUG, NULL);
+  // Declare a variable to store a string of startup_cmd.
   char *startup_cmd = NULL;
 
+  // Iterate through args until it finds a -s then save to startup_cmd.   
   int c;
   while ((c = getopt(argc, argv, "s:h")) != -1) {
     switch (c) {
@@ -919,6 +939,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  // Create the wayland server/compositor.
   struct tinywl_server server = {0};
   /* The Wayland display is managed by libwayland. It handles accepting
    * clients from the Unix socket, manging Wayland globals, and so on. */
@@ -1003,6 +1024,14 @@ int main(int argc, char *argv[]) {
    * Creates a cursor, which is a wlroots utility for tracking the cursor
    * image shown on screen.
    */
+
+  // This is where I am creating the layer_shell, this is a wlr protocol that
+  // lets clients create things like a wofi popup that is on another layer.
+  server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
+  server.new_layer_shell_surface.notify = &handle_new_layer_shell_surface;
+  wl_signal_add(&server.layer_shell->events.new_surface, &server.new_layer_shell_surface);
+
+
   server.cursor = wlr_cursor_create();
   wlr_cursor_attach_output_layout(server.cursor, server.output_layout);
 

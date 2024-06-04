@@ -1,4 +1,5 @@
 WAYLAND_PROTOCOLS=$(shell pkg-config --variable=pkgdatadir wayland-protocols)
+WLR_PROTOCOLS=$(shell pkg-config --variable=pkgdatadir wlr-protocols)
 WAYLAND_SCANNER=$(shell pkg-config --variable=wayland_scanner wayland-scanner)
 LIBS=\
 	 $(shell pkg-config --cflags --libs "wlroots-0.18") \
@@ -12,7 +13,11 @@ xdg-shell-protocol.h:
 	$(WAYLAND_SCANNER) server-header \
 		$(WAYLAND_PROTOCOLS)/stable/xdg-shell/xdg-shell.xml $@
 
-tinywl: tinywl.c xdg-shell-protocol.h
+wlr-layer-shell-unstable-v1-protocol.h:
+	$(WAYLAND_SCANNER) server-header \
+		$(WLR_PROTOCOLS)/unstable/wlr-layer-shell-unstable-v1.xml $@
+
+tinywl: tinywl.c xdg-shell-protocol.h wlr-layer-shell-unstable-v1-protocol.h 
 	$(CC) $(CFLAGS) \
 		-g -Werror -I. \
 		-DWLR_USE_UNSTABLE \
@@ -20,7 +25,7 @@ tinywl: tinywl.c xdg-shell-protocol.h
 		$(LIBS)
 
 clean:
-	rm -f tinywl xdg-shell-protocol.h xdg-shell-protocol.c
+	rm -f tinywl xdg-shell-protocol.h xdg-shell-protocol.c wlr-layer-shell-unstable-v1-protocol.h
 
 .DEFAULT_GOAL=tinywl
 .PHONY: clean
