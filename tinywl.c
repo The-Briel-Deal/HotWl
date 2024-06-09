@@ -113,7 +113,7 @@ struct tinywl_popup {
 struct tinywl_launcher {
   struct wlr_layer_surface_v1 *wlr_layer_surface;
   struct wl_listener map;
-  struct wl_listener client_commit;
+  struct wl_listener commit;
 };
 
 struct tinywl_keyboard {
@@ -928,14 +928,17 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
 
+  struct tinywl_server *server = wl_container_of(listener, server, layer_shell);
+  struct wlr_surface *surf = data;
+
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }
 
-void handle_layer_surface_client_commit(struct wl_listener *listener,
-                                        void *data) {
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_client_commit started.");
+void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
+  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
+  struct wlr_surface *surf = data;
   struct tinywl_launcher *launcher =
-      wl_container_of(listener, launcher, client_commit);
+      wl_container_of(listener, launcher, commit);
 
   if (launcher->wlr_layer_surface->initialized) {
     wlr_log(WLR_INFO, "GFLOG: layer_surface is initialized, configuring now.");
@@ -945,7 +948,7 @@ void handle_layer_surface_client_commit(struct wl_listener *listener,
             "GFLOG: layer_surface not yet initialized, doing nothing.");
   }
 
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_client_commit finished.");
+  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit finished.");
 }
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
@@ -959,14 +962,17 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   struct tinywl_launcher *launcher = calloc(1, sizeof(*launcher));
   launcher->wlr_layer_surface = wlr_layer_surface;
 
-  // Register client_commit hander.
-  launcher->client_commit.notify = handle_layer_surface_client_commit;
-  wl_signal_add(&wlr_layer_surface->surface->events.client_commit,
-                &launcher->client_commit);
+  // Register commit hander.
+  launcher->commit.notify = handle_layer_surface_commit;
+  wl_signal_add(&wlr_layer_surface->surface->events.commit, &launcher->commit);
 
   // Register map handler.
   launcher->map.notify = handle_layer_surface_map;
   wl_signal_add(&wlr_layer_surface->surface->events.map, &launcher->map);
+
+  // Handle rendering.
+  // launcher->map.notify = handle_layer_surface_map;
+  // wl_signal_add(&wlr_layer_surface->surface->events.map, &launcher->map);
 
   // I think I need to wait for initial commit to configure.
   // wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 800, 600);
