@@ -55,6 +55,7 @@ struct tinywl_server {
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;
+  struct wl_list launchers;
 
   struct wlr_cursor *cursor;
   struct wlr_xcursor_manager *cursor_mgr;
@@ -111,7 +112,9 @@ struct tinywl_popup {
 };
 
 struct tinywl_launcher {
+  struct wl_list link;
   struct wlr_layer_surface_v1 *wlr_layer_surface;
+  struct tinywl_server *server;
   struct wl_listener map;
   struct wl_listener commit;
 };
@@ -928,9 +931,16 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
 
-  struct tinywl_server *server = wl_container_of(listener, server, layer_shell);
-  struct wlr_surface *surf = data;
+  struct tinywl_launcher *launcher = wl_container_of(listener, launcher, map);
+  struct tinywl_server *server = launcher->server;
 
+  wl_list_insert(&server->launchers, &launcher->link);
+  /* struct wlr_layer_surface_v1 *parent =
+   *   wlr_layer_surface_v1_try_from_wlr_surface(
+   *       launcher->wlr_layer_surface->surface);
+   * struct wlr_xdg_surface *parent = wlr_xdg_surface_try_from_wlr_surface(
+   *     launcher->wlr_layer_surface->surface);
+   */
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }
 
@@ -954,13 +964,16 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface started.");
   // Grab our server (parent of the listener).
-  struct tinywl_server *server = wl_container_of(listener, server, layer_shell);
+  struct tinywl_server *server =
+      wl_container_of(listener, server, new_layer_shell_surface);
+
   // Type the wlr_layer_shell
   struct wlr_layer_surface_v1 *wlr_layer_surface = data;
 
   // Dynamically allocate a new tinywl_launcher
   struct tinywl_launcher *launcher = calloc(1, sizeof(*launcher));
   launcher->wlr_layer_surface = wlr_layer_surface;
+  launcher->server = server;
 
   // Register commit hander.
   launcher->commit.notify = handle_layer_surface_commit;
@@ -1090,6 +1103,7 @@ int main(int argc, char *argv[]) {
 
   // This is where I am creating the layer_shell, this is a wlr protocol that
   // lets clients create things like a wofi popup that is on another layer.
+  wl_list_init(&server.launchers);
   server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
   server.new_layer_shell_surface.notify = handle_new_layer_shell_surface;
   wl_signal_add(&server.layer_shell->events.new_surface,
