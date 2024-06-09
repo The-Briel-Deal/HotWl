@@ -58,3 +58,4 @@ tinywl
 xdg-shell-protocol.h
 /.cache/
 /compile_commands.json
+/wlr-layer-shell-unstable-v1-protocol.h

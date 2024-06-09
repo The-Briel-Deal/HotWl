@@ -14,6 +14,7 @@
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_keyboard.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_pointer.h>
@@ -22,7 +23,6 @@
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_shell.h>
-#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 
@@ -108,6 +108,12 @@ struct tinywl_popup {
   struct wlr_xdg_popup *xdg_popup;
   struct wl_listener commit;
   struct wl_listener destroy;
+};
+
+struct tinywl_launcher {
+  struct wlr_layer_surface_v1 *wlr_layer_surface;
+  struct wl_listener map;
+  struct wl_listener client_commit;
 };
 
 struct tinywl_keyboard {
@@ -822,16 +828,25 @@ static void xdg_toplevel_request_fullscreen(struct wl_listener *listener,
 static void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
   /* This event is raised when a client creates a new toplevel (application
    * window). */
+
+  /* We are first getting our compositors state (the server object) from the
+   * callback. */
   struct tinywl_server *server =
       wl_container_of(listener, server, new_xdg_toplevel);
+  /* We are typing the generic callback's data pointer to an xdg_toplevel
+   * object. */
   struct wlr_xdg_toplevel *xdg_toplevel = data;
 
-  /* Allocate a tinywl_toplevel for this surface */
+  /* We are dynamically allocating a tinywl_toplevel instance. */
   struct tinywl_toplevel *toplevel = calloc(1, sizeof(*toplevel));
+  /* We are attaching our servers state to the new tinywl_toplevel instance. */
   toplevel->server = server;
+  /* We are storing the wlr_toplevel object that we have been was given to use
+   * from the data field. */
   toplevel->xdg_toplevel = xdg_toplevel;
   toplevel->scene_tree = wlr_scene_xdg_surface_create(
       &toplevel->server->scene->tree, xdg_toplevel->base);
+  // Setting the root node of scene_tree to have toplevel as data?
   toplevel->scene_tree->node.data = toplevel;
   xdg_toplevel->base->data = toplevel->scene_tree;
 
@@ -910,10 +925,52 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
   wl_signal_add(&xdg_popup->events.destroy, &popup->destroy);
 }
 
+void handle_layer_surface_map(struct wl_listener *listener, void *data) {
+  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
 
+  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
+}
+
+void handle_layer_surface_client_commit(struct wl_listener *listener,
+                                        void *data) {
+  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_client_commit started.");
+  struct tinywl_launcher *launcher =
+      wl_container_of(listener, launcher, client_commit);
+
+  if (launcher->wlr_layer_surface->initialized) {
+    wlr_log(WLR_INFO, "GFLOG: layer_surface is initialized, configuring now.");
+    wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 800, 600);
+  } else {
+    wlr_log(WLR_INFO,
+            "GFLOG: layer_surface not yet initialized, doing nothing.");
+  }
+
+  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_client_commit finished.");
+}
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
-	wlr_log(WLR_INFO, "HI GABRIEL IT WORKED I WAS CALLED");
+  wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface started.");
+  // Grab our server (parent of the listener).
+  struct tinywl_server *server = wl_container_of(listener, server, layer_shell);
+  // Type the wlr_layer_shell
+  struct wlr_layer_surface_v1 *wlr_layer_surface = data;
+
+  // Dynamically allocate a new tinywl_launcher
+  struct tinywl_launcher *launcher = calloc(1, sizeof(*launcher));
+  launcher->wlr_layer_surface = wlr_layer_surface;
+
+  // Register client_commit hander.
+  launcher->client_commit.notify = handle_layer_surface_client_commit;
+  wl_signal_add(&wlr_layer_surface->surface->events.client_commit,
+                &launcher->client_commit);
+
+  // Register map handler.
+  launcher->map.notify = handle_layer_surface_map;
+  wl_signal_add(&wlr_layer_surface->surface->events.map, &launcher->map);
+
+  // I think I need to wait for initial commit to configure.
+  // wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 800, 600);
+  wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface finished.");
 }
 
 int main(int argc, char *argv[]) {
@@ -922,7 +979,7 @@ int main(int argc, char *argv[]) {
   // Declare a variable to store a string of startup_cmd.
   char *startup_cmd = NULL;
 
-  // Iterate through args until it finds a -s then save to startup_cmd.   
+  // Iterate through args until it finds a -s then save to startup_cmd.
   int c;
   while ((c = getopt(argc, argv, "s:h")) != -1) {
     switch (c) {
@@ -1028,9 +1085,9 @@ int main(int argc, char *argv[]) {
   // This is where I am creating the layer_shell, this is a wlr protocol that
   // lets clients create things like a wofi popup that is on another layer.
   server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
-  server.new_layer_shell_surface.notify = &handle_new_layer_shell_surface;
-  wl_signal_add(&server.layer_shell->events.new_surface, &server.new_layer_shell_surface);
-
+  server.new_layer_shell_surface.notify = handle_new_layer_shell_surface;
+  wl_signal_add(&server.layer_shell->events.new_surface,
+                &server.new_layer_shell_surface);
 
   server.cursor = wlr_cursor_create();
   wlr_cursor_attach_output_layout(server.cursor, server.output_layout);
