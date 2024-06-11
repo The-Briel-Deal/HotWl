@@ -935,12 +935,12 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   struct tinywl_server *server = launcher->server;
 
   wl_list_insert(&server->launchers, &launcher->link);
-  /* struct wlr_layer_surface_v1 *parent =
-   *   wlr_layer_surface_v1_try_from_wlr_surface(
-   *       launcher->wlr_layer_surface->surface);
-   * struct wlr_xdg_surface *parent = wlr_xdg_surface_try_from_wlr_surface(
-   *     launcher->wlr_layer_surface->surface);
-   */
+
+  struct tinywl_output *output =
+      wl_container_of(server->outputs.prev, output, link);
+  
+  launcher->wlr_layer_surface->output = output->wlr_output;
+
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }
 
