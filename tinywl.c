@@ -950,9 +950,9 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
   struct tinywl_launcher *launcher =
       wl_container_of(listener, launcher, commit);
 
-  if (launcher->wlr_layer_surface->initialized) {
+  if (launcher->wlr_layer_surface->initial_commit) {
     wlr_log(WLR_INFO, "GFLOG: layer_surface is initialized, configuring now.");
-    wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 800, 600);
+    wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 0, 0);
   } else {
     wlr_log(WLR_INFO,
             "GFLOG: layer_surface not yet initialized, doing nothing.");
