@@ -1038,10 +1038,12 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
 
   // WIP - Getting output layer. I should actually check the layer_type.
-  struct wlr_scene_tree *output_layer = gfwl_output->layers.shell_top;
+  //struct wlr_scene_tree *output_layer =
+  //    wlr_scene_tree_create(gfwl_output->layers.shell_top);
 
+  // This is the issue, I think I need to run wlr_screne_tree_create
   struct wlr_scene_layer_surface_v1 *scene_surface =
-      wlr_scene_layer_surface_v1_create(output_layer, wlr_layer_surface);
+      wlr_scene_layer_surface_v1_create(&server->scene->tree, wlr_layer_surface);
   // Register commit handler.
   gfwl_layer_surface->commit.notify = handle_layer_surface_commit;
   wl_signal_add(&wlr_layer_surface->surface->events.commit,
