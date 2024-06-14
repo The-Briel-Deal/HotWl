@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <wayland-server-core.h>
+#include <wayland-util.h>
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
@@ -81,7 +82,17 @@ struct tinywl_server {
   struct wl_listener new_output;
 };
 
-struct tinywl_output {
+struct gfwl_output {
+  // For wlr_layer_surface
+  struct {
+    struct wlr_scene_tree *shell_background;
+    struct wlr_scene_tree *shell_bottom;
+    struct wlr_scene_tree *tiling;
+    struct wlr_scene_tree *fullscreen;
+    struct wlr_scene_tree *shell_top;
+    struct wlr_scene_tree *shell_overlay;
+    struct wlr_scene_tree *session_lock;
+  } layers;
   struct wl_list link;
   struct tinywl_server *server;
   struct wlr_output *wlr_output;
@@ -111,8 +122,9 @@ struct tinywl_popup {
   struct wl_listener destroy;
 };
 
-struct tinywl_launcher {
+struct gfwl_layer_surface {
   struct wl_list link;
+  struct gfwl_output *output;
   struct wlr_layer_surface_v1 *wlr_layer_surface;
   struct tinywl_server *server;
   struct wl_listener map;
@@ -588,7 +600,7 @@ static void server_cursor_frame(struct wl_listener *listener, void *data) {
 static void output_frame(struct wl_listener *listener, void *data) {
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
-  struct tinywl_output *output = wl_container_of(listener, output, frame);
+  struct gfwl_output *output = wl_container_of(listener, output, frame);
   struct wlr_scene *scene = output->server->scene;
 
   struct wlr_scene_output *scene_output =
@@ -606,14 +618,13 @@ static void output_request_state(struct wl_listener *listener, void *data) {
   /* This function is called when the backend requests a new state for
    * the output. For example, Wayland and X11 backends request a new mode
    * when the output window is resized. */
-  struct tinywl_output *output =
-      wl_container_of(listener, output, request_state);
+  struct gfwl_output *output = wl_container_of(listener, output, request_state);
   const struct wlr_output_event_request_state *event = data;
   wlr_output_commit_state(output->wlr_output, event->state);
 }
 
 static void output_destroy(struct wl_listener *listener, void *data) {
-  struct tinywl_output *output = wl_container_of(listener, output, destroy);
+  struct gfwl_output *output = wl_container_of(listener, output, destroy);
 
   wl_list_remove(&output->frame.link);
   wl_list_remove(&output->request_state.link);
@@ -652,7 +663,7 @@ static void server_new_output(struct wl_listener *listener, void *data) {
   wlr_output_state_finish(&state);
 
   /* Allocates and configures our state for this output */
-  struct tinywl_output *output = calloc(1, sizeof(*output));
+  struct gfwl_output *output = calloc(1, sizeof(*output));
   output->wlr_output = wlr_output;
   output->server = server;
 
@@ -931,14 +942,15 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
 
-  struct tinywl_launcher *launcher = wl_container_of(listener, launcher, map);
+  struct gfwl_layer_surface *launcher =
+      wl_container_of(listener, launcher, map);
   struct tinywl_server *server = launcher->server;
 
   wl_list_insert(&server->launchers, &launcher->link);
 
-  struct tinywl_output *output =
+  struct gfwl_output *output =
       wl_container_of(server->outputs.prev, output, link);
-  
+
   launcher->wlr_layer_surface->output = output->wlr_output;
 
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
@@ -947,7 +959,7 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
 void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
   struct wlr_surface *surf = data;
-  struct tinywl_launcher *launcher =
+  struct gfwl_layer_surface *launcher =
       wl_container_of(listener, launcher, commit);
 
   if (launcher->wlr_layer_surface->initial_commit) {
@@ -962,33 +974,84 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 }
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface started.");
+  wlr_log(WLR_DEBUG, "GFLOG: handle_new_layer_shell_surface started.");
   // Grab our server (parent of the listener).
   struct tinywl_server *server =
       wl_container_of(listener, server, new_layer_shell_surface);
+  if (!server) {
+    wlr_log(WLR_ERROR, "No server from listener.");
+    return;
+  }
 
-  // Type the wlr_layer_shell
+  // Grab layer surface.
   struct wlr_layer_surface_v1 *wlr_layer_surface = data;
+  if (!wlr_layer_surface) {
+    wlr_log(WLR_ERROR, "No layer surface.");
+    return;
+  }
 
-  // Dynamically allocate a new tinywl_launcher
-  struct tinywl_launcher *launcher = calloc(1, sizeof(*launcher));
-  launcher->wlr_layer_surface = wlr_layer_surface;
-  launcher->server = server;
+  // Dynamically allocate a new layer surface wrapper and save callback args.
+  struct gfwl_layer_surface *gfwl_layer_surface =
+      calloc(1, sizeof(*gfwl_layer_surface));
+  if (!gfwl_layer_surface) {
+    wlr_log(WLR_ERROR, "No gfwl layer surface.");
+    return;
+  }
+  gfwl_layer_surface->wlr_layer_surface = wlr_layer_surface;
+  gfwl_layer_surface->server = server;
 
-  // Register commit hander.
-  launcher->commit.notify = handle_layer_surface_commit;
-  wl_signal_add(&wlr_layer_surface->surface->events.commit, &launcher->commit);
+  // Check for layer surface output.
+  if (!wlr_layer_surface->output) {
+    wlr_log(WLR_INFO, "No output on layer surface.");
+    struct gfwl_output *output = NULL;
+    struct wlr_seat *seat = server->seat;
+    if (!seat) {
+      wlr_log(WLR_ERROR, "No seat.");
+      return;
+    }
+
+    // Get first output. -- THIS SEEMS TO BE THE CURRENT PROBLEM.
+    struct gfwl_output *gfwl_output =
+        wl_container_of(server->outputs.next, gfwl_output, link);
+    if (!gfwl_output) {
+      wlr_log(WLR_ERROR, "No output.");
+      return;
+    }
+
+    // Set layer_surface output.
+    if (gfwl_output->wlr_output) {
+      wlr_layer_surface->output = gfwl_output->wlr_output;
+    } else {
+      wlr_log(WLR_ERROR, "gfwl_output has no wlr_output.");
+      return;
+    }
+  }
+  // Get gfwl_output from wlr_output
+  struct gfwl_output *gfwl_output =
+      wl_container_of(wlr_layer_surface->output, gfwl_output, wlr_output);
+  if (!gfwl_output) {
+    wlr_log(WLR_ERROR, "No gfwl_output is parent of wlr_output.");
+    return;
+  }
+  gfwl_layer_surface->output = gfwl_output;
+
+  enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
+
+  // WIP - Getting output layer. I should actually check the layer_type.
+  struct wlr_scene_tree *output_layer = gfwl_output->layers.shell_top;
+
+  struct wlr_scene_layer_surface_v1 *scene_surface =
+      wlr_scene_layer_surface_v1_create(output_layer, wlr_layer_surface);
+  // Register commit handler.
+  gfwl_layer_surface->commit.notify = handle_layer_surface_commit;
+  wl_signal_add(&wlr_layer_surface->surface->events.commit,
+                &gfwl_layer_surface->commit);
 
   // Register map handler.
-  launcher->map.notify = handle_layer_surface_map;
-  wl_signal_add(&wlr_layer_surface->surface->events.map, &launcher->map);
+  gfwl_layer_surface->map.notify = handle_layer_surface_map;
+  wl_signal_add(&wlr_layer_surface->surface->events.map,
+                &gfwl_layer_surface->map);
 
-  // Handle rendering.
-  // launcher->map.notify = handle_layer_surface_map;
-  // wl_signal_add(&wlr_layer_surface->surface->events.map, &launcher->map);
-
-  // I think I need to wait for initial commit to configure.
-  // wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 800, 600);
   wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface finished.");
 }
 
