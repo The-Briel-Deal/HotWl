@@ -47,7 +47,7 @@ struct gfwl_server {
   struct wlr_renderer *renderer;
   // The allocator allocates memory for pixel buffers.
   struct wlr_allocator *allocator;
-  struct wlr_scene *scene;
+  struct gfwl_scene *scene_roots;
   struct wlr_scene_output_layout *scene_layout;
 
   struct wlr_xdg_shell *xdg_shell;
@@ -100,6 +100,20 @@ struct gfwl_output {
   struct wl_listener frame;
   struct wl_listener request_state;
   struct wl_listener destroy;
+};
+
+struct gfwl_scene {
+  // A scene wrapper so I can grab certain parts of the tree easily.
+  struct {
+    struct wlr_scene_tree *shell_background;
+    struct wlr_scene_tree *shell_bottom;
+    struct wlr_scene_tree *tiling;
+    struct wlr_scene_tree *fullscreen;
+    struct wlr_scene_tree *shell_top;
+    struct wlr_scene_tree *shell_overlay;
+    struct wlr_scene_tree *session_lock;
+  } layer_roots;
+  struct wlr_scene *root;
 };
 
 struct tinywl_toplevel {
@@ -392,7 +406,7 @@ static struct tinywl_toplevel *desktop_toplevel_at(struct gfwl_server *server,
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a tinywl_toplevel. */
   struct wlr_scene_node *node =
-      wlr_scene_node_at(&server->scene->tree.node, lx, ly, sx, sy);
+      wlr_scene_node_at(&server->scene_roots->root->tree.node, lx, ly, sx, sy);
   if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
     return NULL;
   }
@@ -413,6 +427,17 @@ static struct tinywl_toplevel *desktop_toplevel_at(struct gfwl_server *server,
   // Only return the tree's node IF it has a node.
   if (tree)
     return tree->node.data;
+  return NULL;
+}
+
+static struct gfwl_layer_surface *
+desktop_layer_surface_at(struct gfwl_server *server, double lx, double ly,
+                         struct wlr_surface **surface, double *sx, double *sy) {
+  // To get the output here I'm going to add root layer nodes too. And have
+  // the output specific ones be children of each layer.
+  struct wlr_scene_node *node = wlr_scene_node_at(&server->scene_roots->layer_roots.shell_top->node, lx, ly, sx, sy);
+
+  // TODO: Add more checks like above
   return NULL;
 }
 
@@ -498,6 +523,9 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   struct wlr_surface *surface = NULL;
   struct tinywl_toplevel *toplevel = desktop_toplevel_at(
       server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+  // TODO: Continue Here Tomorrow
+  struct gfwl_layer_surface *layer_surface = desktop_layer_surface_at(
+      server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
   if (!toplevel) {
     /* If there's no toplevel under the cursor, set the cursor image to a
      * default. This is what makes the cursor image appear when you move it
@@ -535,6 +563,7 @@ static void server_cursor_motion(struct wl_listener *listener, void *data) {
    * special configuration applied for the specific input device which
    * generated the event. You can pass NULL for the device if you want to move
    * the cursor around without any input. */
+  wlr_log(WLR_INFO, "Cursor moved: x=%f, y=%f", event->delta_x, event->delta_y);
   wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x,
                   event->delta_y);
   process_cursor_motion(server, event->time_msec);
@@ -602,7 +631,7 @@ static void output_frame(struct wl_listener *listener, void *data) {
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
   struct gfwl_output *output = wl_container_of(listener, output, frame);
-  struct wlr_scene *scene = output->server->scene;
+  struct wlr_scene *scene = output->server->scene_roots->root;
 
   struct wlr_scene_output *scene_output =
       wlr_scene_get_scene_output(scene, output->wlr_output);
@@ -694,7 +723,7 @@ static void server_new_output(struct wl_listener *listener, void *data) {
   struct wlr_output_layout_output *l_output =
       wlr_output_layout_add_auto(server->output_layout, wlr_output);
   struct wlr_scene_output *scene_output =
-      wlr_scene_output_create(server->scene, wlr_output);
+      wlr_scene_output_create(server->scene_roots->root, wlr_output);
   wlr_scene_output_layout_add_output(server->scene_layout, l_output,
                                      scene_output);
 }
@@ -860,7 +889,7 @@ static void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
    * from the data field. */
   toplevel->xdg_toplevel = xdg_toplevel;
   toplevel->scene_tree = wlr_scene_xdg_surface_create(
-      &toplevel->server->scene->tree, xdg_toplevel->base);
+      &toplevel->server->scene_roots->root->tree, xdg_toplevel->base);
   // Setting the root node of scene_tree to have toplevel as data?
   toplevel->scene_tree->node.data = toplevel;
   xdg_toplevel->base->data = toplevel->scene_tree;
@@ -947,6 +976,7 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
       wl_container_of(listener, gfwl_layer_surface, map);
   struct gfwl_server *server = gfwl_layer_surface->server;
 
+  // Remove launchers in favor of somewhere else to save layer surface nodes.
   wl_list_insert(&server->launchers, &gfwl_layer_surface->link);
 
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
@@ -1006,7 +1036,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
       return;
     }
 
-    // Get first output. -- THIS SEEMS TO BE THE CURRENT PROBLEM.
+    // Get first output.
     struct gfwl_output *gfwl_output =
         wl_container_of(server->outputs.next, gfwl_output, link);
     if (!gfwl_output) {
@@ -1033,13 +1063,11 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
 
-  // WIP - Getting output layer. I should actually check the layer_type.
-  // struct wlr_scene_tree *output_layer =
-  //    wlr_scene_tree_create(gfwl_output->layers.shell_top);
-
-  // This is the issue, I think I need to run wlr_screne_tree_create
+  if (!gfwl_output->layers.shell_top) {
+    gfwl_output->layers.shell_top = wlr_scene_tree_create(server->scene_roots->layer_roots.shell_top);
+  }
   struct wlr_scene_layer_surface_v1 *scene_surface =
-      wlr_scene_layer_surface_v1_create(&server->scene->tree,
+      wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
                                         wlr_layer_surface);
   // Register commit handler.
   gfwl_layer_surface->commit.notify = handle_layer_surface_commit;
@@ -1136,15 +1164,13 @@ int main(int argc, char *argv[]) {
   server.new_output.notify = server_new_output;
   wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
-  /* Create a scene graph. This is a wlroots abstraction that handles all
-   * rendering and damage tracking. All the compositor author needs to do
-   * is add things that should be rendered to the scene graph at the proper
-   * positions and then call wlr_scene_output_commit() to render a frame if
-   * necessary.
-   */
-  server.scene = wlr_scene_create();
-  server.scene_layout =
-      wlr_scene_attach_output_layout(server.scene, server.output_layout);
+  // Create root scene and the layer roots.
+  server.scene_roots = calloc(sizeof(*server.scene_roots), 1);
+  server.scene_roots->root = wlr_scene_create();
+  server.scene_layout = wlr_scene_attach_output_layout(server.scene_roots->root,
+                                                       server.output_layout);
+  server.scene_roots->layer_roots.shell_top =
+      wlr_scene_tree_create(&server.scene_roots->root->tree);
 
   /* Set up xdg-shell version 3. The xdg-shell is a Wayland protocol which is
    * used for application windows. For more detail on shells, refer to
@@ -1253,7 +1279,7 @@ int main(int argc, char *argv[]) {
   /* Once wl_display_run returns, we destroy all clients then shut down the
    * server. */
   wl_display_destroy_clients(server.wl_display);
-  wlr_scene_node_destroy(&server.scene->tree.node);
+  wlr_scene_node_destroy(&server.scene_roots->root->tree.node);
   wlr_xcursor_manager_destroy(server.cursor_mgr);
   wlr_cursor_destroy(server.cursor);
   wlr_allocator_destroy(server.allocator);
