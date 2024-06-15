@@ -22,7 +22,7 @@ build/lib: | build
 
 build/main: src/main.c build/lib/xdg-shell-protocol.h build/lib/wlr-layer-shell-unstable-v1-protocol.h | build 
 	$(CC) $(CFLAGS) \
-		-g -Werror -I. \
+		-g -Werror -I. -Ibuild/lib \
 		-DWLR_USE_UNSTABLE \
 		-o $@ $< \
 		$(LIBS)
