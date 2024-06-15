@@ -1,3 +1,4 @@
+// TODO: Change name to gfwl.c
 #include <assert.h>
 #include <getopt.h>
 #include <stdbool.h>
@@ -35,7 +36,7 @@ enum tinywl_cursor_mode {
 };
 
 // This server struct is for holding our compositors state.
-struct tinywl_server {
+struct gfwl_server {
   // This is the core object in wayland. Its a special singleton.
   struct wl_display *wl_display;
   // Provides a set of input and output devices. Has signals for when inputs
@@ -94,7 +95,7 @@ struct gfwl_output {
     struct wlr_scene_tree *session_lock;
   } layers;
   struct wl_list link;
-  struct tinywl_server *server;
+  struct gfwl_server *server;
   struct wlr_output *wlr_output;
   struct wl_listener frame;
   struct wl_listener request_state;
@@ -103,7 +104,7 @@ struct gfwl_output {
 
 struct tinywl_toplevel {
   struct wl_list link;
-  struct tinywl_server *server;
+  struct gfwl_server *server;
   struct wlr_xdg_toplevel *xdg_toplevel;
   struct wlr_scene_tree *scene_tree;
   struct wl_listener map;
@@ -126,14 +127,14 @@ struct gfwl_layer_surface {
   struct wl_list link;
   struct gfwl_output *output;
   struct wlr_layer_surface_v1 *wlr_layer_surface;
-  struct tinywl_server *server;
+  struct gfwl_server *server;
   struct wl_listener map;
   struct wl_listener commit;
 };
 
 struct tinywl_keyboard {
   struct wl_list link;
-  struct tinywl_server *server;
+  struct gfwl_server *server;
   struct wlr_keyboard *wlr_keyboard;
 
   struct wl_listener modifiers;
@@ -147,7 +148,7 @@ static void focus_toplevel(struct tinywl_toplevel *toplevel,
   if (toplevel == NULL) {
     return;
   }
-  struct tinywl_server *server = toplevel->server;
+  struct gfwl_server *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
   struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
   if (prev_surface == surface) {
@@ -203,7 +204,7 @@ static void keyboard_handle_modifiers(struct wl_listener *listener,
                                      &keyboard->wlr_keyboard->modifiers);
 }
 
-static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
+static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
   static char *newargv[] = {NULL};
   pid_t pid;
   /*
@@ -241,7 +242,7 @@ static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
 static void keyboard_handle_key(struct wl_listener *listener, void *data) {
   /* This event is raised when a key is pressed or released. */
   struct tinywl_keyboard *keyboard = wl_container_of(listener, keyboard, key);
-  struct tinywl_server *server = keyboard->server;
+  struct gfwl_server *server = keyboard->server;
   struct wlr_keyboard_key_event *event = data;
   struct wlr_seat *seat = server->seat;
 
@@ -285,7 +286,7 @@ static void keyboard_handle_destroy(struct wl_listener *listener, void *data) {
   free(keyboard);
 }
 
-static void server_new_keyboard(struct tinywl_server *server,
+static void server_new_keyboard(struct gfwl_server *server,
                                 struct wlr_input_device *device) {
   struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
 
@@ -318,7 +319,7 @@ static void server_new_keyboard(struct tinywl_server *server,
   wl_list_insert(&server->keyboards, &keyboard->link);
 }
 
-static void server_new_pointer(struct tinywl_server *server,
+static void server_new_pointer(struct gfwl_server *server,
                                struct wlr_input_device *device) {
   /* We don't do anything special with pointers. All of our pointer handling
    * is proxied through wlr_cursor. On another compositor, you might take this
@@ -330,7 +331,7 @@ static void server_new_pointer(struct tinywl_server *server,
 static void server_new_input(struct wl_listener *listener, void *data) {
   /* This event is raised by the backend when a new input device becomes
    * available. */
-  struct tinywl_server *server = wl_container_of(listener, server, new_input);
+  struct gfwl_server *server = wl_container_of(listener, server, new_input);
   struct wlr_input_device *device = data;
   switch (device->type) {
   case WLR_INPUT_DEVICE_KEYBOARD:
@@ -353,7 +354,7 @@ static void server_new_input(struct wl_listener *listener, void *data) {
 }
 
 static void seat_request_cursor(struct wl_listener *listener, void *data) {
-  struct tinywl_server *server =
+  struct gfwl_server *server =
       wl_container_of(listener, server, request_cursor);
   /* This event is raised by the seat when a client provides a cursor image */
   struct wlr_seat_pointer_request_set_cursor_event *event = data;
@@ -377,13 +378,13 @@ static void seat_request_set_selection(struct wl_listener *listener,
    * usually when the user copies something. wlroots allows compositors to
    * ignore such requests if they so choose, but in tinywl we always honor
    */
-  struct tinywl_server *server =
+  struct gfwl_server *server =
       wl_container_of(listener, server, request_set_selection);
   struct wlr_seat_request_set_selection_event *event = data;
   wlr_seat_set_selection(server->seat, event->source, event->serial);
 }
 
-static struct tinywl_toplevel *desktop_toplevel_at(struct tinywl_server *server,
+static struct tinywl_toplevel *desktop_toplevel_at(struct gfwl_server *server,
                                                    double lx, double ly,
                                                    struct wlr_surface **surface,
                                                    double *sx, double *sy) {
@@ -409,16 +410,19 @@ static struct tinywl_toplevel *desktop_toplevel_at(struct tinywl_server *server,
   while (tree != NULL && tree->node.data == NULL) {
     tree = tree->node.parent;
   }
-  return tree->node.data;
+  // Only return the tree's node IF it has a node.
+  if (tree)
+    return tree->node.data;
+  return NULL;
 }
 
-static void reset_cursor_mode(struct tinywl_server *server) {
+static void reset_cursor_mode(struct gfwl_server *server) {
   /* Reset the cursor mode to passthrough. */
   server->cursor_mode = TINYWL_CURSOR_PASSTHROUGH;
   server->grabbed_toplevel = NULL;
 }
 
-static void process_cursor_move(struct tinywl_server *server, uint32_t time) {
+static void process_cursor_move(struct gfwl_server *server, uint32_t time) {
   /* Move the grabbed toplevel to the new position. */
   struct tinywl_toplevel *toplevel = server->grabbed_toplevel;
   wlr_scene_node_set_position(&toplevel->scene_tree->node,
@@ -426,7 +430,7 @@ static void process_cursor_move(struct tinywl_server *server, uint32_t time) {
                               server->cursor->y - server->grab_y);
 }
 
-static void process_cursor_resize(struct tinywl_server *server, uint32_t time) {
+static void process_cursor_resize(struct gfwl_server *server, uint32_t time) {
   /*
    * Resizing the grabbed toplevel can be a little bit complicated, because we
    * could be resizing from any corner or edge. This not only resizes the
@@ -478,7 +482,7 @@ static void process_cursor_resize(struct tinywl_server *server, uint32_t time) {
   wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, new_width, new_height);
 }
 
-static void process_cursor_motion(struct tinywl_server *server, uint32_t time) {
+static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   /* If the mode is non-passthrough, delegate to those functions. */
   if (server->cursor_mode == TINYWL_CURSOR_MOVE) {
     process_cursor_move(server, time);
@@ -524,8 +528,7 @@ static void process_cursor_motion(struct tinywl_server *server, uint32_t time) {
 static void server_cursor_motion(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits a _relative_
    * pointer motion event (i.e. a delta) */
-  struct tinywl_server *server =
-      wl_container_of(listener, server, cursor_motion);
+  struct gfwl_server *server = wl_container_of(listener, server, cursor_motion);
   struct wlr_pointer_motion_event *event = data;
   /* The cursor doesn't move unless we tell it to. The cursor automatically
    * handles constraining the motion to the output layout, as well as any
@@ -545,7 +548,7 @@ static void server_cursor_motion_absolute(struct wl_listener *listener,
    * move the mouse over the window. You could enter the window from any edge,
    * so we have to warp the mouse there. There is also some hardware which
    * emits these events. */
-  struct tinywl_server *server =
+  struct gfwl_server *server =
       wl_container_of(listener, server, cursor_motion_absolute);
   struct wlr_pointer_motion_absolute_event *event = data;
   wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x,
@@ -556,8 +559,7 @@ static void server_cursor_motion_absolute(struct wl_listener *listener,
 static void server_cursor_button(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits a button
    * event. */
-  struct tinywl_server *server =
-      wl_container_of(listener, server, cursor_button);
+  struct gfwl_server *server = wl_container_of(listener, server, cursor_button);
   struct wlr_pointer_button_event *event = data;
   /* Notify the client with pointer focus that a button press has occurred */
   wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button,
@@ -578,7 +580,7 @@ static void server_cursor_button(struct wl_listener *listener, void *data) {
 static void server_cursor_axis(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits an axis event,
    * for example when you move the scroll wheel. */
-  struct tinywl_server *server = wl_container_of(listener, server, cursor_axis);
+  struct gfwl_server *server = wl_container_of(listener, server, cursor_axis);
   struct wlr_pointer_axis_event *event = data;
   /* Notify the client with pointer focus of the axis event. */
   wlr_seat_pointer_notify_axis(
@@ -591,8 +593,7 @@ static void server_cursor_frame(struct wl_listener *listener, void *data) {
    * event. Frame events are sent after regular pointer events to group
    * multiple events together. For instance, two axis events may happen at the
    * same time, in which case a frame event won't be sent in between. */
-  struct tinywl_server *server =
-      wl_container_of(listener, server, cursor_frame);
+  struct gfwl_server *server = wl_container_of(listener, server, cursor_frame);
   /* Notify the client with pointer focus of the frame event. */
   wlr_seat_pointer_notify_frame(server->seat);
 }
@@ -636,7 +637,7 @@ static void output_destroy(struct wl_listener *listener, void *data) {
 static void server_new_output(struct wl_listener *listener, void *data) {
   /* This event is raised by the backend when a new output (aka a display or
    * monitor) becomes available. */
-  struct tinywl_server *server = wl_container_of(listener, server, new_output);
+  struct gfwl_server *server = wl_container_of(listener, server, new_output);
   struct wlr_output *wlr_output = data;
 
   /* Configures the output created by the backend to use our allocator
@@ -755,7 +756,7 @@ static void begin_interactive(struct tinywl_toplevel *toplevel,
   /* This function sets up an interactive move or resize operation, where the
    * compositor stops propegating pointer events to clients and instead
    * consumes them itself, to move or resize windows. */
-  struct tinywl_server *server = toplevel->server;
+  struct gfwl_server *server = toplevel->server;
   struct wlr_surface *focused_surface =
       server->seat->pointer_state.focused_surface;
   if (toplevel->xdg_toplevel->base->surface !=
@@ -845,7 +846,7 @@ static void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
 
   /* We are first getting our compositors state (the server object) from the
    * callback. */
-  struct tinywl_server *server =
+  struct gfwl_server *server =
       wl_container_of(listener, server, new_xdg_toplevel);
   /* We are typing the generic callback's data pointer to an xdg_toplevel
    * object. */
@@ -942,29 +943,24 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
 
-  struct gfwl_layer_surface *launcher =
-      wl_container_of(listener, launcher, map);
-  struct tinywl_server *server = launcher->server;
+  struct gfwl_layer_surface *gfwl_layer_surface =
+      wl_container_of(listener, gfwl_layer_surface, map);
+  struct gfwl_server *server = gfwl_layer_surface->server;
 
-  wl_list_insert(&server->launchers, &launcher->link);
-
-  struct gfwl_output *output =
-      wl_container_of(server->outputs.prev, output, link);
-
-  launcher->wlr_layer_surface->output = output->wlr_output;
+  wl_list_insert(&server->launchers, &gfwl_layer_surface->link);
 
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }
 
 void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
-  struct wlr_surface *surf = data;
-  struct gfwl_layer_surface *launcher =
-      wl_container_of(listener, launcher, commit);
+  struct wlr_surface *wlr_surface = data;
+  struct gfwl_layer_surface *gfwl_layer_surface =
+      wl_container_of(listener, gfwl_layer_surface, commit);
 
-  if (launcher->wlr_layer_surface->initial_commit) {
+  if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
     wlr_log(WLR_INFO, "GFLOG: layer_surface is initialized, configuring now.");
-    wlr_layer_surface_v1_configure(launcher->wlr_layer_surface, 0, 0);
+    wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
   } else {
     wlr_log(WLR_INFO,
             "GFLOG: layer_surface not yet initialized, doing nothing.");
@@ -976,7 +972,7 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   wlr_log(WLR_DEBUG, "GFLOG: handle_new_layer_shell_surface started.");
   // Grab our server (parent of the listener).
-  struct tinywl_server *server =
+  struct gfwl_server *server =
       wl_container_of(listener, server, new_layer_shell_surface);
   if (!server) {
     wlr_log(WLR_ERROR, "No server from listener.");
@@ -1038,12 +1034,13 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
 
   // WIP - Getting output layer. I should actually check the layer_type.
-  //struct wlr_scene_tree *output_layer =
+  // struct wlr_scene_tree *output_layer =
   //    wlr_scene_tree_create(gfwl_output->layers.shell_top);
 
   // This is the issue, I think I need to run wlr_screne_tree_create
   struct wlr_scene_layer_surface_v1 *scene_surface =
-      wlr_scene_layer_surface_v1_create(&server->scene->tree, wlr_layer_surface);
+      wlr_scene_layer_surface_v1_create(&server->scene->tree,
+                                        wlr_layer_surface);
   // Register commit handler.
   gfwl_layer_surface->commit.notify = handle_layer_surface_commit;
   wl_signal_add(&wlr_layer_surface->surface->events.commit,
@@ -1081,7 +1078,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Create the wayland server/compositor.
-  struct tinywl_server server = {0};
+  struct gfwl_server server = {0};
   /* The Wayland display is managed by libwayland. It handles accepting
    * clients from the Unix socket, manging Wayland globals, and so on. */
   server.wl_display = wl_display_create();
