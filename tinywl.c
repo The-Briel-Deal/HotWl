@@ -435,7 +435,9 @@ desktop_layer_surface_at(struct gfwl_server *server, double lx, double ly,
                          struct wlr_surface **surface, double *sx, double *sy) {
   // To get the output here I'm going to add root layer nodes too. And have
   // the output specific ones be children of each layer.
-  struct wlr_scene_node *node = wlr_scene_node_at(&server->scene_roots->layer_roots.shell_top->node, lx, ly, sx, sy);
+  // TODO: Use - wlr_layer_surface_v1_surface_at instead.
+  struct wlr_scene_node *node = wlr_scene_node_at(
+      &server->scene_roots->layer_roots.shell_top->node, lx, ly, sx, sy);
 
   // TODO: Add more checks like above
   return NULL;
@@ -1063,9 +1065,9 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
 
-  if (!gfwl_output->layers.shell_top) {
-    gfwl_output->layers.shell_top = wlr_scene_tree_create(server->scene_roots->layer_roots.shell_top);
-  }
+  gfwl_output->layers.shell_top =
+      wlr_scene_tree_create(server->scene_roots->layer_roots.shell_top);
+
   struct wlr_scene_layer_surface_v1 *scene_surface =
       wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
                                         wlr_layer_surface);
