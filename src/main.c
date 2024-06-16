@@ -1,4 +1,6 @@
 #include "layer_shell.h"
+#include "output.h"
+#include "scene.h"
 #include "server.h"
 #include <assert.h>
 #include <getopt.h>
@@ -28,39 +30,6 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
-
-struct gfwl_output {
-  // For wlr_layer_surface
-  struct {
-    struct wlr_scene_tree *shell_background;
-    struct wlr_scene_tree *shell_bottom;
-    struct wlr_scene_tree *tiling;
-    struct wlr_scene_tree *fullscreen;
-    struct wlr_scene_tree *shell_top;
-    struct wlr_scene_tree *shell_overlay;
-    struct wlr_scene_tree *session_lock;
-  } layers;
-  struct wl_list link;
-  struct gfwl_server *server;
-  struct wlr_output *wlr_output;
-  struct wl_listener frame;
-  struct wl_listener request_state;
-  struct wl_listener destroy;
-};
-
-struct gfwl_scene {
-  // A scene wrapper so I can grab certain parts of the tree easily.
-  struct {
-    struct wlr_scene_tree *shell_background;
-    struct wlr_scene_tree *shell_bottom;
-    struct wlr_scene_tree *tiling;
-    struct wlr_scene_tree *fullscreen;
-    struct wlr_scene_tree *shell_top;
-    struct wlr_scene_tree *shell_overlay;
-    struct wlr_scene_tree *session_lock;
-  } layer_roots;
-  struct wlr_scene *root;
-};
 
 struct gfwl_toplevel {
   struct wl_list link;
@@ -894,106 +863,6 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
 
   popup->destroy.notify = xdg_popup_destroy;
   wl_signal_add(&xdg_popup->events.destroy, &popup->destroy);
-}
-
-void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
-  struct wlr_surface *wlr_surface = data;
-  struct gfwl_layer_surface *gfwl_layer_surface =
-      wl_container_of(listener, gfwl_layer_surface, commit);
-
-  if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
-    wlr_log(WLR_INFO, "GFLOG: layer_surface is initialized, configuring now.");
-    wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
-  } else {
-    wlr_log(WLR_INFO,
-            "GFLOG: layer_surface not yet initialized, doing nothing.");
-  }
-
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit finished.");
-}
-
-void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_DEBUG, "GFLOG: handle_new_layer_shell_surface started.");
-  // Grab our server (parent of the listener).
-  struct gfwl_server *server =
-      wl_container_of(listener, server, new_layer_shell_surface);
-  if (!server) {
-    wlr_log(WLR_ERROR, "No server from listener.");
-    return;
-  }
-
-  // Grab layer surface.
-  struct wlr_layer_surface_v1 *wlr_layer_surface = data;
-  if (!wlr_layer_surface) {
-    wlr_log(WLR_ERROR, "No layer surface.");
-    return;
-  }
-
-  // Dynamically allocate a new layer surface wrapper and save callback args.
-  struct gfwl_layer_surface *gfwl_layer_surface =
-      calloc(1, sizeof(*gfwl_layer_surface));
-  if (!gfwl_layer_surface) {
-    wlr_log(WLR_ERROR, "No gfwl layer surface.");
-    return;
-  }
-  gfwl_layer_surface->wlr_layer_surface = wlr_layer_surface;
-  gfwl_layer_surface->server = server;
-
-  // Check for layer surface output.
-  if (!wlr_layer_surface->output) {
-    wlr_log(WLR_INFO, "No output on layer surface.");
-    struct gfwl_output *output = NULL;
-    struct wlr_seat *seat = server->seat;
-    if (!seat) {
-      wlr_log(WLR_ERROR, "No seat.");
-      return;
-    }
-
-    // Get first output.
-    struct gfwl_output *gfwl_output =
-        wl_container_of(server->outputs.next, gfwl_output, link);
-    if (!gfwl_output) {
-      wlr_log(WLR_ERROR, "No output.");
-      return;
-    }
-
-    // Set layer_surface output.
-    if (gfwl_output->wlr_output) {
-      wlr_layer_surface->output = gfwl_output->wlr_output;
-    } else {
-      wlr_log(WLR_ERROR, "gfwl_output has no wlr_output.");
-      return;
-    }
-  }
-  // Get gfwl_output from wlr_output
-  struct gfwl_output *gfwl_output =
-      wl_container_of(wlr_layer_surface->output, gfwl_output, wlr_output);
-  if (!gfwl_output) {
-    wlr_log(WLR_ERROR, "No gfwl_output is parent of wlr_output.");
-    return;
-  }
-  gfwl_layer_surface->output = gfwl_output;
-
-  enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
-
-  gfwl_output->layers.shell_top =
-      wlr_scene_tree_create(server->scene_roots->layer_roots.shell_top);
-
-  struct wlr_scene_layer_surface_v1 *scene_surface =
-      wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
-                                        wlr_layer_surface);
-  // Register commit handler.
-  gfwl_layer_surface->commit.notify = handle_layer_surface_commit;
-  wl_signal_add(&wlr_layer_surface->surface->events.commit,
-                &gfwl_layer_surface->commit);
-
-  // Register map handler.
-  gfwl_layer_surface->map.notify = handle_layer_surface_map;
-  wl_signal_add(&wlr_layer_surface->surface->events.map,
-                &gfwl_layer_surface->map);
-
-  wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface finished.");
 }
 
 int main(int argc, char *argv[]) {
