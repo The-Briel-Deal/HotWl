@@ -25,7 +25,7 @@ build/main: src/main.c build/lib/xdg-shell-protocol.h build/lib/wlr-layer-shell-
 		-g -Werror -I. -Ibuild/lib \
 		-DWLR_USE_UNSTABLE \
 		-o $@ $< \
-		$(LIBS)
+		$(LIBS) -Isrc src/layer_shell.c src/layer_shell.h
 
 clean:
 	rm -rf build 

@@ -1,0 +1,7 @@
+enum gfwl_cursor_mode {
+  TINYWL_CURSOR_PASSTHROUGH,
+  TINYWL_CURSOR_MOVE,
+  TINYWL_CURSOR_RESIZE,
+};
+
+

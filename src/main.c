@@ -1,4 +1,5 @@
-// TODO: Change name to gfwl.c
+#include "layer_shell.h"
+#include "server.h"
 #include <assert.h>
 #include <getopt.h>
 #include <stdbool.h>
@@ -27,61 +28,6 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
-
-/* For brevity's sake, struct members are annotated where they are used. */
-enum gfwl_cursor_mode {
-  TINYWL_CURSOR_PASSTHROUGH,
-  TINYWL_CURSOR_MOVE,
-  TINYWL_CURSOR_RESIZE,
-};
-
-// This server struct is for holding our compositors state.
-struct gfwl_server {
-  // This is the core object in wayland. Its a special singleton.
-  struct wl_display *wl_display;
-  // Provides a set of input and output devices. Has signals for when inputs
-  // and outputs are added.
-  struct wlr_backend *backend;
-  // A struct to access the renderer. Can give you a file descriptor pointing
-  // to the DRM device.
-  struct wlr_renderer *renderer;
-  // The allocator allocates memory for pixel buffers.
-  struct wlr_allocator *allocator;
-  struct gfwl_scene *scene_roots;
-  struct wlr_scene_output_layout *scene_layout;
-
-  struct wlr_xdg_shell *xdg_shell;
-  struct wl_listener new_xdg_toplevel;
-  struct wl_listener new_xdg_popup;
-  struct wl_list toplevels;
-
-  struct wlr_layer_shell_v1 *layer_shell;
-  struct wl_listener new_layer_shell_surface;
-  struct wl_list launchers;
-
-  struct wlr_cursor *cursor;
-  struct wlr_xcursor_manager *cursor_mgr;
-  struct wl_listener cursor_motion;
-  struct wl_listener cursor_motion_absolute;
-  struct wl_listener cursor_button;
-  struct wl_listener cursor_axis;
-  struct wl_listener cursor_frame;
-
-  struct wlr_seat *seat;
-  struct wl_listener new_input;
-  struct wl_listener request_cursor;
-  struct wl_listener request_set_selection;
-  struct wl_list keyboards;
-  enum gfwl_cursor_mode cursor_mode;
-  struct gfwl_toplevel *grabbed_toplevel;
-  double grab_x, grab_y;
-  struct wlr_box grab_geobox;
-  uint32_t resize_edges;
-
-  struct wlr_output_layout *output_layout;
-  struct wl_list outputs;
-  struct wl_listener new_output;
-};
 
 struct gfwl_output {
   // For wlr_layer_surface
@@ -135,15 +81,6 @@ struct gfwl_popup {
   struct wlr_xdg_popup *xdg_popup;
   struct wl_listener commit;
   struct wl_listener destroy;
-};
-
-struct gfwl_layer_surface {
-  struct wl_list link;
-  struct gfwl_output *output;
-  struct wlr_layer_surface_v1 *wlr_layer_surface;
-  struct gfwl_server *server;
-  struct wl_listener map;
-  struct wl_listener commit;
 };
 
 struct gfwl_keyboard {
@@ -291,8 +228,7 @@ static void keyboard_handle_destroy(struct wl_listener *listener, void *data) {
    * the destruction of the wlr_keyboard. It will no longer receive events
    * and should be destroyed.
    */
-  struct gfwl_keyboard *keyboard =
-      wl_container_of(listener, keyboard, destroy);
+  struct gfwl_keyboard *keyboard = wl_container_of(listener, keyboard, destroy);
   wl_list_remove(&keyboard->modifiers.link);
   wl_list_remove(&keyboard->key.link);
   wl_list_remove(&keyboard->destroy.link);
@@ -399,9 +335,9 @@ static void seat_request_set_selection(struct wl_listener *listener,
 }
 
 static struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server,
-                                                   double lx, double ly,
-                                                   struct wlr_surface **surface,
-                                                   double *sx, double *sy) {
+                                                 double lx, double ly,
+                                                 struct wlr_surface **surface,
+                                                 double *sx, double *sy) {
   /* This returns the topmost node in the scene at the given layout coords.
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a gfwl_toplevel. */
@@ -744,8 +680,7 @@ static void xdg_toplevel_unmap(struct wl_listener *listener, void *data) {
 
 static void xdg_toplevel_commit(struct wl_listener *listener, void *data) {
   /* Called when a new surface state is committed. */
-  struct gfwl_toplevel *toplevel =
-      wl_container_of(listener, toplevel, commit);
+  struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
   if (toplevel->xdg_toplevel->base->initial_commit) {
     /* When an xdg_surface performs an initial commit, the compositor must
@@ -758,8 +693,7 @@ static void xdg_toplevel_commit(struct wl_listener *listener, void *data) {
 
 static void xdg_toplevel_destroy(struct wl_listener *listener, void *data) {
   /* Called when the xdg_toplevel is destroyed. */
-  struct gfwl_toplevel *toplevel =
-      wl_container_of(listener, toplevel, destroy);
+  struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, destroy);
 
   wl_list_remove(&toplevel->map.link);
   wl_list_remove(&toplevel->unmap.link);
@@ -960,19 +894,6 @@ static void server_new_xdg_popup(struct wl_listener *listener, void *data) {
 
   popup->destroy.notify = xdg_popup_destroy;
   wl_signal_add(&xdg_popup->events.destroy, &popup->destroy);
-}
-
-void handle_layer_surface_map(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
-
-  struct gfwl_layer_surface *gfwl_layer_surface =
-      wl_container_of(listener, gfwl_layer_surface, map);
-  struct gfwl_server *server = gfwl_layer_surface->server;
-
-  // Remove launchers in favor of somewhere else to save layer surface nodes.
-  wl_list_insert(&server->launchers, &gfwl_layer_surface->link);
-
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }
 
 void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
