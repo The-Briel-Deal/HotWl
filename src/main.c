@@ -430,19 +430,6 @@ static struct tinywl_toplevel *desktop_toplevel_at(struct gfwl_server *server,
   return NULL;
 }
 
-static struct gfwl_layer_surface *
-desktop_layer_surface_at(struct gfwl_server *server, double lx, double ly,
-                         struct wlr_surface **surface, double *sx, double *sy) {
-  // To get the output here I'm going to add root layer nodes too. And have
-  // the output specific ones be children of each layer.
-  // TODO: Use - wlr_layer_surface_v1_surface_at instead.
-  struct wlr_scene_node *node = wlr_scene_node_at(
-      &server->scene_roots->layer_roots.shell_top->node, lx, ly, sx, sy);
-
-  // TODO: Add more checks like above
-  return NULL;
-}
-
 static void reset_cursor_mode(struct gfwl_server *server) {
   /* Reset the cursor mode to passthrough. */
   server->cursor_mode = TINYWL_CURSOR_PASSTHROUGH;
@@ -522,19 +509,23 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   /* Otherwise, find the toplevel under the pointer and send the event along. */
   double sx, sy;
   struct wlr_seat *seat = server->seat;
-  struct wlr_surface *surface = NULL;
+  struct wlr_surface *wlr_surface = NULL;
   struct tinywl_toplevel *toplevel = desktop_toplevel_at(
-      server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
-  // TODO: Continue Here Tomorrow
-  struct gfwl_layer_surface *layer_surface = desktop_layer_surface_at(
-      server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+      server, server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
+  /* TODO: Verify that this is getting layer_surface's when mouse is over it.
+
+  struct wlr_layer_surface_v1 *wlr_layer_surface = NULL;
+  wlr_surface = wlr_layer_surface_v1_surface_at(
+      wlr_layer_surface, server->cursor->x, server->cursor->y, &sx, &sy);
+
+  */
   if (!toplevel) {
     /* If there's no toplevel under the cursor, set the cursor image to a
      * default. This is what makes the cursor image appear when you move it
      * around the screen, not over any toplevels. */
     wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
   }
-  if (surface) {
+  if (wlr_surface) {
     /*
      * Send pointer enter and motion events.
      *
@@ -546,7 +537,7 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
      * the surface has already has pointer focus or if the client is already
      * aware of the coordinates passed.
      */
-    wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
+    wlr_seat_pointer_notify_enter(seat, wlr_surface, sx, sy);
     wlr_seat_pointer_notify_motion(seat, time, sx, sy);
   } else {
     /* Clear pointer focus so future button events and such are not sent to
