@@ -35,9 +35,7 @@
 #include <xkbcommon/xkbcommon.h>
 
 int main(int argc, char *argv[]) {
-  // Setup wlroots logging.
   wlr_log_init(WLR_DEBUG, NULL);
-  // Declare a variable to store a string of startup_cmd.
   char *startup_cmd = NULL;
 
   // Iterate through args until it finds a -s then save to startup_cmd.
@@ -59,13 +57,7 @@ int main(int argc, char *argv[]) {
 
   // Create the wayland server/compositor.
   struct gfwl_server server = {0};
-  /* The Wayland display is managed by libwayland. It handles accepting
-   * clients from the Unix socket, manging Wayland globals, and so on. */
   server.wl_display = wl_display_create();
-  /* The backend is a wlroots feature which abstracts the underlying input and
-   * output hardware. The autocreate option will choose the most suitable
-   * backend based on the current environment, such as opening an X11 window
-   * if an X11 server is running. */
   server.backend = wlr_backend_autocreate(
       wl_display_get_event_loop(server.wl_display), NULL);
   if (server.backend == NULL) {
@@ -73,10 +65,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  /* Autocreates a renderer, either Pixman, GLES2 or Vulkan for us. The user
-   * can also specify a renderer using the WLR_RENDERER env var.
-   * The renderer is responsible for defining the various pixel formats it
-   * supports for shared memory, this configures that for clients. */
   server.renderer = wlr_renderer_autocreate(server.backend);
   if (server.renderer == NULL) {
     wlr_log(WLR_ERROR, "failed to create wlr_renderer");
@@ -141,8 +129,7 @@ int main(int argc, char *argv[]) {
    * image shown on screen.
    */
 
-  // This is where I am creating the layer_shell, this is a wlr protocol that
-  // lets clients create things like a wofi popup that is on another layer.
+  // Init layer shell and setup listeners.
   wl_list_init(&server.launchers);
   server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
   server.new_layer_shell_surface.notify = handle_new_layer_shell_surface;
