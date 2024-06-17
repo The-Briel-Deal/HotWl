@@ -1,9 +1,9 @@
-#include "layer_shell.h"
-#include "output.h"
-#include "scene.h"
-#include "server.h"
-#include "wlr/types/wlr_scene.h"
-#include "wlr/util/log.h"
+#include <layer_shell.h>
+#include <output.h>
+#include <scene.h>
+#include <server.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/util/log.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>
 

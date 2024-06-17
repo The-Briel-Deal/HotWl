@@ -20,12 +20,12 @@ build:
 build/lib: | build
 	mkdir $@
 
-build/main: src/main.c build/lib/xdg-shell-protocol.h build/lib/wlr-layer-shell-unstable-v1-protocol.h | build 
+build/main: src/*.c build/lib/xdg-shell-protocol.h build/lib/wlr-layer-shell-unstable-v1-protocol.h | build 
 	$(CC) $(CFLAGS) \
 		-g -Werror -I. -Ibuild/lib \
 		-DWLR_USE_UNSTABLE \
-		-o $@ $< \
-		$(LIBS) -Isrc src/layer_shell.c src/layer_shell.h
+		-o $@ src/*.c \
+		$(LIBS) -Isrc
 
 clean:
 	rm -rf build 
