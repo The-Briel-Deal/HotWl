@@ -20,3 +20,4 @@ struct gfwl_output {
   struct wl_listener destroy;
 };
 
+void server_new_output(struct wl_listener *listener, void *data);
