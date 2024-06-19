@@ -1,11 +1,15 @@
 #include <input.h>
 #include <scene.h>
+#include <wayland-util.h>
 #include <wlr-layer-shell-unstable-v1-protocol.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/edges.h>
 #include <wlr/util/log.h>
 #include <xdg_shell.h>
 
+struct wlr_scene_layer_surface_v1 *
+desktop_layersurface_at(struct gfwl_server *server, double lx, double ly,
+                        struct wlr_surface **surface, double *sx, double *sy);
 void server_new_pointer(struct gfwl_server *server,
                         struct wlr_input_device *device) {
   /* We don't do anything special with pointers. All of our pointer handling
@@ -95,6 +99,13 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   double sx, sy;
   struct wlr_seat *seat = server->seat;
   struct wlr_surface *wlr_surface = NULL;
+  // TODO: This has yet to be tested. First I need to add a check to make sure
+  // desktop_toplevel_at isn't overriding this. Also, fuzzel doesn't do any
+  // mouse things.
+  struct wlr_scene_layer_surface_v1 *scene_layer_surface =
+      desktop_layersurface_at(server, server->cursor->x, server->cursor->y,
+                              &wlr_surface, &sx, &sy); 
+
   struct gfwl_toplevel *toplevel = desktop_toplevel_at(
       server, server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
 
@@ -135,7 +146,8 @@ void server_cursor_motion(struct wl_listener *listener, void *data) {
    * special configuration applied for the specific input device which
    * generated the event. You can pass NULL for the device if you want to move
    * the cursor around without any input. */
-  wlr_log(WLR_INFO, "Cursor moved: x=%f, y=%f", event->delta_x, event->delta_y);
+  // wlr_log(WLR_INFO, "Cursor moved: x=%f, y=%f", event->delta_x,
+  // event->delta_y);
   wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x,
                   event->delta_y);
   process_cursor_motion(server, event->time_msec);
@@ -228,4 +240,42 @@ struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server, double lx,
   if (tree)
     return tree->node.data;
   return NULL;
+}
+
+struct wlr_scene_layer_surface_v1 *
+desktop_layersurface_at(struct gfwl_server *server, double lx, double ly,
+                        struct wlr_surface **surface, double *sx, double *sy) {
+  /* This returns the topmost node in the scene at the given layout coords.
+   * We only care about surface nodes as we are specifically looking for a
+   * surface in the surface tree of a gfwl_toplevel. */
+  struct wlr_scene_node *node =
+      wlr_scene_node_at(&server->scene->layer.top->node, lx, ly, sx, sy);
+  if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
+    return NULL;
+  }
+  struct wlr_scene_buffer *scene_buffer = wlr_scene_buffer_from_node(node);
+  // TODO: I have a new theory that I might be able to just look at the
+  // scene_trees parent to see if its owned by a wlr_scene_layer_surface_v1
+  struct wlr_scene_surface *scene_surface =
+      wlr_scene_surface_try_from_buffer(scene_buffer);
+  if (!scene_surface) {
+    return NULL;
+  }
+
+  *surface = scene_surface->surface;
+  /* Find the node corresponding to the gfwl_toplevel at the root of this
+   * surface tree, it is the only one for which we set the data field. */
+  struct wlr_scene_tree *tree = node->parent;
+
+  struct wlr_scene_layer_surface_v1 *maybe_scene_layer_surface = NULL;
+  while (tree != NULL && maybe_scene_layer_surface == NULL) {
+    maybe_scene_layer_surface =
+        wl_container_of(tree, maybe_scene_layer_surface, tree);
+    tree = tree->node.parent;
+  }
+  if (maybe_scene_layer_surface) {
+    wlr_log(WLR_INFO, "GOLLY GORSH, I FOUND A SCENE_LAYER_SURFACE");
+  }
+
+  return maybe_scene_layer_surface;
 }
