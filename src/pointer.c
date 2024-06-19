@@ -1,8 +1,10 @@
-#include "wlr/util/log.h"
 #include <input.h>
-#include <wlr/util/edges.h>
-#include <xdg_shell.h>
 #include <scene.h>
+#include <wlr-layer-shell-unstable-v1-protocol.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
+#include <wlr/util/edges.h>
+#include <wlr/util/log.h>
+#include <xdg_shell.h>
 
 void server_new_pointer(struct gfwl_server *server,
                         struct wlr_input_device *device) {
@@ -95,13 +97,7 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   struct wlr_surface *wlr_surface = NULL;
   struct gfwl_toplevel *toplevel = desktop_toplevel_at(
       server, server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
-  /* TODO: Verify that this is getting layer_surface's when mouse is over it.
 
-  struct wlr_layer_surface_v1 *wlr_layer_surface = NULL;
-  wlr_surface = wlr_layer_surface_v1_surface_at(
-      wlr_layer_surface, server->cursor->x, server->cursor->y, &sx, &sy);
-
-  */
   if (!toplevel) {
     /* If there's no toplevel under the cursor, set the cursor image to a
      * default. This is what makes the cursor image appear when you move it
@@ -145,8 +141,7 @@ void server_cursor_motion(struct wl_listener *listener, void *data) {
   process_cursor_motion(server, event->time_msec);
 }
 
-void server_cursor_motion_absolute(struct wl_listener *listener,
-                                          void *data) {
+void server_cursor_motion_absolute(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits an _absolute_
    * motion event, from 0..1 on each axis. This happens, for example, when
    * wlroots is running under a Wayland window rather than KMS+DRM, and you
@@ -202,10 +197,11 @@ void server_cursor_frame(struct wl_listener *listener, void *data) {
   /* Notify the client with pointer focus of the frame event. */
   wlr_seat_pointer_notify_frame(server->seat);
 }
-struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server,
-                                                 double lx, double ly,
-                                                 struct wlr_surface **surface,
-                                                 double *sx, double *sy) {
+
+struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server, double lx,
+                                          double ly,
+                                          struct wlr_surface **surface,
+                                          double *sx, double *sy) {
   /* This returns the topmost node in the scene at the given layout coords.
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a gfwl_toplevel. */

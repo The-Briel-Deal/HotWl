@@ -14,8 +14,12 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
       wl_container_of(listener, gfwl_layer_surface, map);
   struct gfwl_server *server = gfwl_layer_surface->server;
 
-  // Remove launchers in favor of somewhere else to save layer surface nodes.
+  // TODO: Remove launchers in favor of somewhere else to save layer surface nodes.
   wl_list_insert(&server->launchers, &gfwl_layer_surface->link);
+
+  struct wlr_box full_area = {0};
+  struct wlr_box usable_area = {0};
+  wlr_scene_layer_surface_v1_configure(gfwl_layer_surface->scene, &full_area, &usable_area);
 
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }
@@ -29,6 +33,8 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
     wlr_log(WLR_INFO, "GFLOG: layer_surface is initialized, configuring now.");
     wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
+//    Add Layer Scene Surface Configuring. TODO:
+//    wlr_scene_layer_surface_v1_configure();
   } else {
     wlr_log(WLR_INFO,
             "GFLOG: layer_surface not yet initialized, doing nothing.");
@@ -97,6 +103,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
     wlr_log(WLR_ERROR, "No gfwl_output is parent of wlr_output.");
     return;
   }
+
   gfwl_layer_surface->output = gfwl_output;
 
   enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
@@ -104,9 +111,12 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   gfwl_output->layers.shell_top =
       wlr_scene_tree_create(server->scene_roots->layer_roots.shell_top);
 
+  // Create the scene.
   struct wlr_scene_layer_surface_v1 *scene_surface =
       wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
                                         wlr_layer_surface);
+  // Add to layer_surface object.
+  gfwl_layer_surface->scene = scene_surface;
   // Register commit handler.
   gfwl_layer_surface->commit.notify = handle_layer_surface_commit;
   wl_signal_add(&wlr_layer_surface->surface->events.commit,

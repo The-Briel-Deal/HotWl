@@ -109,8 +109,14 @@ int main(int argc, char *argv[]) {
   server.scene_roots->root = wlr_scene_create();
   server.scene_layout = wlr_scene_attach_output_layout(server.scene_roots->root,
                                                        server.output_layout);
+  // Create tiling first so its the lowest.
+  server.scene_roots->layer_roots.tiling =
+      wlr_scene_tree_create(&server.scene_roots->root->tree);
+
+  // Create shell_top after so that it displays over layer_roots.
   server.scene_roots->layer_roots.shell_top =
       wlr_scene_tree_create(&server.scene_roots->root->tree);
+  // TODO: Add more layers.
 
   /* Set up xdg-shell version 3. The xdg-shell is a Wayland protocol which is
    * used for application windows. For more detail on shells, refer to
