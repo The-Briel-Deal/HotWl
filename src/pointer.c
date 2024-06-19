@@ -101,7 +101,7 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   struct wlr_surface *wlr_surface = NULL;
   // TODO: This has yet to be tested. First I need to add a check to make sure
   // desktop_toplevel_at isn't overriding this. Also, fuzzel doesn't do any
-  // mouse things.
+  // mouse things. And Wofi is crashing.
   struct wlr_scene_layer_surface_v1 *scene_layer_surface =
       desktop_layersurface_at(server, server->cursor->x, server->cursor->y,
                               &wlr_surface, &sx, &sy); 

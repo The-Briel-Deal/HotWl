@@ -2,10 +2,20 @@
 #include <output.h>
 #include <scene.h>
 #include <server.h>
-#include <wlr/types/wlr_scene.h>
-#include <wlr/util/log.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_seat.h>
+#include <wlr/util/log.h>
+
+void focus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
+  struct wlr_seat *seat = gfwl_layer_surface->server->seat;
+  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+  wlr_seat_keyboard_notify_enter(gfwl_layer_surface->server->seat,
+                                 gfwl_layer_surface->wlr_layer_surface->surface,
+                                 keyboard->keycodes, keyboard->num_keycodes,
+                                 &keyboard->modifiers);
+}
 
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
@@ -13,13 +23,7 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
   struct gfwl_server *server = gfwl_layer_surface->server;
-
-  /**
-  * TODO: I may want to remove this.
-  * struct wlr_box full_area = {0};
-  * struct wlr_box usable_area = {0};
-  * wlr_scene_layer_surface_v1_configure(gfwl_layer_surface->scene, &full_area, &usable_area);
-  **/
+  focus_layer_surface(gfwl_layer_surface);
 
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
 }

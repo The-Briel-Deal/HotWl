@@ -1,10 +1,10 @@
-#include <xdg_shell.h>
-#include <scene.h>
-#include <pointer.h>
 #include <assert.h>
+#include <pointer.h>
+#include <scene.h>
 #include <stdlib.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/edges.h>
+#include <xdg_shell.h>
 
 void focus_toplevel(struct gfwl_toplevel *toplevel,
                     struct wlr_surface *surface) {
