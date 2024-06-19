@@ -105,17 +105,17 @@ int main(int argc, char *argv[]) {
   wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
   // Create root scene and the layer roots.
-  server.scene_roots = calloc(sizeof(*server.scene_roots), 1);
-  server.scene_roots->root = wlr_scene_create();
-  server.scene_layout = wlr_scene_attach_output_layout(server.scene_roots->root,
+  server.scene = calloc(sizeof(*server.scene), 1);
+  server.scene->root = wlr_scene_create();
+  server.scene_layout = wlr_scene_attach_output_layout(server.scene->root,
                                                        server.output_layout);
   // Create tiling first so its the lowest.
-  server.scene_roots->layer_roots.tiling =
-      wlr_scene_tree_create(&server.scene_roots->root->tree);
+  server.scene->layer.base =
+      wlr_scene_tree_create(&server.scene->root->tree);
 
   // Create shell_top after so that it displays over layer_roots.
-  server.scene_roots->layer_roots.shell_top =
-      wlr_scene_tree_create(&server.scene_roots->root->tree);
+  server.scene->layer.top =
+      wlr_scene_tree_create(&server.scene->root->tree);
   // TODO: Add more layers.
 
   /* Set up xdg-shell version 3. The xdg-shell is a Wayland protocol which is
@@ -136,7 +136,6 @@ int main(int argc, char *argv[]) {
    */
 
   // Init layer shell and setup listeners.
-  wl_list_init(&server.launchers);
   server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
   server.new_layer_shell_surface.notify = handle_new_layer_shell_surface;
   wl_signal_add(&server.layer_shell->events.new_surface,
@@ -224,7 +223,7 @@ int main(int argc, char *argv[]) {
   /* Once wl_display_run returns, we destroy all clients then shut down the
    * server. */
   wl_display_destroy_clients(server.wl_display);
-  wlr_scene_node_destroy(&server.scene_roots->root->tree.node);
+  wlr_scene_node_destroy(&server.scene->root->tree.node);
   wlr_xcursor_manager_destroy(server.cursor_mgr);
   wlr_cursor_destroy(server.cursor);
   wlr_allocator_destroy(server.allocator);

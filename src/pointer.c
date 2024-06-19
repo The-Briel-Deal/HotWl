@@ -206,7 +206,7 @@ struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server, double lx,
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a gfwl_toplevel. */
   struct wlr_scene_node *node =
-      wlr_scene_node_at(&server->scene_roots->root->tree.node, lx, ly, sx, sy);
+      wlr_scene_node_at(&server->scene->root->tree.node, lx, ly, sx, sy);
   if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
     return NULL;
   }

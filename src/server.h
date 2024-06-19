@@ -14,7 +14,7 @@ struct gfwl_server {
   struct wlr_renderer *renderer;
   // The allocator allocates memory for pixel buffers.
   struct wlr_allocator *allocator;
-  struct gfwl_scene *scene_roots;
+  struct gfwl_scene *scene;
   struct wlr_scene_output_layout *scene_layout;
 
   struct wlr_xdg_shell *xdg_shell;
@@ -24,7 +24,6 @@ struct gfwl_server {
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;
-  struct wl_list launchers;
 
   struct wlr_cursor *cursor;
   struct wlr_xcursor_manager *cursor_mgr;
