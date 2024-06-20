@@ -11,21 +11,34 @@
 void focus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
   struct wlr_seat *seat = gfwl_layer_surface->server->seat;
   struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
-  wlr_seat_keyboard_notify_enter(gfwl_layer_surface->server->seat,
-                                 gfwl_layer_surface->wlr_layer_surface->surface,
+  gfwl_layer_surface->prev_focused = seat->keyboard_state.focused_surface;
+
+  wlr_seat_keyboard_notify_enter(
+      seat, gfwl_layer_surface->wlr_layer_surface->surface, keyboard->keycodes,
+      keyboard->num_keycodes, &keyboard->modifiers);
+}
+
+void unfocus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
+  struct wlr_seat *seat = gfwl_layer_surface->server->seat;
+  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+
+  wlr_seat_keyboard_notify_enter(seat, gfwl_layer_surface->prev_focused,
                                  keyboard->keycodes, keyboard->num_keycodes,
                                  &keyboard->modifiers);
 }
 
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map started.");
-
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
+
   struct gfwl_server *server = gfwl_layer_surface->server;
   focus_layer_surface(gfwl_layer_surface);
+}
 
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_map finished.");
+void handle_layer_surface_unmap(struct wl_listener *listener, void *data) {
+  struct gfwl_layer_surface *gfwl_layer_surface =
+      wl_container_of(listener, gfwl_layer_surface, unmap);
+  unfocus_layer_surface(gfwl_layer_surface);
 }
 
 void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
@@ -123,6 +136,11 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   gfwl_layer_surface->map.notify = handle_layer_surface_map;
   wl_signal_add(&wlr_layer_surface->surface->events.map,
                 &gfwl_layer_surface->map);
+
+  // Register unmap handler.
+  gfwl_layer_surface->unmap.notify = handle_layer_surface_unmap;
+  wl_signal_add(&wlr_layer_surface->surface->events.unmap,
+                &gfwl_layer_surface->unmap);
 
   wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface finished.");
 }
