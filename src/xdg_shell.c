@@ -14,19 +14,19 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
   struct gfwl_server *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
-  struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
-  if (prev_surface == surface) {
+  toplevel->prev_focused = seat->keyboard_state.focused_surface;
+  if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */
     return;
   }
-  if (prev_surface) {
+  if (toplevel->prev_focused) {
     /*
      * Deactivate the previously focused surface. This lets the client know
      * it no longer has focus and the client will repaint accordingly, e.g.
      * stop displaying a caret.
      */
     struct wlr_xdg_toplevel *prev_toplevel =
-        wlr_xdg_toplevel_try_from_wlr_surface(prev_surface);
+        wlr_xdg_toplevel_try_from_wlr_surface(toplevel->prev_focused);
     if (prev_toplevel != NULL) {
       wlr_xdg_toplevel_set_activated(prev_toplevel, false);
     }
@@ -50,6 +50,18 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
 }
 
+void unfocus_toplevel(struct gfwl_toplevel *toplevel) {
+  struct wlr_surface *prev_focused = toplevel->prev_focused;
+  struct wlr_seat *seat = toplevel->server->seat;
+  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+
+  if (prev_focused && keyboard && seat) {
+    wlr_seat_keyboard_notify_enter(seat, toplevel->prev_focused,
+                                   keyboard->keycodes, keyboard->num_keycodes,
+                                   &keyboard->modifiers);
+  }
+}
+
 static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, map);
@@ -62,6 +74,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 static void xdg_toplevel_unmap(struct wl_listener *listener, void *data) {
   /* Called when the surface is unmapped, and should no longer be shown. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
+  unfocus_toplevel(toplevel);
 
   /* Reset the cursor mode if the grabbed toplevel was unmapped. */
   if (toplevel == toplevel->server->grabbed_toplevel) {
