@@ -5,6 +5,7 @@
 #include <server.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>
+#include <wayland-util.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
@@ -55,28 +56,22 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
 }
 
 // Returns false if failed.
-bool center_node(struct wlr_scene_node *node, struct gfwl_output *output) {
-  assert(output);
-  if (!output)
-    return false;
-
-  struct wlr_output *wlr_output = output->wlr_output;
-
+bool center_node(struct wlr_scene_layer_surface_v1 *scene_layer_surface, struct wlr_output *wlr_output) {
   assert(wlr_output);
-  if (!wlr_output)
+  if (!wlr_output || !scene_layer_surface)
     return false;
 
-  int32_t op_x = wlr_output->width / wlr_output->scale;
-  int32_t op_y = wlr_output->height / wlr_output->scale;
+  int32_t op_x = wlr_output->width;
+  int32_t op_y = wlr_output->height;
   wlr_log(WLR_INFO, "center_node x: %i, y: %i", op_x, op_y);
 
-  assert(node);
-  if (node) {
-    node->x = op_x / 2;
-    node->y = op_y / 2;
+  assert(scene_layer_surface);
+  if (scene_layer_surface) {
+    scene_layer_surface->tree->node.x = (op_x - scene_layer_surface->layer_surface->pending.desired_width) / 2;
+    scene_layer_surface->tree->node.y = (op_y - scene_layer_surface->layer_surface->pending.desired_height) / 2;
   }
 
-  return false;
+  return true;
 }
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
@@ -151,7 +146,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   struct wlr_scene_layer_surface_v1 *scene_surface =
       wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
                                         wlr_layer_surface);
-  center_node(&scene_surface->tree->node, gfwl_output);
+  center_node(scene_surface, wlr_layer_surface->output);
   // Add to layer_surface object.
   gfwl_layer_surface->scene = scene_surface;
   // Register commit handler.
