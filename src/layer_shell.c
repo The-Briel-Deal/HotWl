@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <layer_shell.h>
 #include <output.h>
 #include <scene.h>
@@ -51,6 +52,31 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
     wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
   }
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit finished.");
+}
+
+// Returns false if failed.
+bool center_node(struct wlr_scene_node *node, struct gfwl_output *output) {
+  assert(output);
+  if (!output)
+    return false;
+
+  struct wlr_output *wlr_output = output->wlr_output;
+
+  assert(wlr_output);
+  if (!wlr_output)
+    return false;
+
+  int32_t op_x = wlr_output->width / wlr_output->scale;
+  int32_t op_y = wlr_output->height / wlr_output->scale;
+  wlr_log(WLR_INFO, "center_node x: %i, y: %i", op_x, op_y);
+
+  assert(node);
+  if (node) {
+    node->x = op_x / 2;
+    node->y = op_y / 2;
+  }
+
+  return false;
 }
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
@@ -125,6 +151,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   struct wlr_scene_layer_surface_v1 *scene_surface =
       wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
                                         wlr_layer_surface);
+  center_node(&scene_surface->tree->node, gfwl_output);
   // Add to layer_surface object.
   gfwl_layer_surface->scene = scene_surface;
   // Register commit handler.
