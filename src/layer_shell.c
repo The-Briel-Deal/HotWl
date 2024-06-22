@@ -29,10 +29,33 @@ void unfocus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
                                  &keyboard->modifiers);
 }
 
+// Returns false if failed.
+bool center_scene_layer_surface(struct wlr_scene_layer_surface_v1 *scene_layer_surface,
+                 struct wlr_output *wlr_output) {
+  assert(wlr_output);
+  if (!wlr_output || !scene_layer_surface)
+    return false;
+
+  int32_t op_x = wlr_output->width;
+  int32_t op_y = wlr_output->height;
+
+  assert(scene_layer_surface);
+  if (scene_layer_surface) {
+    scene_layer_surface->tree->node.x =
+        (op_x - scene_layer_surface->layer_surface->pending.desired_width) / 2;
+    scene_layer_surface->tree->node.y =
+        (op_y - scene_layer_surface->layer_surface->pending.desired_height) / 2;
+  }
+
+  return true;
+}
+
 void handle_layer_surface_map(struct wl_listener *listener, void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
+  center_scene_layer_surface(gfwl_layer_surface->scene,
+              gfwl_layer_surface->wlr_layer_surface->output);
   struct gfwl_server *server = gfwl_layer_surface->server;
   focus_layer_surface(gfwl_layer_surface);
 }
@@ -53,25 +76,6 @@ void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
     wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
   }
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit finished.");
-}
-
-// Returns false if failed.
-bool center_node(struct wlr_scene_layer_surface_v1 *scene_layer_surface, struct wlr_output *wlr_output) {
-  assert(wlr_output);
-  if (!wlr_output || !scene_layer_surface)
-    return false;
-
-  int32_t op_x = wlr_output->width;
-  int32_t op_y = wlr_output->height;
-  wlr_log(WLR_INFO, "center_node x: %i, y: %i", op_x, op_y);
-
-  assert(scene_layer_surface);
-  if (scene_layer_surface) {
-    scene_layer_surface->tree->node.x = (op_x - scene_layer_surface->layer_surface->pending.desired_width) / 2;
-    scene_layer_surface->tree->node.y = (op_y - scene_layer_surface->layer_surface->pending.desired_height) / 2;
-  }
-
-  return true;
 }
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
@@ -146,7 +150,6 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   struct wlr_scene_layer_surface_v1 *scene_surface =
       wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
                                         wlr_layer_surface);
-  center_node(scene_surface, wlr_layer_surface->output);
   // Add to layer_surface object.
   gfwl_layer_surface->scene = scene_surface;
   // Register commit handler.
