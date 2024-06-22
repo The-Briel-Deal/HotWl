@@ -1,5 +1,4 @@
 #include <output.h>
-#include <scene.h>
 #include <server.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>
@@ -77,6 +76,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
   struct gfwl_output *output = calloc(1, sizeof(*output));
   output->wlr_output = wlr_output;
   output->server = server;
+  gfwl_scene_layers_init(&output->layer, &server->scene->layer);
 
   /* Sets up a listener for the frame event. */
   output->frame.notify = output_frame;
