@@ -47,4 +47,4 @@ struct gfwl_container {
   struct gfwl_scene_tree s_gfwl_tree;
 };
 
-struct wlr_scene_tree *get_top_scene_node(struct wlr_scene_tree *node_in);
+struct wlr_scene_tree *get_top_buffer_scene(struct wlr_scene_tree *node_in);

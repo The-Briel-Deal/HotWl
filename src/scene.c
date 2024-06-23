@@ -13,7 +13,7 @@ struct wlr_scene_tree *get_top_buffer_scene(struct wlr_scene_tree *tree_in) {
     if (node_iter->type == WLR_SCENE_NODE_TREE) {
       struct wlr_scene_tree *tree_iter =
           wl_container_of(node_iter, tree_iter, node);
-      get_top_scene_node(tree_iter);
+      get_top_buffer_scene(tree_iter);
     }
     if (node_iter->type == WLR_SCENE_NODE_BUFFER) {
       struct wlr_scene_buffer *buffer =

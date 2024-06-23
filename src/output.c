@@ -8,11 +8,18 @@
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_scene.h>
 
+//(aka void (*)(struct wlr_scene_buffer *, int, int, void *))
+void test_for_each_buffer(struct wlr_scene_buffer *buff, int sx, int sy, void *data) {
+  buff->dst_width += 1;
+};
+
 static void output_frame(struct wl_listener *listener, void *data) {
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
   struct gfwl_output *output = wl_container_of(listener, output, frame);
   struct wlr_scene *scene = output->server->scene->root;
+
+  wlr_scene_node_for_each_buffer(&scene->tree.node, &test_for_each_buffer, NULL);
 
   struct wlr_scene_output *scene_output =
       wlr_scene_get_scene_output(scene, output->wlr_output);
