@@ -1,3 +1,4 @@
+#include "wlr/util/box.h"
 #include <assert.h>
 #include <pointer.h>
 #include <scene.h>
@@ -66,6 +67,8 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, map);
 
+  struct wlr_box box;
+
   wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
@@ -95,6 +98,7 @@ static void xdg_toplevel_commit(struct wl_listener *listener, void *data) {
      * dimensions itself. */
     wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
   }
+  hori_split_toplevels(&toplevel->server->toplevels, toplevel->server);
 }
 
 static void xdg_toplevel_destroy(struct wl_listener *listener, void *data) {

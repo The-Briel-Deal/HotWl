@@ -1,6 +1,7 @@
-#include "server.h"
-#include <wlr/types/wlr_scene.h>
 #include <layer_shell.h>
+#include <server.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_xdg_shell.h>
 
 struct gfwl_scene {
   // A scene wrapper so I can grab certain parts of the tree easily.
@@ -47,4 +48,5 @@ struct gfwl_container {
   struct gfwl_scene_tree s_gfwl_tree;
 };
 
-struct wlr_scene_tree *get_top_buffer_scene(struct wlr_scene_tree *node_in);
+void hori_split_toplevels(struct wl_list *toplevels, struct gfwl_server *server);
+void set_xdg_surface_box(struct wlr_xdg_toplevel *toplevel, struct wlr_box box);
