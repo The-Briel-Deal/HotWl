@@ -28,18 +28,16 @@ void hori_split_toplevels(struct wl_list *toplevels,
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
   }
-  /**
-   * -- I may want to use these methods later.
-   * wlr_output_layout_get(server->output_layout, server->output_layout);
-   * wlr_output_layout_get_box(struct wlr_output_layout *layout, struct
-   *     wlr_output *reference, struct wlr_box *dest_box)
-   **/
+
+  // Get output.
   struct gfwl_output *output =
       wl_container_of(server->outputs.next, output, link);
 
+  // Get Width and Height.
   u_int32_t width = output->wlr_output->width;
   u_int32_t height = output->wlr_output->height;
 
+  // Get per_win_width.
   u_int32_t per_win_width = width / count;
 
   // Set all sizes. (recycling count for the index)
