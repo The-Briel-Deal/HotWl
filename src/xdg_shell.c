@@ -1,8 +1,10 @@
+#include "server.h"
 #include "wlr/util/box.h"
 #include <assert.h>
 #include <pointer.h>
 #include <scene.h>
 #include <stdlib.h>
+#include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.h>
@@ -66,10 +68,34 @@ void unfocus_toplevel(struct gfwl_toplevel *toplevel) {
 static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, map);
+  struct gfwl_server *server = toplevel->server;
+
+  assert(server);
 
   struct wlr_box box;
 
-  wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
+  wl_list_insert(&server->toplevels, &toplevel->link);
+
+  struct gfwl_container *toplevel_container =
+      calloc(1, sizeof(*toplevel_container));
+
+  toplevel_container->e_type = GFWL_CONTAINER_TOPLEVEL;
+  toplevel_container->toplevel = toplevel;
+  toplevel_container->server = server;
+
+  // if (server->split_dir == GFWL_SPLIT_DIR_HORI) {
+  wl_list_insert(&server->toplevel_root_container.child_containers,
+                 &toplevel_container->link);
+  // } else {
+  //   struct gfwl_container *vsplit_container =
+  //       calloc(1, sizeof(*vsplit_container));
+  //   	vsplit_container->e_type = GFWL_CONTAINER_VSPLIT;
+  //   	vsplit_container->server = server;
+  //   	if (vsplit_container) {
+  //         vsplit_container.
+  //   	}
+  // }
+  parse_containers(&server->toplevel_root_container);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }
@@ -98,7 +124,6 @@ static void xdg_toplevel_commit(struct wl_listener *listener, void *data) {
      * dimensions itself. */
     wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
   }
-  hori_split_toplevels(&toplevel->server->toplevels, toplevel->server);
 }
 
 static void xdg_toplevel_destroy(struct wl_listener *listener, void *data) {

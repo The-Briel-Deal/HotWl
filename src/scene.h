@@ -1,7 +1,11 @@
+#pragma once
+
 #include <layer_shell.h>
-#include <server.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <xdg_shell.h>
+
+struct gfwl_server;
 
 struct gfwl_scene {
   // A scene wrapper so I can grab certain parts of the tree easily.
@@ -12,41 +16,35 @@ struct gfwl_scene {
   struct wlr_scene *root;
 };
 
-struct gfwl_scene_tree {
-  struct gfwl_scene *p_gfwl_scene;
-  struct wlr_scene_tree p_wlr_tree;
-};
-
-enum gfwl_scene_node_type {
-  GFWL_SCENE_NODE_LAYER_SURFACE = 1,
-  GFWL_SCENE_NODE_TOPLEVEL_SURFACE,
-  GFWL_SCENE_NODE_TREE,
-};
-
-// A scene_node so I can grab things like gfwl_layer_surface, gfwl_toplevel,
-// and gfwl_scene_tree without the pain of wl_container_of.
-struct gfwl_scene_node {
-  enum gfwl_scene_node_type e_type;
-  struct wlr_scene_node s_wlr_node;
-
-  struct gfwl_layer_surface *p_gfwl_layer_surface;
-  struct gfwl_toplevel *p_gfwl_toplevel;
-  struct gfwl_scene_tree *p_gfwl_tree;
-};
+enum gfwl_split_direction { GFWL_SPLIT_DIR_HORI = 0, GFWL_SPLIT_DIR_VERT = 1 };
 
 enum gfwl_container_type {
-  GFWL_CONTAINER_NODE = 1,
-  GFWL_CONTAINER_TREE,
+  GFWL_CONTAINER_TOPLEVEL = 1,
   GFWL_CONTAINER_VSPLIT,
   GFWL_CONTAINER_HSPLIT,
 };
 
 struct gfwl_container {
   enum gfwl_container_type e_type;
+  bool is_root;
+  struct wlr_box box;
 
-  struct gfwl_scene_node s_gfwl_node;
-  struct gfwl_scene_tree s_gfwl_tree;
+  struct gfwl_toplevel *toplevel;
+
+  struct gfwl_server *server;
+
+  struct wl_list child_containers;
+  struct wl_list link;
 };
 
-void hori_split_toplevels(struct wl_list *toplevels, struct gfwl_server *server);
-void set_xdg_surface_box(struct wlr_xdg_toplevel *toplevel, struct wlr_box box);
+void flip_split_direction(struct gfwl_server *server);
+
+void hori_split_toplevels(struct gfwl_container *toplevel_containers,
+                          struct gfwl_server *server);
+
+void vert_split_toplevels(struct gfwl_container *toplevel_containers,
+                          struct gfwl_server *server);
+
+void set_container_box(struct gfwl_container *toplevel, struct wlr_box box);
+
+void parse_containers(struct gfwl_container *container);
