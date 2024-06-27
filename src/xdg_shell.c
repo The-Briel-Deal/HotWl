@@ -105,6 +105,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
     //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
     // TODO: I ALSO WANT TO MAKE IT SO THAT WHEN I TOGGLE TO VERT SPLIT IT
     //       SPLITS THE PREVIOUS CONTAINER.
+	// TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT. 
     toplevel_container->parent_container = lftoplevel_parent_container;
     wl_list_insert(&lftoplevel_parent_container->child_containers,
                    &toplevel_container->link);
