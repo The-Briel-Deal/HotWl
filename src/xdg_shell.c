@@ -1,5 +1,6 @@
 #include "server.h"
 #include "wlr/util/box.h"
+#include "wlr/util/log.h"
 #include <assert.h>
 #include <pointer.h>
 #include <scene.h>
@@ -17,6 +18,7 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
   struct gfwl_server *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
+  server->last_focused_toplevel = toplevel;
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */
@@ -82,19 +84,45 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
   toplevel_container->e_type = GFWL_CONTAINER_TOPLEVEL;
   toplevel_container->toplevel = toplevel;
   toplevel_container->server = server;
+  toplevel->parent_container = toplevel_container;
 
-  // if (server->split_dir == GFWL_SPLIT_DIR_HORI) {
-  wl_list_insert(&server->toplevel_root_container.child_containers,
-                 &toplevel_container->link);
-  // } else {
-  //   struct gfwl_container *vsplit_container =
-  //       calloc(1, sizeof(*vsplit_container));
-  //   	vsplit_container->e_type = GFWL_CONTAINER_VSPLIT;
-  //   	vsplit_container->server = server;
-  //   	if (vsplit_container) {
-  //         vsplit_container.
-  //   	}
-  // }
+  struct gfwl_container *lftoplevel_parent_container = NULL;
+
+  if (server->last_focused_toplevel &&
+      server->last_focused_toplevel->parent_container &&
+      server->last_focused_toplevel->parent_container->parent_container) {
+    lftoplevel_parent_container =
+        server->last_focused_toplevel->parent_container->parent_container;
+  }
+
+  // Add vert container to already vert split container.
+  if (lftoplevel_parent_container &&
+      lftoplevel_parent_container->e_type == GFWL_CONTAINER_VSPLIT &&
+      server->split_dir == GFWL_SPLIT_DIR_VERT) {
+    // TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
+    // TODO: CLEAN THIS GARBAGE UP LOL
+    // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
+    //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
+    // TODO: I ALSO WANT TO MAKE IT SO THAT WHEN I TOGGLE TO VERT SPLIT IT
+    //       SPLITS THE PREVIOUS CONTAINER.
+    toplevel_container->parent_container = lftoplevel_parent_container;
+    wl_list_insert(&lftoplevel_parent_container->child_containers,
+                   &toplevel_container->link);
+    // Create Vert Split Container.
+  } else if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
+    struct gfwl_container *vert_split_container =
+        create_parent_container(toplevel_container);
+    assert(vert_split_container &&
+           vert_split_container->e_type == GFWL_CONTAINER_VSPLIT);
+    wl_list_insert(&server->toplevel_root_container.child_containers,
+                   &vert_split_container->link);
+    // Normal Horizontal Mode, This Is Only Like This Due To Lazy Gabriels Not
+    // Actually Adding Horizontal Split Containers.
+  } else {
+    wl_list_insert(&server->toplevel_root_container.child_containers,
+                   &toplevel_container->link);
+  }
+
   parse_containers(&server->toplevel_root_container);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);

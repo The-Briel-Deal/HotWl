@@ -5,6 +5,7 @@
 #include <output.h>
 #include <scene.h>
 #include <server.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_xdg_shell.h>
@@ -37,7 +38,7 @@ void parse_containers(struct gfwl_container *container) {
     container->box.width = output->wlr_output->width;
     container->box.height = output->wlr_output->height;
   }
-  wlr_log(WLR_DEBUG, "In parse container");
+  wlr_log(WLR_INFO, "In parse container enum %i", container->e_type);
   if (container->e_type == GFWL_CONTAINER_HSPLIT)
     hori_split_toplevels(container, container->server);
   if (container->e_type == GFWL_CONTAINER_VSPLIT)
@@ -49,6 +50,7 @@ void parse_containers(struct gfwl_container *container) {
     if (cursor->e_type == GFWL_CONTAINER_HSPLIT ||
         cursor->e_type == GFWL_CONTAINER_VSPLIT) {
       parse_containers(cursor);
+      wlr_log(WLR_INFO, "In parse container enum %i", cursor->e_type);
     }
   }
 }
@@ -67,6 +69,7 @@ void vert_split_toplevels(struct gfwl_container *container_in,
   // Get output.
   struct gfwl_output *output =
       wl_container_of(server->outputs.next, output, link);
+  wlr_log(WLR_INFO, "Am I being Hit?");
 
   // Get Width and Height.
   u_int32_t width = container_in->box.width;
@@ -83,6 +86,12 @@ void vert_split_toplevels(struct gfwl_container *container_in,
                                 .y = per_win_height * count,
                                 .width = width,
                                 .height = per_win_height};
+    wlr_log(WLR_INFO, "vert-split box\n \
+        x: %i\n \
+        y: %i\n \
+        width: %i\n \
+        height: %i\n",
+            box.x, box.y, box.width, box.height);
     set_container_box(curr_toplevel_container, box);
     count += 1;
   }
@@ -134,3 +143,16 @@ void set_container_box(struct gfwl_container *container, struct wlr_box box) {
     scene_tree->node.y = box.y;
   }
 };
+
+struct gfwl_container *
+create_parent_container(struct gfwl_container *child_container) {
+
+  struct gfwl_container *parent_container =
+      calloc(1, sizeof(*parent_container));
+  parent_container->e_type = GFWL_CONTAINER_VSPLIT;
+  parent_container->server = child_container->server;
+  child_container->parent_container = parent_container;
+  wl_list_init(&parent_container->child_containers);
+  wl_list_insert(&parent_container->child_containers, &child_container->link);
+  return parent_container;
+}

@@ -26,6 +26,7 @@ enum gfwl_container_type {
 
 struct gfwl_container {
   enum gfwl_container_type e_type;
+  struct gfwl_container *parent_container;
   bool is_root;
   struct wlr_box box;
 
@@ -48,3 +49,6 @@ void vert_split_toplevels(struct gfwl_container *toplevel_containers,
 void set_container_box(struct gfwl_container *toplevel, struct wlr_box box);
 
 void parse_containers(struct gfwl_container *container);
+
+struct gfwl_container *
+create_parent_container(struct gfwl_container *child_container);

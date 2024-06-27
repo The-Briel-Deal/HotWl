@@ -1,4 +1,5 @@
 #pragma once
+#include "scene.h"
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_compositor.h>
@@ -8,6 +9,7 @@
 
 struct gfwl_toplevel {
   struct wl_list link;
+  struct gfwl_container *parent_container;
   struct gfwl_server *server;
   struct wlr_xdg_toplevel *xdg_toplevel;
   struct wlr_scene_tree *scene_tree;
