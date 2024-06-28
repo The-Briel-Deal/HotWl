@@ -235,13 +235,8 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
       insert_child_container(lftc_container, toplevel_container);
     else
       new_vert_split_container(toplevel_container, lft_container);
-  }
-  // Normal Horizontal Mode, This Is Only Like This Due To Lazy Gabriels Not
-  // Actually Adding Horizontal Split Containers.
-  else {
+  } else
     insert_child_container(&server->toplevel_root_container,
                            toplevel_container);
-  }
-
   parse_containers(&server->toplevel_root_container);
 }
