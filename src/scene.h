@@ -31,7 +31,6 @@ struct gfwl_container {
   struct wlr_box box;
 
   struct gfwl_toplevel *toplevel;
-
   struct gfwl_server *server;
 
   struct wl_list child_containers;
@@ -52,3 +51,5 @@ void parse_containers(struct gfwl_container *container);
 
 struct gfwl_container *
 create_parent_container(struct gfwl_container *child_container);
+
+void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add);

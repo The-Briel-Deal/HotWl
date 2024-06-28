@@ -78,61 +78,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 
   wl_list_insert(&server->toplevels, &toplevel->link);
 
-  struct gfwl_container *toplevel_container =
-      calloc(1, sizeof(*toplevel_container));
-
-  toplevel_container->e_type = GFWL_CONTAINER_TOPLEVEL;
-  toplevel_container->toplevel = toplevel;
-  toplevel_container->server = server;
-  toplevel->parent_container = toplevel_container;
-
-  // lf means last focused btw.
-  struct gfwl_toplevel *lf_toplevel = NULL;
-  struct gfwl_container *lft_container = NULL, *lftc_container = NULL;
-
-  if (server)
-    lf_toplevel = server->last_focused_toplevel;
-  if (lf_toplevel)
-    lft_container = lf_toplevel->parent_container;
-  if (lft_container)
-    lftc_container = lft_container->parent_container;
-  // DOING: I ALSO WANT TO MAKE IT SO THAT WHEN I TOGGLE TO VERT SPLIT IT
-  //        SPLITS THE PREVIOUS CONTAINER.
-  // TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
-  // TODO: CLEAN THIS GARBAGE UP LOL
-  // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
-  //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
-  // TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT.
-  // TODO: Move the tiling code to its own func in scene.
-
-  // Add vert container to already vert split container.
-  if (lftc_container && lftc_container->e_type == GFWL_CONTAINER_VSPLIT &&
-      server->split_dir == GFWL_SPLIT_DIR_VERT) {
-    toplevel_container->parent_container = lftc_container;
-    wl_list_insert(&lftc_container->child_containers,
-                   &toplevel_container->link);
-  }
-  // Create Vert Split Container.
-  else if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
-
-    struct gfwl_container *vert_split_container =
-        create_parent_container(toplevel_container);
-	wl_list_remove(&lft_container->link);
-	wl_list_insert(&vert_split_container->child_containers, &lft_container->link);
-    assert(vert_split_container &&
-           vert_split_container->e_type == GFWL_CONTAINER_VSPLIT);
-
-    wl_list_insert(&server->toplevel_root_container.child_containers,
-                   &vert_split_container->link);
-  }
-  // Normal Horizontal Mode, This Is Only Like This Due To Lazy Gabriels Not
-  // Actually Adding Horizontal Split Containers.
-  else {
-    wl_list_insert(&server->toplevel_root_container.child_containers,
-                   &toplevel_container->link);
-  }
-
-  parse_containers(&server->toplevel_root_container);
+  add_to_tiling_layout(toplevel);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }

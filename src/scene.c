@@ -156,3 +156,73 @@ create_parent_container(struct gfwl_container *child_container) {
   wl_list_insert(&parent_container->child_containers, &child_container->link);
   return parent_container;
 }
+
+struct gfwl_container *
+create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
+  struct gfwl_container *container = calloc(1, sizeof(*container));
+
+  container->e_type = GFWL_CONTAINER_TOPLEVEL;
+  container->toplevel = toplevel;
+  container->server = toplevel->server;
+  toplevel->parent_container = container;
+
+  return container;
+}
+
+void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
+  assert(toplevel);
+  struct gfwl_server *server = toplevel->server;
+  assert(server);
+  struct gfwl_container *toplevel_container =
+      create_container_from_toplevel(toplevel);
+  assert(toplevel_container);
+
+  // lf means last focused btw.
+  struct gfwl_toplevel *lf_toplevel = NULL;
+  struct gfwl_container *lft_container = NULL, *lftc_container = NULL;
+
+  if (server)
+    lf_toplevel = server->last_focused_toplevel;
+  if (lf_toplevel)
+    lft_container = lf_toplevel->parent_container;
+  if (lft_container)
+    lftc_container = lft_container->parent_container;
+  // TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
+  // DOING: CLEAN THIS GARBAGE UP LOL
+  // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
+  //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
+  // TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT.
+  // TODO: Move the tiling code to its own func in scene.
+  // TODO: Change lf_toplevel to lf container.
+  // TODO: Create a tiling_state struct.
+
+  // Add vert container to already vert split container.
+  if (lftc_container && lftc_container->e_type == GFWL_CONTAINER_VSPLIT &&
+      server->split_dir == GFWL_SPLIT_DIR_VERT) {
+    toplevel_container->parent_container = lftc_container;
+    wl_list_insert(&lftc_container->child_containers,
+                   &toplevel_container->link);
+  }
+  // Create Vert Split Container.
+  else if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
+
+    struct gfwl_container *vert_split_container =
+        create_parent_container(toplevel_container);
+    wl_list_remove(&lft_container->link);
+    wl_list_insert(&vert_split_container->child_containers,
+                   &lft_container->link);
+    assert(vert_split_container &&
+           vert_split_container->e_type == GFWL_CONTAINER_VSPLIT);
+
+    wl_list_insert(&server->toplevel_root_container.child_containers,
+                   &vert_split_container->link);
+  }
+  // Normal Horizontal Mode, This Is Only Like This Due To Lazy Gabriels Not
+  // Actually Adding Horizontal Split Containers.
+  else {
+    wl_list_insert(&server->toplevel_root_container.child_containers,
+                   &toplevel_container->link);
+  }
+
+  parse_containers(&server->toplevel_root_container);
+}
