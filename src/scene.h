@@ -16,12 +16,17 @@ struct gfwl_scene {
   struct wlr_scene *root;
 };
 
-enum gfwl_split_direction { GFWL_SPLIT_DIR_HORI = 0, GFWL_SPLIT_DIR_VERT = 1 };
+enum gfwl_split_direction {
+  GFWL_SPLIT_DIR_UNKNOWN = 0,
+  GFWL_SPLIT_DIR_HORI = 1,
+  GFWL_SPLIT_DIR_VERT = 2
+};
 
 enum gfwl_container_type {
-  GFWL_CONTAINER_TOPLEVEL = 1,
-  GFWL_CONTAINER_VSPLIT,
-  GFWL_CONTAINER_HSPLIT,
+  GFWL_CONTAINER_UNKNOWN = 0,
+  GFWL_CONTAINER_HSPLIT = 1,
+  GFWL_CONTAINER_VSPLIT = 2,
+  GFWL_CONTAINER_TOPLEVEL = 3,
 };
 
 struct gfwl_container {
