@@ -131,6 +131,7 @@ int main(int argc, char *argv[]) {
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
   
   server.toplevel_root_container.e_type = GFWL_CONTAINER_HSPLIT;
+  server.split_dir = GFWL_SPLIT_DIR_HORI;
   server.toplevel_root_container.server = &server;
   server.toplevel_root_container.is_root = true;
   wl_list_init(&server.toplevel_root_container.child_containers);

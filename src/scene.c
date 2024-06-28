@@ -230,17 +230,17 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
   // TODO: Create a tiling_state struct.
 
   // Add vert container to already vert split container.
-  if (focused_split_type == GFWL_SPLIT_DIR_VERT &&
-      server->split_dir == GFWL_SPLIT_DIR_VERT) {
-    insert_child_container(lftc_container, toplevel_container);
-  } else if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
-    new_vert_split_container(toplevel_container, lft_container);
+  if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
+    if (focused_split_type == GFWL_SPLIT_DIR_VERT)
+      insert_child_container(lftc_container, toplevel_container);
+    else
+      new_vert_split_container(toplevel_container, lft_container);
   }
   // Normal Horizontal Mode, This Is Only Like This Due To Lazy Gabriels Not
   // Actually Adding Horizontal Split Containers.
   else {
-    wl_list_insert(&server->toplevel_root_container.child_containers,
-                   &toplevel_container->link);
+    insert_child_container(&server->toplevel_root_container,
+                           toplevel_container);
   }
 
   parse_containers(&server->toplevel_root_container);
