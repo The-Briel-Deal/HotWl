@@ -180,7 +180,11 @@ create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
 // Only Tested with toplevel_containers.
 void new_vert_split_container(struct gfwl_container *new_container,
                               struct gfwl_container *focused_container) {
-  assert(focused_container);
+  assert(new_container);
+  if (focused_container == NULL) {
+    wlr_log(WLR_INFO, "No focused container, probably just first window.");
+    return;
+  }
 
   struct gfwl_container *vert_split_container =
       create_parent_container(new_container);
@@ -218,6 +222,13 @@ enum gfwl_split_direction get_split_dir(struct gfwl_container *container) {
     return GFWL_SPLIT_DIR_UNKNOWN;
   }
 }
+// TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
+// TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
+//       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
+// TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT.
+// TODO: Move the tiling code to its own func in scene.
+// TODO: Change lf_toplevel to lf container.
+// TODO: Create a tiling_state struct.
 void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
   assert(toplevel);
   struct gfwl_server *server = toplevel->server;
@@ -240,16 +251,7 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
   if (lftc_container) {
     split_dir = get_split_dir(lftc_container);
   }
-  // TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
-  // DOING: CLEAN THIS GARBAGE UP LOL
-  // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
-  //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
-  // TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT.
-  // TODO: Move the tiling code to its own func in scene.
-  // TODO: Change lf_toplevel to lf container.
-  // TODO: Create a tiling_state struct.
 
-  // Add vert container to already vert split container.
   if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
     if (split_dir == GFWL_SPLIT_DIR_VERT)
       insert_child_container(lftc_container, toplevel_container);
