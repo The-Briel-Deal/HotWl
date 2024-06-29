@@ -18,7 +18,7 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
   struct gfwl_server *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
-  server->last_focused_toplevel = toplevel;
+  set_focused_toplevel_container(toplevel->parent_container);
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */
@@ -78,7 +78,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 
   wl_list_insert(&server->toplevels, &toplevel->link);
 
-  add_to_tiling_layout(toplevel);
+  add_to_tiling_layout(toplevel, &server->tiling_state);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }

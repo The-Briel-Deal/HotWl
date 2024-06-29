@@ -107,15 +107,13 @@ int main(int argc, char *argv[]) {
   // Create root scene and the layer roots.
   server.scene = calloc(sizeof(*server.scene), 1);
   server.scene->root = wlr_scene_create();
-  server.scene_layout = wlr_scene_attach_output_layout(server.scene->root,
-                                                       server.output_layout);
+  server.scene_layout =
+      wlr_scene_attach_output_layout(server.scene->root, server.output_layout);
   // Create tiling first so its the lowest.
-  server.scene->layer.base =
-      wlr_scene_tree_create(&server.scene->root->tree);
+  server.scene->layer.base = wlr_scene_tree_create(&server.scene->root->tree);
 
   // Create shell_top after so that it displays over layer_roots.
-  server.scene->layer.top =
-      wlr_scene_tree_create(&server.scene->root->tree);
+  server.scene->layer.top = wlr_scene_tree_create(&server.scene->root->tree);
   // TODO: Add more layers.
 
   /* Set up xdg-shell version 3. The xdg-shell is a Wayland protocol which is
@@ -129,13 +127,14 @@ int main(int argc, char *argv[]) {
                 &server.new_xdg_toplevel);
   server.new_xdg_popup.notify = server_new_xdg_popup;
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
-  
-  server.toplevel_root_container.e_type = GFWL_CONTAINER_ROOT;
-  server.split_dir = GFWL_SPLIT_DIR_HORI;
-  server.toplevel_root_container.server = &server;
-  server.toplevel_root_container.is_root = true;
-  wl_list_init(&server.toplevel_root_container.child_containers);
-  
+
+  server.tiling_state.root = calloc(sizeof(*server.tiling_state.root), 1);
+
+  server.tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
+  server.tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;
+  server.tiling_state.root->server = &server;
+  server.tiling_state.root->is_root = true;
+  wl_list_init(&server.tiling_state.root->child_containers);
 
   /*
    * Creates a cursor, which is a wlroots utility for tracking the cursor

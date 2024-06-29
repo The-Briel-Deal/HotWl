@@ -14,12 +14,12 @@
 
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
 
-void flip_split_direction(struct gfwl_server *server) {
-  if (server->split_dir == GFWL_SPLIT_DIR_HORI)
-    server->split_dir = GFWL_SPLIT_DIR_VERT;
+void flip_split_direction(struct gfwl_tiling_state *tiling_state) {
+  if (tiling_state->split_dir == GFWL_SPLIT_DIR_HORI)
+    tiling_state->split_dir = GFWL_SPLIT_DIR_VERT;
   else
-    server->split_dir = GFWL_SPLIT_DIR_HORI;
-  wlr_log(WLR_INFO, "Vert Split=%i", server->split_dir);
+    tiling_state->split_dir = GFWL_SPLIT_DIR_HORI;
+  wlr_log(WLR_INFO, "Vert Split=%i", tiling_state->split_dir);
 }
 
 static u_int16_t count_toplevel_containers(struct wl_list *toplevels) {
@@ -195,7 +195,7 @@ void new_vert_split_container(struct gfwl_container *new_container,
          vert_split_container->e_type == GFWL_CONTAINER_VSPLIT);
 
   wl_list_insert(
-      &focused_container->server->toplevel_root_container.child_containers,
+      &focused_container->tiling_state->root->child_containers,
       &vert_split_container->link);
 }
 
@@ -207,6 +207,7 @@ void insert_child_container(struct gfwl_container *parent,
     wl_list_remove(&child->link);
   wl_list_insert(&parent->child_containers, &child->link);
 }
+
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container) {
   if (container == NULL)
     return GFWL_SPLIT_DIR_UNKNOWN;
@@ -222,42 +223,46 @@ enum gfwl_split_direction get_split_dir(struct gfwl_container *container) {
     return GFWL_SPLIT_DIR_UNKNOWN;
   }
 }
-// Doing: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
+
+void set_focused_toplevel_container(struct gfwl_container *container) {
+  assert(container);
+  struct gfwl_tiling_state *tiling_state = container->tiling_state;
+  assert(tiling_state);
+
+  tiling_state->active_toplevel_container = container;
+}
+
 // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
 //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
 // TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT.
-// TODO: Change lf_toplevel to lf container.
+// TODO: Change lf_toplevel to currently_focused container..
 // TODO: Create a tiling_state struct.
-void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
+void add_to_tiling_layout(struct gfwl_toplevel *toplevel,
+                          struct gfwl_tiling_state *tiling_state) {
   assert(toplevel);
-  struct gfwl_server *server = toplevel->server;
-  assert(server);
   struct gfwl_container *toplevel_container =
       create_container_from_toplevel(toplevel);
   assert(toplevel_container);
+  toplevel_container->tiling_state = tiling_state;
 
   // lf means last focused btw.
-  struct gfwl_toplevel *lf_toplevel = NULL;
   struct gfwl_container *lft_container = NULL, *lftc_container = NULL;
   enum gfwl_split_direction split_dir = GFWL_SPLIT_DIR_UNKNOWN;
 
-  if (server)
-    lf_toplevel = server->last_focused_toplevel;
-  if (lf_toplevel)
-    lft_container = lf_toplevel->parent_container;
+  lft_container = tiling_state->active_toplevel_container;
   if (lft_container)
     lftc_container = lft_container->parent_container;
   if (lftc_container) {
     split_dir = get_split_dir(lftc_container);
   }
 
-  if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
+  if (tiling_state->split_dir == GFWL_SPLIT_DIR_VERT) {
     if (split_dir == GFWL_SPLIT_DIR_VERT)
       insert_child_container(lftc_container, toplevel_container);
     else
       new_vert_split_container(toplevel_container, lft_container);
   } else
-    insert_child_container(&server->toplevel_root_container,
+    insert_child_container(tiling_state->root,
                            toplevel_container);
-  parse_containers(&server->toplevel_root_container);
+  parse_containers(tiling_state->root);
 }

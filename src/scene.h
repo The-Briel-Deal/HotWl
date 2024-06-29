@@ -31,6 +31,7 @@ enum gfwl_container_type {
 };
 
 struct gfwl_container {
+  struct gfwl_tiling_state *tiling_state;
   enum gfwl_container_type e_type;
   struct gfwl_container *parent_container;
   bool is_root;
@@ -43,7 +44,14 @@ struct gfwl_container {
   struct wl_list link;
 };
 
-void flip_split_direction(struct gfwl_server *server);
+struct gfwl_tiling_state {
+  struct gfwl_server *server;
+  struct gfwl_container *root;
+  struct gfwl_container *active_toplevel_container;
+  enum gfwl_split_direction split_dir;
+};
+
+void flip_split_direction(struct gfwl_tiling_state *tiling_state);
 
 void hori_split_toplevels(struct gfwl_container *toplevel_containers,
                           struct gfwl_server *server);
@@ -58,4 +66,6 @@ void parse_containers(struct gfwl_container *container);
 struct gfwl_container *
 create_parent_container(struct gfwl_container *child_container);
 
-void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add);
+void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
+                          struct gfwl_tiling_state *tiling_state);
+void set_focused_toplevel_container(struct gfwl_container *container);

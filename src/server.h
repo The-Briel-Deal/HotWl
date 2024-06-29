@@ -23,9 +23,7 @@ struct gfwl_server {
   struct wl_listener new_xdg_toplevel;
   struct wl_listener new_xdg_popup;
   struct wl_list toplevels;
-  struct gfwl_toplevel *last_focused_toplevel;
-  struct gfwl_container toplevel_root_container;
-  enum gfwl_split_direction split_dir;
+  struct gfwl_tiling_state tiling_state;
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;
