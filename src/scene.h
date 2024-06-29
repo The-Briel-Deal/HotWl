@@ -53,9 +53,9 @@ struct gfwl_tiling_state {
 
 void flip_split_direction(struct gfwl_tiling_state *tiling_state);
 
-void hori_split_toplevels(struct gfwl_container *container);
+void hori_split_containers(struct gfwl_container *container);
 
-void vert_split_toplevels(struct gfwl_container *container);
+void vert_split_containers(struct gfwl_container *container);
 
 void set_container_box(struct gfwl_container *toplevel, struct wlr_box box);
 
