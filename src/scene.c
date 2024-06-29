@@ -94,12 +94,6 @@ void vert_split_toplevels(struct gfwl_container *container_in,
                                 .y = per_win_height * count,
                                 .width = width,
                                 .height = per_win_height};
-    wlr_log(WLR_INFO, "vert-split box\n \
-        x: %i\n \
-        y: %i\n \
-        width: %i\n \
-        height: %i\n",
-            box.x, box.y, box.width, box.height);
     set_container_box(curr_toplevel_container, box);
     count += 1;
   }
@@ -194,9 +188,8 @@ void new_vert_split_container(struct gfwl_container *new_container,
   assert(vert_split_container &&
          vert_split_container->e_type == GFWL_CONTAINER_VSPLIT);
 
-  wl_list_insert(
-      &focused_container->tiling_state->root->child_containers,
-      &vert_split_container->link);
+  wl_list_insert(&focused_container->tiling_state->root->child_containers,
+                 &vert_split_container->link);
 }
 
 void insert_child_container(struct gfwl_container *parent,
@@ -262,7 +255,6 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel,
     else
       new_vert_split_container(toplevel_container, lft_container);
   } else
-    insert_child_container(tiling_state->root,
-                           toplevel_container);
+    insert_child_container(tiling_state->root, toplevel_container);
   parse_containers(tiling_state->root);
 }
