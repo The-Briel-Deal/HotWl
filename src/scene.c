@@ -1,5 +1,4 @@
 #include "wlr/util/log.h"
-#include "xdg-shell-protocol.h"
 #include <assert.h>
 #include <layer_shell.h>
 #include <output.h>
@@ -20,7 +19,6 @@ void flip_split_direction(struct gfwl_tiling_state *tiling_state) {
     tiling_state->split_dir = GFWL_SPLIT_DIR_VERT;
   else
     tiling_state->split_dir = GFWL_SPLIT_DIR_HORI;
-  wlr_log(WLR_INFO, "Vert Split=%i", tiling_state->split_dir);
 }
 
 static u_int16_t count_toplevel_containers(struct wl_list *toplevels) {
@@ -146,6 +144,7 @@ create_parent_container(struct gfwl_container *child_container) {
       calloc(1, sizeof(*parent_container));
   parent_container->e_type = GFWL_CONTAINER_VSPLIT;
   parent_container->server = child_container->server;
+  parent_container->tiling_state = child_container->tiling_state;
   child_container->parent_container = parent_container;
   wl_list_init(&parent_container->child_containers);
   wl_list_insert(&parent_container->child_containers, &child_container->link);
@@ -168,20 +167,19 @@ create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
 void new_vert_split_container(struct gfwl_container *new_container,
                               struct gfwl_container *focused_container) {
   assert(new_container);
-  if (focused_container == NULL) {
-    wlr_log(WLR_INFO, "No focused container, probably just first window.");
-    return;
-  }
 
   struct gfwl_container *vert_split_container =
       create_parent_container(new_container);
-  wl_list_remove(&focused_container->link);
-  wl_list_insert(&vert_split_container->child_containers,
-                 &focused_container->link);
+  if (focused_container) {
+    if (focused_container->link.next)
+      wl_list_remove(&focused_container->link);
+    wl_list_insert(&vert_split_container->child_containers,
+                   &focused_container->link);
+  }
   assert(vert_split_container &&
          vert_split_container->e_type == GFWL_CONTAINER_VSPLIT);
 
-  wl_list_insert(&focused_container->tiling_state->root->child_containers,
+  wl_list_insert(&vert_split_container->tiling_state->root->child_containers,
                  &vert_split_container->link);
 }
 
