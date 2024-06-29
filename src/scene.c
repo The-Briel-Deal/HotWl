@@ -13,6 +13,7 @@
 #include <xdg_shell.h>
 
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
+void split_containers(struct gfwl_container *container);
 
 void flip_split_direction(struct gfwl_tiling_state *tiling_state) {
   if (tiling_state->split_dir == GFWL_SPLIT_DIR_HORI)
@@ -40,33 +41,21 @@ void parse_containers(struct gfwl_container *container) {
     container->box.width = output->wlr_output->width;
     container->box.height = output->wlr_output->height;
   }
-  wlr_log(WLR_INFO, "In parse container enum %i", container->e_type);
-  switch (get_split_dir(container)) {
-  case GFWL_CONTAINER_HSPLIT:
-    hori_split_toplevels(container, container->server);
-    break;
-  case GFWL_CONTAINER_VSPLIT:
-    vert_split_toplevels(container, container->server);
-    break;
-  default:
-    break;
-  }
-
+  split_containers(container);
   struct gfwl_container *cursor;
   struct wl_list *head = &container->child_containers;
   wl_list_for_each(cursor, head, link) {
     if (cursor->e_type == GFWL_CONTAINER_HSPLIT ||
         cursor->e_type == GFWL_CONTAINER_VSPLIT) {
       parse_containers(cursor);
-      wlr_log(WLR_INFO, "In parse container enum %i", cursor->e_type);
     }
   }
 }
 
+// TODO: Replace duplicate parts with generalized helpers.
 // Change this to get output size from the parent.
-void vert_split_toplevels(struct gfwl_container *container_in,
-                          struct gfwl_server *server) {
-  struct wl_list *toplevel_containers = &container_in->child_containers;
+void vert_split_containers(struct gfwl_container *container) {
+  struct wl_list *toplevel_containers = &container->child_containers;
   // Get count.
   u_int16_t count = count_toplevel_containers(toplevel_containers);
   if (count == 0) {
@@ -74,14 +63,9 @@ void vert_split_toplevels(struct gfwl_container *container_in,
     return;
   }
 
-  // Get output.
-  struct gfwl_output *output =
-      wl_container_of(server->outputs.next, output, link);
-  wlr_log(WLR_INFO, "Am I being Hit?");
-
   // Get Width and Height.
-  u_int32_t width = container_in->box.width;
-  u_int32_t height = container_in->box.height;
+  u_int32_t width = container->box.width;
+  u_int32_t height = container->box.height;
 
   // Get per_win_width.
   u_int32_t per_win_height = height / count;
@@ -90,7 +74,7 @@ void vert_split_toplevels(struct gfwl_container *container_in,
   count = 0;
   struct gfwl_container *curr_toplevel_container;
   wl_list_for_each(curr_toplevel_container, toplevel_containers, link) {
-    const struct wlr_box box = {.x = container_in->box.x,
+    const struct wlr_box box = {.x = container->box.x,
                                 .y = per_win_height * count,
                                 .width = width,
                                 .height = per_win_height};
@@ -98,9 +82,9 @@ void vert_split_toplevels(struct gfwl_container *container_in,
     count += 1;
   }
 }
-void hori_split_toplevels(struct gfwl_container *container_in,
-                          struct gfwl_server *server) {
-  struct wl_list *toplevel_containers = &container_in->child_containers;
+
+void hori_split_containers(struct gfwl_container *container) {
+  struct wl_list *toplevel_containers = &container->child_containers;
   // Get count.
   u_int16_t count = count_toplevel_containers(toplevel_containers);
   if (count == 0) {
@@ -108,13 +92,9 @@ void hori_split_toplevels(struct gfwl_container *container_in,
     return;
   }
 
-  // Get output.
-  struct gfwl_output *output =
-      wl_container_of(server->outputs.next, output, link);
-
   // Get Width and Height.
-  u_int32_t width = container_in->box.width;
-  u_int32_t height = container_in->box.height;
+  u_int32_t width = container->box.width;
+  u_int32_t height = container->box.height;
 
   // Get per_win_width.
   u_int32_t per_win_width = width / count;
@@ -129,6 +109,19 @@ void hori_split_toplevels(struct gfwl_container *container_in,
                                 .height = height};
     set_container_box(curr_toplevel_container, box);
     count += 1;
+  }
+}
+
+void split_containers(struct gfwl_container *container) {
+  switch (get_split_dir(container)) {
+  case GFWL_CONTAINER_HSPLIT:
+    hori_split_containers(container);
+    break;
+  case GFWL_CONTAINER_VSPLIT:
+    vert_split_containers(container);
+    break;
+  default:
+    break;
   }
 }
 
