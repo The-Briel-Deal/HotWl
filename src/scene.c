@@ -222,11 +222,10 @@ enum gfwl_split_direction get_split_dir(struct gfwl_container *container) {
     return GFWL_SPLIT_DIR_UNKNOWN;
   }
 }
-// TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
+// Doing: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
 // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
 //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
 // TODO: WM CRASHES WHEN THE FIRST CONTAINER IS SPLIT VERT.
-// TODO: Move the tiling code to its own func in scene.
 // TODO: Change lf_toplevel to lf container.
 // TODO: Create a tiling_state struct.
 void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
