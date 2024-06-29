@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   server.new_xdg_popup.notify = server_new_xdg_popup;
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
   
-  server.toplevel_root_container.e_type = GFWL_CONTAINER_HSPLIT;
+  server.toplevel_root_container.e_type = GFWL_CONTAINER_ROOT;
   server.split_dir = GFWL_SPLIT_DIR_HORI;
   server.toplevel_root_container.server = &server;
   server.toplevel_root_container.is_root = true;

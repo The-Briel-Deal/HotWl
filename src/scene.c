@@ -12,6 +12,8 @@
 #include <wlr/util/box.h>
 #include <xdg_shell.h>
 
+enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
+
 void flip_split_direction(struct gfwl_server *server) {
   if (server->split_dir == GFWL_SPLIT_DIR_HORI)
     server->split_dir = GFWL_SPLIT_DIR_VERT;
@@ -39,10 +41,16 @@ void parse_containers(struct gfwl_container *container) {
     container->box.height = output->wlr_output->height;
   }
   wlr_log(WLR_INFO, "In parse container enum %i", container->e_type);
-  if (container->e_type == GFWL_CONTAINER_HSPLIT)
+  switch (get_split_dir(container)) {
+  case GFWL_CONTAINER_HSPLIT:
     hori_split_toplevels(container, container->server);
-  if (container->e_type == GFWL_CONTAINER_VSPLIT)
+    break;
+  case GFWL_CONTAINER_VSPLIT:
     vert_split_toplevels(container, container->server);
+    break;
+  default:
+    break;
+  }
 
   struct gfwl_container *cursor;
   struct wl_list *head = &container->child_containers;
@@ -195,6 +203,21 @@ void insert_child_container(struct gfwl_container *parent,
     wl_list_remove(&child->link);
   wl_list_insert(&parent->child_containers, &child->link);
 }
+enum gfwl_split_direction get_split_dir(struct gfwl_container *container) {
+  if (container == NULL)
+    return GFWL_SPLIT_DIR_UNKNOWN;
+
+  switch (container->e_type) {
+  case GFWL_CONTAINER_VSPLIT:
+    return GFWL_SPLIT_DIR_VERT;
+  case GFWL_CONTAINER_HSPLIT:
+    return GFWL_SPLIT_DIR_HORI;
+  case GFWL_CONTAINER_ROOT:
+    return GFWL_SPLIT_DIR_HORI;
+  default:
+    return GFWL_SPLIT_DIR_UNKNOWN;
+  }
+}
 void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
   assert(toplevel);
   struct gfwl_server *server = toplevel->server;
@@ -206,7 +229,7 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
   // lf means last focused btw.
   struct gfwl_toplevel *lf_toplevel = NULL;
   struct gfwl_container *lft_container = NULL, *lftc_container = NULL;
-  enum gfwl_split_direction focused_split_type = GFWL_SPLIT_DIR_UNKNOWN;
+  enum gfwl_split_direction split_dir = GFWL_SPLIT_DIR_UNKNOWN;
 
   if (server)
     lf_toplevel = server->last_focused_toplevel;
@@ -215,10 +238,7 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
   if (lft_container)
     lftc_container = lft_container->parent_container;
   if (lftc_container) {
-    if (lftc_container->e_type == GFWL_CONTAINER_HSPLIT)
-      focused_split_type = GFWL_SPLIT_DIR_HORI;
-    else if (lftc_container->e_type == GFWL_CONTAINER_VSPLIT)
-      focused_split_type = GFWL_SPLIT_DIR_VERT;
+    split_dir = get_split_dir(lftc_container);
   }
   // TODO: MAKE SURE TO SET PARENT CONTAINER ON ALL CONTAINERS.
   // DOING: CLEAN THIS GARBAGE UP LOL
@@ -231,7 +251,7 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel) {
 
   // Add vert container to already vert split container.
   if (server->split_dir == GFWL_SPLIT_DIR_VERT) {
-    if (focused_split_type == GFWL_SPLIT_DIR_VERT)
+    if (split_dir == GFWL_SPLIT_DIR_VERT)
       insert_child_container(lftc_container, toplevel_container);
     else
       new_vert_split_container(toplevel_container, lft_container);

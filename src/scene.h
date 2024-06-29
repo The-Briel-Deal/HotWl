@@ -27,6 +27,7 @@ enum gfwl_container_type {
   GFWL_CONTAINER_HSPLIT = 1,
   GFWL_CONTAINER_VSPLIT = 2,
   GFWL_CONTAINER_TOPLEVEL = 3,
+  GFWL_CONTAINER_ROOT = 4,
 };
 
 struct gfwl_container {
