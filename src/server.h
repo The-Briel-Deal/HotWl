@@ -1,8 +1,8 @@
 #pragma once
-#include "wlr/util/box.h"
 #include "xdg_shell.h"
 #include <scene.h>
 #include <wayland-server-core.h>
+#include <wlr/util/box.h>
 
 // This server struct is for holding our compositors state.
 struct gfwl_server {
