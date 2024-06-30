@@ -4,7 +4,8 @@ WAYLAND_SCANNER=$(shell pkg-config --variable=wayland_scanner wayland-scanner)
 LIBS=\
 	 $(shell pkg-config --cflags --libs "wlroots-0.18") \
 	 $(shell pkg-config --cflags --libs wayland-server) \
-	 $(shell pkg-config --cflags --libs xkbcommon)
+	 $(shell pkg-config --cflags --libs xkbcommon) \
+	 $(shell pkg-config --cflags --libs lua5.1)
 
 build/lib/xdg-shell-protocol.h: | build/lib
 	$(WAYLAND_SCANNER) server-header \
@@ -24,7 +25,7 @@ build/main: src/*.c build/lib/xdg-shell-protocol.h build/lib/wlr-layer-shell-uns
 	$(CC) $(CFLAGS) \
 		-g -Werror -I. -Ibuild/lib \
 		-DWLR_USE_UNSTABLE \
-		-o $@ src/*.c \
+		-o $@ src/*.c src/conf/*.c \
 		$(LIBS) -Isrc
 
 clean:

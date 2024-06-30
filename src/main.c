@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <conf/parse_conf.h> 
 #include <getopt.h>
 #include <input.h>
 #include <keyboard.h>
@@ -36,6 +37,10 @@
 
 int main(int argc, char *argv[]) {
   wlr_log_init(WLR_DEBUG, NULL);
+
+  char* key_loaded = load("./src/conf/default_conf.lua");
+  wlr_log(WLR_INFO, "LUA: Da key is %s", key_loaded);
+  
   char *startup_cmd = NULL;
 
   // Iterate through args until it finds a -s then save to startup_cmd.

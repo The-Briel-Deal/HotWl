@@ -1,0 +1,1 @@
+char *load(char *filename);
