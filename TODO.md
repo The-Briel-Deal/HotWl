@@ -4,5 +4,5 @@
 - [ ] Actually handle destroying windows.
 
 - [x] Make tiling less goofy.
-
+- [ ] Maybe even a little less goofy.
 
