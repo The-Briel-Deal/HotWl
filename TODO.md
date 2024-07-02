@@ -4,5 +4,7 @@
 - [ ] Actually handle destroying windows.
 
 - [x] Make tiling less goofy.
-- [ ] Maybe even a little less goofy.
+- [a] Maybe even a little less goofy.
+  - [a] Allow nested splits.
+  - [ ] Split based on which direction is longer.
 
