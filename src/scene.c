@@ -233,6 +233,7 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel,
   struct gfwl_container *lft_container = NULL, *lftc_container = NULL;
   enum gfwl_split_direction split_dir = GFWL_SPLIT_DIR_UNKNOWN;
 
+  // TODO: Come up with better names for this.
   lft_container = tiling_state->active_toplevel_container;
   if (lft_container)
     lftc_container = lft_container->parent_container;
@@ -240,12 +241,28 @@ void add_to_tiling_layout(struct gfwl_toplevel *toplevel,
     split_dir = get_split_dir(lftc_container);
   }
 
-  if (tiling_state->split_dir == GFWL_SPLIT_DIR_VERT) {
+  switch (tiling_state->split_dir) {
+  case GFWL_SPLIT_DIR_VERT:
     if (split_dir == GFWL_SPLIT_DIR_VERT)
       insert_child_container(lftc_container, toplevel_container);
     else
       new_vert_split_container(toplevel_container, lft_container);
-  } else
+    break;
+  case GFWL_SPLIT_DIR_HORI:
     insert_child_container(tiling_state->root, toplevel_container);
+    break;
+  case GFWL_SPLIT_DIR_UNKNOWN:
+    wlr_log(WLR_ERROR, "Split dir shouldn't ever be unknown on a toplevel.");
+    break;
+  }
+  /*
+   *  if (tiling_state->split_dir == GFWL_SPLIT_DIR_VERT) {
+   *    if (split_dir == GFWL_SPLIT_DIR_VERT)
+   *      insert_child_container(lftc_container, toplevel_container);
+   *    else
+   *      new_vert_split_container(toplevel_container, lft_container);
+   *  } else
+   *    insert_child_container(tiling_state->root, toplevel_container);
+   */
   parse_containers(tiling_state->root);
 }
