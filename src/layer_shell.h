@@ -1,3 +1,4 @@
+#pragma once
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_layer_shell_v1.h>

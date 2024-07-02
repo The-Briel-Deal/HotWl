@@ -1,5 +1,7 @@
 #pragma once
 #include "wlr/util/box.h"
+#include "xdg_shell.h"
+#include <scene.h>
 #include <wayland-server-core.h>
 
 // This server struct is for holding our compositors state.
@@ -21,6 +23,7 @@ struct gfwl_server {
   struct wl_listener new_xdg_toplevel;
   struct wl_listener new_xdg_popup;
   struct wl_list toplevels;
+  struct gfwl_tiling_state tiling_state;
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;

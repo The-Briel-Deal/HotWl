@@ -1,7 +1,11 @@
+#include "server.h"
+#include "wlr/util/box.h"
+#include "wlr/util/log.h"
 #include <assert.h>
 #include <pointer.h>
 #include <scene.h>
 #include <stdlib.h>
+#include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.h>
@@ -14,6 +18,7 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
   struct gfwl_server *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
+  set_focused_toplevel_container(toplevel->parent_container);
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */
@@ -65,8 +70,15 @@ void unfocus_toplevel(struct gfwl_toplevel *toplevel) {
 static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, map);
+  struct gfwl_server *server = toplevel->server;
 
-  wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
+  assert(server);
+
+  struct wlr_box box;
+
+  wl_list_insert(&server->toplevels, &toplevel->link);
+
+  add_to_tiling_layout(toplevel, &server->tiling_state);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }

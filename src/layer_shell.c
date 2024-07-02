@@ -143,12 +143,9 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
 
-  gfwl_output->layers.shell_top =
-      wlr_scene_tree_create(server->scene->layer.top);
-
   // Create the scene.
   struct wlr_scene_layer_surface_v1 *scene_surface =
-      wlr_scene_layer_surface_v1_create(gfwl_output->layers.shell_top,
+      wlr_scene_layer_surface_v1_create(server->scene->layer.top,
                                         wlr_layer_surface);
   // Add to layer_surface object.
   gfwl_layer_surface->scene = scene_surface;
