@@ -5,6 +5,7 @@
 
 - [x] Make tiling less goofy.
 - [a] Maybe even a little less goofy.
-  - [a] Allow nested splits.
+  - [x] Allow nested splits.
   - [ ] Split based on which direction is longer.
+  - [ ] For some reason decorations on some windows turn transparent on kitty.
 

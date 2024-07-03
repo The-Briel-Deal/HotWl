@@ -133,8 +133,7 @@ void set_container_box(struct gfwl_container *container, struct wlr_box box) {
     wlr_xdg_toplevel_set_size(toplevel, box.width, box.height);
     // Set the position.
     struct wlr_scene_tree *scene_tree = toplevel->base->data;
-    scene_tree->node.x = box.x;
-    scene_tree->node.y = box.y;
+    wlr_scene_node_set_position(&scene_tree->node, box.x, box.y);
   }
 };
 
