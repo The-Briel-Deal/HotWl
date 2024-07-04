@@ -68,3 +68,4 @@ create_parent_container(struct gfwl_container *child_container,
 void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
                           struct gfwl_tiling_state *tiling_state);
 void set_focused_toplevel_container(struct gfwl_container *container);
+bool move_right(struct gfwl_tiling_state *tiling_state);

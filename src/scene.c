@@ -14,6 +14,34 @@
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
 void split_containers(struct gfwl_container *container);
 
+bool move_right(struct gfwl_tiling_state *tiling_state) {
+  assert(tiling_state);
+  struct gfwl_container *toplevel_container =
+      tiling_state->active_toplevel_container;
+  assert(toplevel_container);
+  struct gfwl_container *parent_container =
+      toplevel_container->parent_container;
+  assert(parent_container);
+
+  if (parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
+    /* # Go through every child until we find the one after the currently
+     * # focused, then set that as focused. It would probably be nice to make
+     *  a get_next_child() and a get_prev_child() helper.
+     */
+
+    struct gfwl_container *prev_child = NULL;
+    struct gfwl_container *curr_child = NULL;
+    wl_list_for_each(curr_child, &parent_container->child_containers, link) {
+      if (prev_child == toplevel_container) {
+        break;
+      }
+      prev_child = curr_child;
+    }
+    focus_toplevel(curr_child->toplevel, curr_child->toplevel->xdg_toplevel->base->surface);
+  }
+  return true;
+}
+
 void flip_split_direction(struct gfwl_tiling_state *tiling_state) {
   if (tiling_state->split_dir == GFWL_SPLIT_DIR_HORI)
     tiling_state->split_dir = GFWL_SPLIT_DIR_VERT;
