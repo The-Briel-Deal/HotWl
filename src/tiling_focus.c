@@ -1,4 +1,6 @@
 #include "scene.h"
+#include "wlr/util/log.h"
+#include "xdg_shell.h"
 #include <assert.h>
 #include <tiling_focus.h>
 #include <wayland-util.h>
@@ -70,7 +72,23 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   return NULL;
 }
 
-static bool focus_and_warp_to_container(struct gfwl_container *contaiener,
+static bool focus_and_warp_to_container(struct gfwl_container *container,
                                         struct gfwl_tiling_state *state) {
-  return false;
+  assert(container);
+  assert(container->e_type == GFWL_CONTAINER_TOPLEVEL);
+
+  struct gfwl_toplevel *toplevel = container->toplevel;
+  assert(toplevel);
+
+  struct wlr_surface *surface = toplevel->xdg_toplevel->base->surface;
+  assert(surface);
+
+  if (toplevel == NULL || surface == NULL) {
+    wlr_log(WLR_ERROR, "Couldn't focus because of null toplevel or surface.");
+    return false;
+  }
+
+  focus_toplevel(container->toplevel,
+                 container->toplevel->xdg_toplevel->base->surface);
+  return true;
 }
