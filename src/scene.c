@@ -6,6 +6,7 @@
 #include <server.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <time.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
@@ -14,6 +15,19 @@
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
 void split_containers(struct gfwl_container *container);
 
+struct gfwl_container *
+get_next_container(struct gfwl_container *parent_container,
+                   struct gfwl_container *toplevel_container) {
+  struct gfwl_container *prev_child = NULL;
+  struct gfwl_container *curr_child = NULL;
+  wl_list_for_each(curr_child, &parent_container->child_containers, link) {
+    if (prev_child == toplevel_container) {
+      return curr_child;
+    }
+    prev_child = curr_child;
+  }
+  return NULL;
+}
 bool move_right(struct gfwl_tiling_state *tiling_state) {
   assert(tiling_state);
   struct gfwl_container *toplevel_container =
@@ -24,20 +38,42 @@ bool move_right(struct gfwl_tiling_state *tiling_state) {
   assert(parent_container);
 
   if (parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
-    /* # Go through every child until we find the one after the currently
-     * # focused, then set that as focused. It would probably be nice to make
-     *  a get_next_child() and a get_prev_child() helper.
-     */
-
-    struct gfwl_container *prev_child = NULL;
-    struct gfwl_container *curr_child = NULL;
-    wl_list_for_each(curr_child, &parent_container->child_containers, link) {
-      if (prev_child == toplevel_container) {
+    struct gfwl_container *next_container =
+        get_next_container(parent_container, toplevel_container);
+    // If there is a next container, then focus, otherwise return false.
+    if (next_container)
+      focus_toplevel(next_container->toplevel,
+                     next_container->toplevel->xdg_toplevel->base->surface);
+    else
+      return false;
+  } else if (parent_container->e_type == GFWL_CONTAINER_VSPLIT) {
+    struct gfwl_container *prev_container = NULL;
+    // The issue might be here, it seems to never find an hsplit, probably
+    // because it hits root first.
+    while (parent_container) {
+      if (parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
         break;
       }
-      prev_child = curr_child;
+      prev_container = parent_container;
+      parent_container = parent_container->parent_container;
     }
-    focus_toplevel(curr_child->toplevel, curr_child->toplevel->xdg_toplevel->base->surface);
+    if (parent_container && parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
+      struct gfwl_container *next_container =
+          get_next_container(parent_container, prev_container);
+      while (next_container) {
+        if (next_container->e_type == GFWL_CONTAINER_TOPLEVEL) {
+          break;
+        }
+        next_container = wl_container_of(next_container->child_containers.next,
+                                         next_container, link);
+      }
+      if (next_container) {
+        focus_toplevel(next_container->toplevel,
+                       next_container->toplevel->xdg_toplevel->base->surface);
+      } else {
+        return false;
+      }
+    }
   }
   return true;
 }
@@ -212,11 +248,14 @@ void new_vert_split_container(struct gfwl_container *new_container,
   }
   assert(split_container && split_container->e_type == GFWL_CONTAINER_VSPLIT);
 
-  if (fc_parent)
+  if (fc_parent) {
+    split_container->parent_container = fc_parent;
     wl_list_insert(&fc_parent->child_containers, &split_container->link);
-  else
+  } else {
+    split_container->parent_container = new_container->tiling_state->root;
     wl_list_insert(&new_container->tiling_state->root->child_containers,
                    &split_container->link);
+  }
 }
 
 // I think these need to be changed for nesting.
@@ -237,11 +276,14 @@ void new_hori_split_container(struct gfwl_container *new_container,
   }
   assert(split_container && split_container->e_type == GFWL_CONTAINER_HSPLIT);
 
-  if (fc_parent)
+  if (fc_parent) {
+    split_container->parent_container = fc_parent;
     wl_list_insert(&fc_parent->child_containers, &split_container->link);
-  else
+  } else {
+    split_container->parent_container = new_container->tiling_state->root;
     wl_list_insert(&new_container->tiling_state->root->child_containers,
                    &split_container->link);
+  }
 }
 
 void insert_child_container(struct gfwl_container *parent,
