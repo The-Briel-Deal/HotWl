@@ -15,6 +15,21 @@
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
 void split_containers(struct gfwl_container *container);
 
+void print_tiling_tree(struct gfwl_tiling_state *tiling_state) {
+  struct gfwl_container *curr_node = NULL;
+  struct wl_list *head = tiling_state->root->child_containers.next;
+  wl_list_for_each(curr_node, head, link) {
+    wlr_log(WLR_INFO, "Node %i", curr_node->e_type);
+  }
+}
+
+struct gfwl_container *get_container_from_list(struct wl_list *container_link) {
+
+  struct gfwl_container *container =
+      wl_container_of(container_link, container, link);
+  return container;
+}
+
 struct gfwl_container *
 get_next_container(struct gfwl_container *parent_container,
                    struct gfwl_container *toplevel_container) {
@@ -28,53 +43,38 @@ get_next_container(struct gfwl_container *parent_container,
   }
   return NULL;
 }
+
 bool move_right(struct gfwl_tiling_state *tiling_state) {
   assert(tiling_state);
-  struct gfwl_container *toplevel_container =
+  struct gfwl_container *child_container =
       tiling_state->active_toplevel_container;
-  assert(toplevel_container);
-  struct gfwl_container *parent_container =
-      toplevel_container->parent_container;
+  assert(child_container);
+  struct gfwl_container *parent_container = child_container->parent_container;
   assert(parent_container);
 
-  if (parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
-    struct gfwl_container *next_container =
-        get_next_container(parent_container, toplevel_container);
-    // If there is a next container, then focus, otherwise return false.
-    if (next_container)
-      focus_toplevel(next_container->toplevel,
-                     next_container->toplevel->xdg_toplevel->base->surface);
-    else
-      return false;
-  } else if (parent_container->e_type == GFWL_CONTAINER_VSPLIT) {
-    struct gfwl_container *prev_container = NULL;
-    // The issue might be here, it seems to never find an hsplit, probably
-    // because it hits root first.
-    while (parent_container) {
-      if (parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
-        break;
-      }
-      prev_container = parent_container;
-      parent_container = parent_container->parent_container;
-    }
-    if (parent_container && parent_container->e_type == GFWL_CONTAINER_HSPLIT) {
-      struct gfwl_container *next_container =
-          get_next_container(parent_container, prev_container);
-      while (next_container) {
-        if (next_container->e_type == GFWL_CONTAINER_TOPLEVEL) {
-          break;
-        }
-        next_container = wl_container_of(next_container->child_containers.next,
-                                         next_container, link);
-      }
-      if (next_container) {
-        focus_toplevel(next_container->toplevel,
-                       next_container->toplevel->xdg_toplevel->base->surface);
-      } else {
-        return false;
-      }
-    }
+  while (parent_container &&
+         parent_container->e_type != GFWL_CONTAINER_HSPLIT &&
+         wl_list_length(&parent_container->child_containers) > 1) {
+    child_container = parent_container;
+    parent_container = parent_container->parent_container;
   }
+  if (parent_container == NULL) {
+    return false;
+  }
+  // I thought about trying using link.next to make this work but it the memory
+	// did not like that.
+  struct gfwl_container *next_container =
+      get_next_container(parent_container, child_container);
+  // If there is a next container, then focus, otherwise return false.
+  while (next_container && next_container->e_type != GFWL_CONTAINER_TOPLEVEL) {
+    next_container =
+        get_container_from_list(next_container->child_containers.next);
+  }
+  if (next_container == NULL)
+    return false;
+
+  focus_toplevel(next_container->toplevel,
+                 next_container->toplevel->xdg_toplevel->base->surface);
   return true;
 }
 
