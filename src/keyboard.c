@@ -1,5 +1,6 @@
 #include <keyboard.h>
 #include <scene.h>
+#include <tiling_focus.h>
 #include <server.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -92,6 +93,8 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
       execv("/usr/bin/kitty", newargv);
     }
     break;
+  case XKB_KEY_l:
+	tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
   case XKB_KEY_s:
 	flip_split_direction(&server->tiling_state);
     break;

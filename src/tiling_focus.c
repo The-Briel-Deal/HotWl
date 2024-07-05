@@ -2,6 +2,7 @@
 #include "wlr/util/log.h"
 #include "xdg_shell.h"
 #include <assert.h>
+#include <stdlib.h>
 #include <tiling_focus.h>
 #include <wayland-util.h>
 
@@ -14,8 +15,8 @@ static bool focus_and_warp_to_container(struct gfwl_container *contaiener,
 
 static struct gfwl_point get_container_origin(struct gfwl_container *container);
 
-static struct wl_list *
-get_toplevel_container_list(struct gfwl_tiling_state *state);
+static struct wl_list *get_toplevel_container_list(struct gfwl_container *head,
+                                                   struct wl_list *list);
 
 static struct gfwl_container *
 find_closest_to_origin_in_dir(struct gfwl_point origin,
@@ -49,9 +50,11 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   struct gfwl_point curr_focused_origin = get_container_origin(curr_focused);
 
   // Get List of all Toplevel Containers.
-  struct wl_list *toplevel_container_list = get_toplevel_container_list(state);
-  assert(toplevel_container_list);
+  struct wl_list toplevel_container_list;
+  wl_list_init(&toplevel_container_list);
+  get_toplevel_container_list(state->root, &toplevel_container_list);
 
+  assert(false);
   // Iterate through all Toplevel Containers, if we are going left, we
   // should look for a container where the curr focused container's y value
   // is within (new_focused_y < curr_focused_center_y &&
@@ -61,7 +64,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   //        (new_focused_x - curr_focused_center_x)
   // And return the one with the closest distance.
   struct gfwl_container *to_focus = find_closest_to_origin_in_dir(
-      curr_focused_origin, toplevel_container_list, dir);
+      curr_focused_origin, &toplevel_container_list, dir);
 
   // Return found container.
   if (to_focus) {
@@ -91,4 +94,34 @@ static bool focus_and_warp_to_container(struct gfwl_container *container,
   focus_toplevel(container->toplevel,
                  container->toplevel->xdg_toplevel->base->surface);
   return true;
+}
+
+static struct gfwl_point
+get_container_origin(struct gfwl_container *container) {
+  struct wlr_box box = container->box;
+  struct gfwl_point center = {.x = (box.width / 2) + box.x,
+                              .y = (box.height / 2) + box.y};
+  return center;
+}
+
+static struct wl_list *get_toplevel_container_list(struct gfwl_container *head,
+                                                   struct wl_list *list) {
+  if (head->e_type == GFWL_CONTAINER_TOPLEVEL) {
+    wl_list_insert(list, &head->link);
+    return list;
+  }
+  struct gfwl_container *curs = NULL;
+  struct wl_list *child_containers = head->child_containers.next;
+  wl_list_for_each(curs, child_containers, link) {
+    get_toplevel_container_list(curs, list);
+  }
+  return list;
+}
+
+static struct gfwl_container *
+find_closest_to_origin_in_dir(struct gfwl_point origin,
+                              struct wl_list *toplevel_container_list,
+                              enum gfwl_tiling_focus_direction dir) {
+
+  return NULL;
 }
