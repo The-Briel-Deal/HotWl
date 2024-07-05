@@ -1,9 +1,45 @@
 #pragma once
 
-#include <layer_shell.h>
-#include <wlr/types/wlr_scene.h>
+#include <layer_shell.hpp>
+extern "C" {
 #include <wlr/types/wlr_xdg_shell.h>
-#include <xdg_shell.h>
+}
+#include <xdg_shell.hpp>
+
+enum wlr_scene_node_type {
+	WLR_SCENE_NODE_TREE,
+	WLR_SCENE_NODE_RECT,
+	WLR_SCENE_NODE_BUFFER,
+};
+
+void wlr_scene_node_set_position(struct wlr_scene_node *node, int x, int y);
+
+struct wlr_scene_node {
+	enum wlr_scene_node_type type;
+	struct wlr_scene_tree *parent;
+
+	struct wl_list link; // wlr_scene_tree.children
+
+	bool enabled;
+	int x, y; // relative to parent
+
+	struct {
+		struct wl_signal destroy;
+	} events;
+
+	void *data;
+
+	struct wlr_addon_set addons;
+
+	// private state
+
+	pixman_region32_t visible;
+};
+struct wlr_scene_tree {
+	struct wlr_scene_node node;
+
+	struct wl_list children; // wlr_scene_node.link
+};
 
 struct gfwl_server;
 

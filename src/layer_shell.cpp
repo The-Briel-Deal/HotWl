@@ -1,8 +1,8 @@
 #include <assert.h>
-#include <layer_shell.h>
-#include <output.h>
-#include <scene.h>
-#include <server.h>
+#include <layer_shell.hpp>
+#include <output.hpp>
+#include <scene.hpp>
+#include <server.hpp>
 #include <stdlib.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
@@ -30,8 +30,9 @@ void unfocus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
 }
 
 // Returns false if failed.
-bool center_scene_layer_surface(struct wlr_scene_layer_surface_v1 *scene_layer_surface,
-                 struct wlr_output *wlr_output) {
+bool center_scene_layer_surface(
+    struct wlr_scene_layer_surface_v1 *scene_layer_surface,
+    struct wlr_output *wlr_output) {
   assert(wlr_output);
   if (!wlr_output || !scene_layer_surface)
     return false;
@@ -55,7 +56,7 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
       wl_container_of(listener, gfwl_layer_surface, map);
 
   center_scene_layer_surface(gfwl_layer_surface->scene,
-              gfwl_layer_surface->wlr_layer_surface->output);
+                             gfwl_layer_surface->wlr_layer_surface->output);
   struct gfwl_server *server = gfwl_layer_surface->server;
   focus_layer_surface(gfwl_layer_surface);
 }
@@ -68,7 +69,7 @@ void handle_layer_surface_unmap(struct wl_listener *listener, void *data) {
 
 void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
-  struct wlr_surface *wlr_surface = data;
+  struct wlr_surface *wlr_surface = (wlr_surface *)data;
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
@@ -89,7 +90,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   }
 
   // Grab layer surface.
-  struct wlr_layer_surface_v1 *wlr_layer_surface = data;
+  struct wlr_layer_surface_v1 *wlr_layer_surface = (wlr_layer_surface_v1 *)data;
   if (!wlr_layer_surface) {
     wlr_log(WLR_ERROR, "No layer surface.");
     return;
@@ -97,7 +98,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   // Dynamically allocate a new layer surface wrapper and save callback args.
   struct gfwl_layer_surface *gfwl_layer_surface =
-      calloc(1, sizeof(*gfwl_layer_surface));
+      (gfwl_layer_surface *)calloc(1, sizeof(*gfwl_layer_surface));
   if (!gfwl_layer_surface) {
     wlr_log(WLR_ERROR, "No gfwl layer surface.");
     return;

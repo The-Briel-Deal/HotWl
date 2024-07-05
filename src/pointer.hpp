@@ -1,4 +1,5 @@
-#include <server.h>
+#include <server.hpp>
+
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_input_device.h>
 

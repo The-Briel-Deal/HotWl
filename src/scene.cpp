@@ -1,15 +1,17 @@
 #include "wlr/util/log.h"
 #include <assert.h>
-#include <layer_shell.h>
-#include <output.h>
-#include <scene.h>
-#include <server.h>
+#include <layer_shell.hpp>
+#include <output.hpp>
+#include <scene.hpp>
+#include <server.hpp>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
-#include <xdg_shell.h>
+#include <xdg_shell.hpp>
+
+struct wlr_scene_tree;
 
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
 void split_containers(struct gfwl_container *container);
@@ -132,7 +134,7 @@ void set_container_box(struct gfwl_container *container, struct wlr_box box) {
     // Set the size.
     wlr_xdg_toplevel_set_size(toplevel, box.width, box.height);
     // Set the position.
-    struct wlr_scene_tree *scene_tree = toplevel->base->data;
+    struct wlr_scene_tree *scene_tree = (wlr_scene_tree *)toplevel->base->data;
     wlr_scene_node_set_position(&scene_tree->node, box.x, box.y);
   }
 };
@@ -144,7 +146,7 @@ create_parent_container(struct gfwl_container *child_container,
   assert(type != GFWL_CONTAINER_UNKNOWN);
 
   struct gfwl_container *parent_container =
-      calloc(1, sizeof(*parent_container));
+      (gfwl_container *)calloc(1, sizeof(*parent_container));
   parent_container->e_type = type;
   parent_container->server = child_container->server;
   parent_container->tiling_state = child_container->tiling_state;
@@ -156,7 +158,8 @@ create_parent_container(struct gfwl_container *child_container,
 
 struct gfwl_container *
 create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
-  struct gfwl_container *container = calloc(1, sizeof(*container));
+  struct gfwl_container *container =
+      (gfwl_container *)calloc(1, sizeof(*container));
 
   container->e_type = GFWL_CONTAINER_TOPLEVEL;
   container->toplevel = toplevel;

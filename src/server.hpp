@@ -1,7 +1,7 @@
 #pragma once
 #include "wlr/util/box.h"
-#include "xdg_shell.h"
-#include <scene.h>
+#include "xdg_shell.hpp"
+#include <scene.hpp>
 #include <wayland-server-core.h>
 
 // This server struct is for holding our compositors state.
