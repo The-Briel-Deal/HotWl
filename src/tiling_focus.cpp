@@ -3,9 +3,9 @@
 #include "xdg_shell.h"
 #include <assert.h>
 #include <stdlib.h>
-#include <tiling_focus.h>
+#include <tiling_focus.hpp>
 #include <wayland-util.h>
-
+// TODO: Make tiling_state object oriented in cpp.
 static struct gfwl_container *
 get_container_in_dir(enum gfwl_tiling_focus_direction dir,
                      struct gfwl_tiling_state *state);

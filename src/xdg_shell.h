@@ -7,6 +7,13 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
+#ifdef __cplusplus
+#include <includes.hpp>
+#define EXTERNC extern "C"
+#else
+#define EXTERNC
+#endif
+
 struct gfwl_toplevel {
   struct wl_list link;
   struct gfwl_container *parent_container;
@@ -32,6 +39,6 @@ struct gfwl_popup {
 
 void server_new_xdg_popup(struct wl_listener *listener, void *data);
 
-void focus_toplevel(struct gfwl_toplevel *toplevel,
-                    struct wlr_surface *surface);
+EXTERNC void focus_toplevel(struct gfwl_toplevel *toplevel,
+                            struct wlr_surface *surface);
 void server_new_xdg_toplevel(struct wl_listener *listener, void *data);

@@ -1,17 +1,17 @@
 #include <keyboard.h>
-#include <tiling_focus.h>
-#include <wlr/util/box.h>
 #include <scene.hpp>
 #include <server.h>
 #include <stdlib.h>
+#include <tiling_focus.hpp>
 #include <unistd.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
+#include <wlr/util/box.h>
 #include <xdg_shell.h>
 
 void server_new_keyboard(struct gfwl_server *server,
-                                struct wlr_input_device *device) {
+                         struct wlr_input_device *device) {
   struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
 
   struct gfwl_keyboard *keyboard = calloc(1, sizeof(*keyboard));
@@ -95,9 +95,9 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
     }
     break;
   case XKB_KEY_l:
-	tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
+    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
   case XKB_KEY_s:
-	flip_split_direction(&server->tiling_state);
+    flip_split_direction(&server->tiling_state);
     break;
   case XKB_KEY_F1:
     /* Cycle to the next toplevel */
