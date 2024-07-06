@@ -58,18 +58,18 @@ void parse_containers(struct gfwl_container *container) {
 void vert_split_containers(struct gfwl_container *container) {
   struct wl_list *toplevel_containers = &container->child_containers;
   // Get count.
-  u_int16_t count = count_toplevel_containers(toplevel_containers);
+  int count = count_toplevel_containers(toplevel_containers);
   if (count == 0) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
   }
 
   // Get Width and Height.
-  u_int32_t width = container->box.width;
-  u_int32_t height = container->box.height;
+  int width = container->box.width;
+  int height = container->box.height;
 
   // Get per_win_width.
-  u_int32_t per_win_height = height / count;
+  int per_win_height = height / count;
 
   // Set all sizes. (recycling count for the index)
   count = 0;
@@ -94,11 +94,11 @@ void hori_split_containers(struct gfwl_container *container) {
   }
 
   // Get Width and Height.
-  u_int32_t width = container->box.width;
-  u_int32_t height = container->box.height;
+  int width = container->box.width;
+  int height = container->box.height;
 
   // Get per_win_width.
-  u_int32_t per_win_width = width / count;
+  int per_win_width = width / count;
 
   // Set all sizes. (recycling count for the index)
   count = 0;
