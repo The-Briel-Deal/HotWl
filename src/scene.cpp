@@ -99,7 +99,7 @@ void hori_split_containers(struct gfwl_container *container) {
 }
 
 void split_containers(struct gfwl_container *container) {
-  switch (get_split_dir(container)) {
+  switch (container->get_split_dir()) {
   case GFWL_SPLIT_DIR_HORI:
     hori_split_containers(container);
     break;
@@ -141,10 +141,9 @@ create_parent_container(struct gfwl_container *child_container,
   return parent_container;
 }
 
-
 struct gfwl_container *
 create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
-	// Replace calloc with new
+  // Replace calloc with new
   struct gfwl_container *container =
       (gfwl_container *)calloc(1, sizeof(*container));
 
@@ -158,8 +157,6 @@ create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
 
 // Only Tested with toplevel_containers.
 
-
-
 void set_focused_toplevel_container(struct gfwl_container *container) {
   assert(container);
   struct gfwl_tiling_state *tiling_state = container->tiling_state;
@@ -167,4 +164,3 @@ void set_focused_toplevel_container(struct gfwl_container *container) {
 
   tiling_state->active_toplevel_container = container;
 }
-
