@@ -1,5 +1,5 @@
 #include <input.h>
-#include <scene.h>
+#include <scene.hpp>
 #include <wayland-util.h>
 #include <wlr-layer-shell-unstable-v1-protocol.h>
 #include <wlr/types/wlr_layer_shell_v1.h>

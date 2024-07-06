@@ -5,7 +5,7 @@ extern "C" {
 #include <assert.h>
 #include <includes.hpp>
 #include <output.h>
-#include <scene.h>
+#include <scene.hpp>
 #include <server.h>
 #include <stdlib.h>
 #include <sys/types.h>

@@ -3,7 +3,7 @@
 #include "wlr/util/log.h"
 #include <assert.h>
 #include <pointer.h>
-#include <scene.h>
+#include <scene.hpp>
 #include <stdlib.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
