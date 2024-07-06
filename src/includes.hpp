@@ -6,7 +6,9 @@
 #pragma diag_suppress 1696
 #endif
 
+#include <cassert>
 #include <climits>
+#include <cstdlib>
 #include <filesystem>
 #include <getopt.h>
 #include <libinput.h>
@@ -34,6 +36,7 @@
 #define delete delete_
 
 extern "C" {
+#include "wlr/util/log.h"
 #include <layer_shell.hpp>
 #include <wlr/backend.h>
 #include <wlr/backend/drm.h>
