@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wlr/util/box.h>
 #ifdef __cplusplus
 #include <includes.hpp>
 #define EXTERNC extern "C"

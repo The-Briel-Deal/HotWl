@@ -1,7 +1,7 @@
 
 // This header describes the interface of how to change focus via keyboard.
 
-#include "scene.h"
+#include "scene.hpp"
 #include <stdbool.h>
 
 enum gfwl_tiling_focus_direction {

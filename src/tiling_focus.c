@@ -1,4 +1,4 @@
-#include "scene.h"
+#include "scene.hpp"
 #include "wlr/util/log.h"
 #include "xdg_shell.h"
 #include <assert.h>
