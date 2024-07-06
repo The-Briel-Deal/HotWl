@@ -1,13 +1,15 @@
+extern "C" {
 #include "wlr/util/log.h"
+#include <wlr/types/wlr_xdg_shell.h>
+}
 #include <assert.h>
-#include <layer_shell.h>
+#include <includes.hpp>
 #include <output.h>
-#include <scene.h>
+#include <scene.hpp>
 #include <server.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <wayland-util.h>
-#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <xdg_shell.h>
 
@@ -56,18 +58,18 @@ void parse_containers(struct gfwl_container *container) {
 void vert_split_containers(struct gfwl_container *container) {
   struct wl_list *toplevel_containers = &container->child_containers;
   // Get count.
-  u_int16_t count = count_toplevel_containers(toplevel_containers);
+  int count = count_toplevel_containers(toplevel_containers);
   if (count == 0) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
   }
 
   // Get Width and Height.
-  u_int32_t width = container->box.width;
-  u_int32_t height = container->box.height;
+  int width = container->box.width;
+  int height = container->box.height;
 
   // Get per_win_width.
-  u_int32_t per_win_height = height / count;
+  int per_win_height = height / count;
 
   // Set all sizes. (recycling count for the index)
   count = 0;
@@ -92,11 +94,11 @@ void hori_split_containers(struct gfwl_container *container) {
   }
 
   // Get Width and Height.
-  u_int32_t width = container->box.width;
-  u_int32_t height = container->box.height;
+  int width = container->box.width;
+  int height = container->box.height;
 
   // Get per_win_width.
-  u_int32_t per_win_width = width / count;
+  int per_win_width = width / count;
 
   // Set all sizes. (recycling count for the index)
   count = 0;
@@ -132,7 +134,7 @@ void set_container_box(struct gfwl_container *container, struct wlr_box box) {
     // Set the size.
     wlr_xdg_toplevel_set_size(toplevel, box.width, box.height);
     // Set the position.
-    struct wlr_scene_tree *scene_tree = toplevel->base->data;
+    struct wlr_scene_tree *scene_tree = (wlr_scene_tree *)toplevel->base->data;
     wlr_scene_node_set_position(&scene_tree->node, box.x, box.y);
   }
 };
@@ -144,7 +146,7 @@ create_parent_container(struct gfwl_container *child_container,
   assert(type != GFWL_CONTAINER_UNKNOWN);
 
   struct gfwl_container *parent_container =
-      calloc(1, sizeof(*parent_container));
+      (gfwl_container *)calloc(1, sizeof(*parent_container));
   parent_container->e_type = type;
   parent_container->server = child_container->server;
   parent_container->tiling_state = child_container->tiling_state;
@@ -156,7 +158,8 @@ create_parent_container(struct gfwl_container *child_container,
 
 struct gfwl_container *
 create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
-  struct gfwl_container *container = calloc(1, sizeof(*container));
+  struct gfwl_container *container =
+      (gfwl_container *)calloc(1, sizeof(*container));
 
   container->e_type = GFWL_CONTAINER_TOPLEVEL;
   container->toplevel = toplevel;

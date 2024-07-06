@@ -1,6 +1,7 @@
 #include <keyboard.h>
-#include <scene.h>
 #include <tiling_focus.h>
+#include <wlr/util/box.h>
+#include <scene.hpp>
 #include <server.h>
 #include <stdlib.h>
 #include <unistd.h>
