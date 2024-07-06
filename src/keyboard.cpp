@@ -100,7 +100,7 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
     break;
   case XKB_KEY_s:
-    flip_split_direction(&server->tiling_state);
+    server->tiling_state.flip_split_direction();
     break;
   case XKB_KEY_F1:
     /* Cycle to the next toplevel */

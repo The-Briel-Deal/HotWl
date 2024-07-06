@@ -26,6 +26,7 @@ enum gfwl_container_type {
   GFWL_CONTAINER_ROOT = 4,
 };
 
+// Move this to its own container file.
 struct gfwl_container {
   struct gfwl_tiling_state *tiling_state;
   enum gfwl_container_type e_type;
@@ -40,20 +41,7 @@ struct gfwl_container {
   struct wl_list link;
 };
 
-// TODO: Make this a class once I have more things be C++
-struct gfwl_tiling_state {
-  // bool insert(struct gfwl_container containe
 
-  // public:
-  struct gfwl_container *root;
-  struct gfwl_container *active_toplevel_container;
-  enum gfwl_split_direction split_dir;
-
-  // private:
-  struct gfwl_server *server;
-};
-
-void flip_split_direction(struct gfwl_tiling_state *tiling_state);
 
 void hori_split_containers(struct gfwl_container *container);
 
@@ -67,6 +55,9 @@ struct gfwl_container *
 create_parent_container(struct gfwl_container *child_container,
                         enum gfwl_container_type type);
 
-void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
-                          struct gfwl_tiling_state *tiling_state);
+//void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
+//                          struct gfwl_tiling_state *tiling_state);
 void set_focused_toplevel_container(struct gfwl_container *container);
+
+struct gfwl_container *
+create_container_from_toplevel(struct gfwl_toplevel *toplevel);

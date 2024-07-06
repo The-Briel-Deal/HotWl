@@ -1,6 +1,7 @@
 #pragma once
 #include "wlr/util/box.h"
 #include <scene.hpp>
+#include <tiling_focus.hpp>
 #include <wayland-server-core.h>
 
 enum gfwl_cursor_mode {

@@ -80,7 +80,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 
   wl_list_insert(&server->toplevels, &toplevel->link);
 
-  add_to_tiling_layout(toplevel, &server->tiling_state);
+  server->tiling_state.insert(create_container_from_toplevel(toplevel));
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }

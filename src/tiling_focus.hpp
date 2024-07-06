@@ -1,3 +1,4 @@
+#pragma once
 
 // This header describes the interface of how to change focus via keyboard.
 
@@ -11,6 +12,19 @@
 
 #include "scene.hpp"
 #include <stdbool.h>
+
+// TODO: Make this a class once I have more things be C++
+struct gfwl_tiling_state {
+public:
+  void insert(gfwl_container *container);
+  void flip_split_direction();
+  struct gfwl_container *root;
+  struct gfwl_container *active_toplevel_container;
+  enum gfwl_split_direction split_dir;
+
+private:
+  struct gfwl_server *server;
+};
 
 enum gfwl_tiling_focus_direction {
   GFWL_TILING_FOCUS_LEFT = 1,
