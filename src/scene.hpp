@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wlr/util/box.h>
 #ifdef __cplusplus
 #include <includes.hpp>
 #define EXTERNC extern "C"
@@ -46,11 +47,17 @@ struct gfwl_container {
   struct wl_list link;
 };
 
+// TODO: Make this a class once I have more things be C++
 struct gfwl_tiling_state {
-  struct gfwl_server *server;
+  // bool insert(struct gfwl_container containe
+
+  // public:
   struct gfwl_container *root;
   struct gfwl_container *active_toplevel_container;
   enum gfwl_split_direction split_dir;
+
+  // private:
+  struct gfwl_server *server;
 };
 
 EXTERNC void flip_split_direction(struct gfwl_tiling_state *tiling_state);

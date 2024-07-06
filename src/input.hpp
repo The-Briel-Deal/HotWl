@@ -1,5 +1,6 @@
 #include <wayland-server-core.h>
-#include <pointer.h>
+#include <includes.hpp>
+#include <pointer.hpp>
 #include <wlr/types/wlr_xdg_shell.h>
 
 void server_new_input(struct wl_listener *listener, void *data);

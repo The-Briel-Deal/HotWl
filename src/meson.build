@@ -1,16 +1,17 @@
 executable(
-  'gfwl',
-  [
-    'main.c',
-    'pointer.c',
-    'xdg_shell.c',
-    'layer_shell.c',
-    'scene.cpp',
-    'server.c',
-    'keyboard.c',
-    'output.c',
-    'input.c',
-  ]
-  + wl_protos_src,
-  dependencies: [wlroots, wayland_server, wayland_client, libinput, libevdev, xkbcommon],
+	'gfwl',
+	[
+		'main.cpp',
+		'pointer.cpp',
+		'xdg_shell.cpp',
+		'layer_shell.cpp',
+		'server.cpp',
+		'keyboard.cpp',
+		'output.cpp',
+		'input.cpp',
+		'tiling_focus.cpp',
+		'scene.cpp',
+	]
+	+ wl_protos_src,
+	dependencies: [wlroots, wayland_server, wayland_client, libinput, libevdev, xkbcommon],
 )

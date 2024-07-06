@@ -1,14 +1,16 @@
-#include "server.h"
+#include "layer_shell.hpp"
+#include <includes.hpp>
+#include "server.hpp"
 #include "wlr/util/box.h"
 #include "wlr/util/log.h"
 #include <assert.h>
-#include <pointer.h>
+#include <pointer.hpp>
 #include <scene.hpp>
 #include <stdlib.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/edges.h>
-#include <xdg_shell.h>
+#include <xdg_shell.hpp>
 
 void focus_toplevel(struct gfwl_toplevel *toplevel,
                     struct wlr_surface *surface) {
@@ -182,7 +184,7 @@ static void xdg_toplevel_request_resize(struct wl_listener *listener,
    * decorations. Note that a more sophisticated compositor should check the
    * provided serial against a list of button press serials sent to this
    * client, to prevent the client from requesting this whenever they want. */
-  struct wlr_xdg_toplevel_resize_event *event = data;
+  struct wlr_xdg_toplevel_resize_event *event = (wlr_xdg_toplevel_resize_event *)data;
   struct gfwl_toplevel *toplevel =
       wl_container_of(listener, toplevel, request_resize);
   begin_interactive(toplevel, TINYWL_CURSOR_RESIZE, event->edges);
@@ -224,10 +226,10 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
       wl_container_of(listener, server, new_xdg_toplevel);
   /* We are typing the generic callback's data pointer to an xdg_toplevel
    * object. */
-  struct wlr_xdg_toplevel *xdg_toplevel = data;
+  struct wlr_xdg_toplevel *xdg_toplevel = (wlr_xdg_toplevel *)data;
 
   /* We are dynamically allocating a gfwl_toplevel instance. */
-  struct gfwl_toplevel *toplevel = calloc(1, sizeof(*toplevel));
+  struct gfwl_toplevel *toplevel = (gfwl_toplevel *)calloc(1, sizeof(*toplevel));
   /* We are attaching our servers state to the new gfwl_toplevel instance. */
   toplevel->server = server;
   /* We are storing the wlr_toplevel object that we have been was given to use
@@ -290,9 +292,9 @@ static void xdg_popup_destroy(struct wl_listener *listener, void *data) {
 
 void server_new_xdg_popup(struct wl_listener *listener, void *data) {
   /* This event is raised when a client creates a new popup. */
-  struct wlr_xdg_popup *xdg_popup = data;
+  struct wlr_xdg_popup *xdg_popup = (wlr_xdg_popup *)data;
 
-  struct gfwl_popup *popup = calloc(1, sizeof(*popup));
+  struct gfwl_popup *popup = (gfwl_popup *)calloc(1, sizeof(*popup));
   popup->xdg_popup = xdg_popup;
 
   /* We must add xdg popups to the scene graph so they get rendered. The
@@ -303,7 +305,7 @@ void server_new_xdg_popup(struct wl_listener *listener, void *data) {
   struct wlr_xdg_surface *parent =
       wlr_xdg_surface_try_from_wlr_surface(xdg_popup->parent);
   assert(parent != NULL);
-  struct wlr_scene_tree *parent_tree = parent->data;
+  struct wlr_scene_tree *parent_tree = (wlr_scene_tree *)parent->data;
   xdg_popup->base->data =
       wlr_scene_xdg_surface_create(parent_tree, xdg_popup->base);
 

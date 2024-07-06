@@ -33,7 +33,7 @@
 #define delete delete_
 
 extern "C" {
-#include <layer_shell.h>
+#include <layer_shell.hpp>
 #include <wlr/backend.h>
 #include <wlr/backend/libinput.h>
 #include <wlr/backend/drm.h>
@@ -47,9 +47,15 @@ extern "C" {
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_keyboard.h>
+#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_cursor.h>
+#include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_pointer.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_primary_selection.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_viewporter.h>

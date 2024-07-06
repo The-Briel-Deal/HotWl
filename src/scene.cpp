@@ -4,14 +4,14 @@ extern "C" {
 }
 #include <assert.h>
 #include <includes.hpp>
-#include <output.h>
+#include <output.hpp>
 #include <scene.hpp>
-#include <server.h>
+#include <server.hpp>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <wayland-util.h>
 #include <wlr/util/box.h>
-#include <xdg_shell.h>
+#include <xdg_shell.hpp>
 
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
 void split_containers(struct gfwl_container *container);
@@ -251,6 +251,8 @@ void set_focused_toplevel_container(struct gfwl_container *container) {
 
   tiling_state->active_toplevel_container = container;
 }
+
+//bool gfwl_tiling_state::insert(gfwl_container container) { return true; }
 
 // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
 //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.
