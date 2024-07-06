@@ -1,4 +1,7 @@
+extern "C" {
 #include "wlr/util/log.h"
+#include <wlr/types/wlr_xdg_shell.h>
+}
 #include <assert.h>
 #include <includes.hpp>
 #include <output.h>
@@ -7,7 +10,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <wayland-util.h>
-#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <xdg_shell.h>
 
@@ -242,8 +244,7 @@ enum gfwl_split_direction get_split_dir(struct gfwl_container *container) {
   }
 }
 
-void
-set_focused_toplevel_container(struct gfwl_container *container) {
+void set_focused_toplevel_container(struct gfwl_container *container) {
   assert(container);
   struct gfwl_tiling_state *tiling_state = container->tiling_state;
   assert(tiling_state);
