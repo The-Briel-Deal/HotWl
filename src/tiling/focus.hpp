@@ -2,18 +2,11 @@
 
 // This header describes the interface of how to change focus via keyboard.
 
-#include <wlr/util/box.h>
-#ifdef __cplusplus
-#include <includes.hpp>
-#define EXTERNC extern "C"
-#else
-#define EXTERNC
-#endif
-
 #include "scene.hpp"
+#include <includes.hpp>
 #include <stdbool.h>
+#include <wlr/util/box.h>
 
-// TODO: Make this a class once I have more things be C++
 struct gfwl_tiling_state {
 public:
   void insert(gfwl_container *container);
@@ -41,5 +34,5 @@ struct gfwl_point {
 /*
  * Shift the focus to the next window in any of 4 directions.
  */
-EXTERNC bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
+bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
                                       struct gfwl_tiling_state *state);
