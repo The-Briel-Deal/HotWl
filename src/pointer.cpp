@@ -1,7 +1,7 @@
 #include <includes.hpp>
-#include <server.hpp>
 #include <input.hpp>
 #include <scene.hpp>
+#include <server.hpp>
 #include <wayland-util.h>
 #include <wlr/util/edges.h>
 #include <wlr/util/log.h>
@@ -162,7 +162,8 @@ void server_cursor_motion_absolute(struct wl_listener *listener, void *data) {
    * emits these events. */
   struct gfwl_server *server =
       wl_container_of(listener, server, cursor_motion_absolute);
-  struct wlr_pointer_motion_absolute_event *event = (wlr_pointer_motion_absolute_event *)data;
+  struct wlr_pointer_motion_absolute_event *event =
+      (wlr_pointer_motion_absolute_event *)data;
   wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x,
                            event->y);
   process_cursor_motion(server, event->time_msec);

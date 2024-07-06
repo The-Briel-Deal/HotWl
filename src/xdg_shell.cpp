@@ -1,9 +1,9 @@
 #include "layer_shell.hpp"
-#include <includes.hpp>
 #include "server.hpp"
 #include "wlr/util/box.h"
 #include "wlr/util/log.h"
 #include <assert.h>
+#include <includes.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>
 #include <stdlib.h>
@@ -184,7 +184,8 @@ static void xdg_toplevel_request_resize(struct wl_listener *listener,
    * decorations. Note that a more sophisticated compositor should check the
    * provided serial against a list of button press serials sent to this
    * client, to prevent the client from requesting this whenever they want. */
-  struct wlr_xdg_toplevel_resize_event *event = (wlr_xdg_toplevel_resize_event *)data;
+  struct wlr_xdg_toplevel_resize_event *event =
+      (wlr_xdg_toplevel_resize_event *)data;
   struct gfwl_toplevel *toplevel =
       wl_container_of(listener, toplevel, request_resize);
   begin_interactive(toplevel, TINYWL_CURSOR_RESIZE, event->edges);
@@ -229,7 +230,8 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
   struct wlr_xdg_toplevel *xdg_toplevel = (wlr_xdg_toplevel *)data;
 
   /* We are dynamically allocating a gfwl_toplevel instance. */
-  struct gfwl_toplevel *toplevel = (gfwl_toplevel *)calloc(1, sizeof(*toplevel));
+  struct gfwl_toplevel *toplevel =
+      (gfwl_toplevel *)calloc(1, sizeof(*toplevel));
   /* We are attaching our servers state to the new gfwl_toplevel instance. */
   toplevel->server = server;
   /* We are storing the wlr_toplevel object that we have been was given to use

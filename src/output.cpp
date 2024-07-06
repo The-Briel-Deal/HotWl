@@ -32,7 +32,8 @@ static void output_request_state(struct wl_listener *listener, void *data) {
    * the output. For example, Wayland and X11 backends request a new mode
    * when the output window is resized. */
   struct gfwl_output *output = wl_container_of(listener, output, request_state);
-  const struct wlr_output_event_request_state *event = (wlr_output_event_request_state *)data;
+  const struct wlr_output_event_request_state *event =
+      (wlr_output_event_request_state *)data;
   wlr_output_commit_state(output->wlr_output, event->state);
 }
 
