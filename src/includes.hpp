@@ -112,7 +112,6 @@ extern "C" {
 #endif
 
 #ifdef NO_XWAYLAND
-#define XWAYLAND false
-#else
+#defin
 #define XWAYLAND true
 #endif
