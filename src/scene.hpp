@@ -1,9 +1,11 @@
 #pragma once
 
-#include <layer_shell.h>
-#include <wlr/types/wlr_scene.h>
-#include <wlr/types/wlr_xdg_shell.h>
-#include <xdg_shell.h>
+#ifdef __cplusplus
+#include <includes.hpp>
+#define EXTERNC extern "C"
+#else
+#define EXTERNC
+#endif
 
 struct gfwl_server;
 
@@ -51,20 +53,21 @@ struct gfwl_tiling_state {
   enum gfwl_split_direction split_dir;
 };
 
-void flip_split_direction(struct gfwl_tiling_state *tiling_state);
+EXTERNC void flip_split_direction(struct gfwl_tiling_state *tiling_state);
 
-void hori_split_containers(struct gfwl_container *container);
+EXTERNC void hori_split_containers(struct gfwl_container *container);
 
-void vert_split_containers(struct gfwl_container *container);
+EXTERNC void vert_split_containers(struct gfwl_container *container);
 
-void set_container_box(struct gfwl_container *toplevel, struct wlr_box box);
+EXTERNC void set_container_box(struct gfwl_container *toplevel,
+                               struct wlr_box box);
 
-void parse_containers(struct gfwl_container *container);
+EXTERNC void parse_containers(struct gfwl_container *container);
 
-struct gfwl_container *
+EXTERNC struct gfwl_container *
 create_parent_container(struct gfwl_container *child_container,
                         enum gfwl_container_type type);
 
-void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
-                          struct gfwl_tiling_state *tiling_state);
-void set_focused_toplevel_container(struct gfwl_container *container);
+EXTERNC void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
+                                  struct gfwl_tiling_state *tiling_state);
+EXTERNC void set_focused_toplevel_container(struct gfwl_container *container);

@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <layer_shell.h>
 #include <output.h>
-#include <scene.h>
+#include <scene.hpp>
 #include <server.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>

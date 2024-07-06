@@ -1,5 +1,6 @@
 #include <keyboard.h>
-#include <scene.h>
+#include <wlr/util/box.h>
+#include <scene.hpp>
 #include <server.h>
 #include <stdlib.h>
 #include <unistd.h>

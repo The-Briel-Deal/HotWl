@@ -5,7 +5,7 @@
 #include <layer_shell.h>
 #include <output.h>
 #include <pointer.h>
-#include <scene.h>
+#include <scene.hpp>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

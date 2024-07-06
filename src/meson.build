@@ -5,7 +5,7 @@ executable(
     'pointer.c',
     'xdg_shell.c',
     'layer_shell.c',
-    'scene.c',
+    'scene.cpp',
     'server.c',
     'keyboard.c',
     'output.c',
