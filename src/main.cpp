@@ -1,6 +1,6 @@
+#include <includes.hpp>
 #include <assert.h>
 #include <getopt.h>
-#include <includes.hpp>
 #include <input.hpp>
 #include <keyboard.hpp>
 #include <layer_shell.hpp>
