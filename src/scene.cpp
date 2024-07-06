@@ -1,16 +1,7 @@
-extern "C" {
-#include "wlr/util/log.h"
-#include <wlr/types/wlr_xdg_shell.h>
-}
-#include <assert.h>
 #include <includes.hpp>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <wayland-util.h>
-#include <wlr/util/box.h>
 #include <xdg_shell.hpp>
 
 enum gfwl_split_direction get_split_dir(struct gfwl_container *container);
