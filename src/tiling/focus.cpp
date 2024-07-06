@@ -3,7 +3,7 @@
 #include "xdg_shell.hpp"
 #include <assert.h>
 #include <stdlib.h>
-#include <tiling_focus.hpp>
+#include <tiling/focus.hpp>
 #include <wayland-util.h>
 
 // TODO: Make tiling_state object oriented in cpp.

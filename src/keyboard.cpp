@@ -3,7 +3,7 @@
 #include <scene.hpp>
 #include <server.hpp>
 #include <stdlib.h>
-#include <tiling_focus.hpp>
+#include <tiling/focus.hpp>
 #include <unistd.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
