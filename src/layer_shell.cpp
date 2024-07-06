@@ -1,8 +1,9 @@
 #include <assert.h>
-#include <layer_shell.h>
-#include <output.h>
+#include <includes.hpp>
+#include <layer_shell.hpp>
+#include <output.hpp>
 #include <scene.hpp>
-#include <server.h>
+#include <server.hpp>
 #include <stdlib.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
@@ -68,7 +69,7 @@ void handle_layer_surface_unmap(struct wl_listener *listener, void *data) {
 
 void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
   wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
-  struct wlr_surface *wlr_surface = data;
+  struct wlr_surface *wlr_surface = (struct wlr_surface *)data;
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
@@ -89,7 +90,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   }
 
   // Grab layer surface.
-  struct wlr_layer_surface_v1 *wlr_layer_surface = data;
+  struct wlr_layer_surface_v1 *wlr_layer_surface = (wlr_layer_surface_v1 *)data;
   if (!wlr_layer_surface) {
     wlr_log(WLR_ERROR, "No layer surface.");
     return;
@@ -97,7 +98,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   // Dynamically allocate a new layer surface wrapper and save callback args.
   struct gfwl_layer_surface *gfwl_layer_surface =
-      calloc(1, sizeof(*gfwl_layer_surface));
+      (struct gfwl_layer_surface *)calloc(1, sizeof(*gfwl_layer_surface));
   if (!gfwl_layer_surface) {
     wlr_log(WLR_ERROR, "No gfwl layer surface.");
     return;

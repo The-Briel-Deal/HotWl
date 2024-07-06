@@ -1,8 +1,13 @@
 #pragma once
 #include "wlr/util/box.h"
-#include "xdg_shell.h"
 #include <scene.hpp>
 #include <wayland-server-core.h>
+
+enum gfwl_cursor_mode {
+  TINYWL_CURSOR_PASSTHROUGH,
+  TINYWL_CURSOR_MOVE,
+  TINYWL_CURSOR_RESIZE,
+};
 
 // This server struct is for holding our compositors state.
 struct gfwl_server {
@@ -41,15 +46,11 @@ struct gfwl_server {
   struct wl_listener request_cursor;
   struct wl_listener request_set_selection;
   struct wl_list keyboards;
-  enum gfwl_cursor_mode {
-    TINYWL_CURSOR_PASSTHROUGH,
-    TINYWL_CURSOR_MOVE,
-    TINYWL_CURSOR_RESIZE,
-  } cursor_mode;
   struct gfwl_toplevel *grabbed_toplevel;
   double grab_x, grab_y;
   struct wlr_box grab_geobox;
   uint32_t resize_edges;
+  enum gfwl_cursor_mode cursor_mode;
 
   struct wlr_output_layout *output_layout;
   struct wl_list outputs;

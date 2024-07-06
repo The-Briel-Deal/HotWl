@@ -1,11 +1,13 @@
 #include <assert.h>
 #include <getopt.h>
-#include <input.h>
-#include <keyboard.h>
-#include <layer_shell.h>
-#include <output.h>
-#include <pointer.h>
+#include <includes.hpp>
+#include <input.hpp>
+#include <keyboard.hpp>
+#include <layer_shell.hpp>
+#include <output.hpp>
+#include <pointer.hpp>
 #include <scene.hpp>
+#include <server.hpp>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,17 +23,14 @@
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_keyboard.h>
-#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_pointer.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_subcompositor.h>
-#include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
-#include <xdg_shell.h>
+#include <xdg_shell.hpp>
 #include <xkbcommon/xkbcommon.h>
 
 int main(int argc, char *argv[]) {
@@ -105,7 +104,7 @@ int main(int argc, char *argv[]) {
   wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
   // Create root scene and the layer roots.
-  server.scene = calloc(sizeof(*server.scene), 1);
+  server.scene = (gfwl_scene *)calloc(sizeof(*server.scene), 1);
   server.scene->root = wlr_scene_create();
   server.scene_layout =
       wlr_scene_attach_output_layout(server.scene->root, server.output_layout);
@@ -128,7 +127,7 @@ int main(int argc, char *argv[]) {
   server.new_xdg_popup.notify = server_new_xdg_popup;
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
 
-  server.tiling_state.root = calloc(sizeof(*server.tiling_state.root), 1);
+  server.tiling_state.root = (gfwl_container *)calloc(sizeof(*server.tiling_state.root), 1);
 
   server.tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
   server.tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;

@@ -1,14 +1,14 @@
 executable(
 	'gfwl',
 	[
-		'main.c',
-		'pointer.c',
-		'xdg_shell.c',
-		'layer_shell.c',
-		'server.c',
-		'keyboard.c',
-		'output.c',
-		'input.c',
+		'main.cpp',
+		'pointer.cpp',
+		'xdg_shell.cpp',
+		'layer_shell.cpp',
+		'server.cpp',
+		'keyboard.cpp',
+		'output.cpp',
+		'input.cpp',
 		'tiling_focus.cpp',
 		'scene.cpp',
 	]

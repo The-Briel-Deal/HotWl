@@ -1,6 +1,6 @@
 #include "scene.hpp"
 #include "wlr/util/log.h"
-#include "xdg_shell.h"
+#include "xdg_shell.hpp"
 #include <assert.h>
 #include <stdlib.h>
 #include <tiling_focus.hpp>

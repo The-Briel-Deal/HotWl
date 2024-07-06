@@ -1,6 +1,7 @@
-#include <keyboard.h>
+#include "includes.hpp"
+#include <keyboard.hpp>
 #include <scene.hpp>
-#include <server.h>
+#include <server.hpp>
 #include <stdlib.h>
 #include <tiling_focus.hpp>
 #include <unistd.h>
@@ -8,13 +9,13 @@
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/box.h>
-#include <xdg_shell.h>
+#include <xdg_shell.hpp>
 
 void server_new_keyboard(struct gfwl_server *server,
                          struct wlr_input_device *device) {
   struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
 
-  struct gfwl_keyboard *keyboard = calloc(1, sizeof(*keyboard));
+  struct gfwl_keyboard *keyboard = (gfwl_keyboard *)calloc(1, sizeof(*keyboard));
   keyboard->server = server;
   keyboard->wlr_keyboard = wlr_keyboard;
 
@@ -96,6 +97,7 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
     break;
   case XKB_KEY_l:
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
+    break;
   case XKB_KEY_s:
     flip_split_direction(&server->tiling_state);
     break;
@@ -104,12 +106,13 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
     if (wl_list_length(&server->toplevels) < 2) {
       break;
     }
-    struct gfwl_toplevel *next_toplevel =
-        wl_container_of(server->toplevels.prev, next_toplevel, link);
+    struct gfwl_toplevel *next_toplevel = (gfwl_toplevel *)wl_container_of(
+        server->toplevels.prev, next_toplevel, link);
     focus_toplevel(next_toplevel, next_toplevel->xdg_toplevel->base->surface);
     break;
-  default:
-    return false;
+    //  default:
+    //    return false;
+    //    break;
   }
   return true;
 }
@@ -118,7 +121,7 @@ static void keyboard_handle_key(struct wl_listener *listener, void *data) {
   /* This event is raised when a key is pressed or released. */
   struct gfwl_keyboard *keyboard = wl_container_of(listener, keyboard, key);
   struct gfwl_server *server = keyboard->server;
-  struct wlr_keyboard_key_event *event = data;
+  struct wlr_keyboard_key_event *event = (wlr_keyboard_key_event *)data;
   struct wlr_seat *seat = server->seat;
 
   /* Translate libinput keycode -> xkbcommon */

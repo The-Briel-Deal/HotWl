@@ -1,11 +1,11 @@
-#include <input.h>
+#include <includes.hpp>
+#include <server.hpp>
+#include <input.hpp>
 #include <scene.hpp>
 #include <wayland-util.h>
-#include <wlr-layer-shell-unstable-v1-protocol.h>
-#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/edges.h>
 #include <wlr/util/log.h>
-#include <xdg_shell.h>
+#include <xdg_shell.hpp>
 
 struct wlr_scene_layer_surface_v1 *
 desktop_layersurface_at(struct gfwl_server *server, double lx, double ly,
@@ -104,7 +104,7 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   // mouse things. And Wofi is crashing.
   struct wlr_scene_layer_surface_v1 *scene_layer_surface =
       desktop_layersurface_at(server, server->cursor->x, server->cursor->y,
-                              &wlr_surface, &sx, &sy); 
+                              &wlr_surface, &sx, &sy);
 
   struct gfwl_toplevel *toplevel = desktop_toplevel_at(
       server, server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
@@ -140,7 +140,7 @@ void server_cursor_motion(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits a _relative_
    * pointer motion event (i.e. a delta) */
   struct gfwl_server *server = wl_container_of(listener, server, cursor_motion);
-  struct wlr_pointer_motion_event *event = data;
+  struct wlr_pointer_motion_event *event = (wlr_pointer_motion_event *)data;
   /* The cursor doesn't move unless we tell it to. The cursor automatically
    * handles constraining the motion to the output layout, as well as any
    * special configuration applied for the specific input device which
@@ -162,7 +162,7 @@ void server_cursor_motion_absolute(struct wl_listener *listener, void *data) {
    * emits these events. */
   struct gfwl_server *server =
       wl_container_of(listener, server, cursor_motion_absolute);
-  struct wlr_pointer_motion_absolute_event *event = data;
+  struct wlr_pointer_motion_absolute_event *event = (wlr_pointer_motion_absolute_event *)data;
   wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x,
                            event->y);
   process_cursor_motion(server, event->time_msec);
@@ -172,7 +172,7 @@ void server_cursor_button(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits a button
    * event. */
   struct gfwl_server *server = wl_container_of(listener, server, cursor_button);
-  struct wlr_pointer_button_event *event = data;
+  struct wlr_pointer_button_event *event = (wlr_pointer_button_event *)data;
   /* Notify the client with pointer focus that a button press has occurred */
   wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button,
                                  event->state);
@@ -193,7 +193,7 @@ void server_cursor_axis(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits an axis event,
    * for example when you move the scroll wheel. */
   struct gfwl_server *server = wl_container_of(listener, server, cursor_axis);
-  struct wlr_pointer_axis_event *event = data;
+  struct wlr_pointer_axis_event *event = (wlr_pointer_axis_event *)data;
   /* Notify the client with pointer focus of the axis event. */
   wlr_seat_pointer_notify_axis(
       server->seat, event->time_msec, event->orientation, event->delta,
@@ -238,7 +238,7 @@ struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server, double lx,
   }
   // Only return the tree's node IF it has a node.
   if (tree)
-    return tree->node.data;
+    return (struct gfwl_toplevel *)tree->node.data;
   return NULL;
 }
 

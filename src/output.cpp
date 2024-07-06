@@ -1,13 +1,14 @@
-#include <output.h>
-#include <wlr/util/box.h>
+#include <includes.hpp>
+#include <output.hpp>
 #include <scene.hpp>
-#include <server.h>
+#include <server.hpp>
 #include <stdlib.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_scene.h>
+#include <wlr/util/box.h>
 
 static void output_frame(struct wl_listener *listener, void *data) {
   /* This function is called every time an output is ready to display a frame,
@@ -31,7 +32,7 @@ static void output_request_state(struct wl_listener *listener, void *data) {
    * the output. For example, Wayland and X11 backends request a new mode
    * when the output window is resized. */
   struct gfwl_output *output = wl_container_of(listener, output, request_state);
-  const struct wlr_output_event_request_state *event = data;
+  const struct wlr_output_event_request_state *event = (wlr_output_event_request_state *)data;
   wlr_output_commit_state(output->wlr_output, event->state);
 }
 
@@ -49,7 +50,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
   /* This event is raised by the backend when a new output (aka a display or
    * monitor) becomes available. */
   struct gfwl_server *server = wl_container_of(listener, server, new_output);
-  struct wlr_output *wlr_output = data;
+  struct wlr_output *wlr_output = (struct wlr_output *)data;
 
   /* Configures the output created by the backend to use our allocator
    * and our renderer. Must be done once, before commiting the output */
@@ -75,7 +76,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
   wlr_output_state_finish(&state);
 
   /* Allocates and configures our state for this output */
-  struct gfwl_output *output = calloc(1, sizeof(*output));
+  struct gfwl_output *output = (gfwl_output *)calloc(1, sizeof(*output));
   output->wlr_output = wlr_output;
   output->server = server;
 

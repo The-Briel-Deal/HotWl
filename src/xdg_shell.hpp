@@ -1,9 +1,9 @@
 #pragma once
 #include "scene.hpp"
+#include <includes.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_compositor.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
