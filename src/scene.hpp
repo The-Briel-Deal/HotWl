@@ -41,8 +41,6 @@ struct gfwl_container {
   struct wl_list link;
 };
 
-
-
 void hori_split_containers(struct gfwl_container *container);
 
 void vert_split_containers(struct gfwl_container *container);
@@ -55,8 +53,6 @@ struct gfwl_container *
 create_parent_container(struct gfwl_container *child_container,
                         enum gfwl_container_type type);
 
-//void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
-//                          struct gfwl_tiling_state *tiling_state);
 void set_focused_toplevel_container(struct gfwl_container *container);
 
 struct gfwl_container *
