@@ -4,6 +4,11 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <xdg_shell.h>
+#ifdef __cplusplus
+#define EXTERNC extern "C"
+#else
+#define EXTERNC
+#endif
 
 struct gfwl_server;
 
@@ -67,4 +72,4 @@ create_parent_container(struct gfwl_container *child_container,
 
 void add_to_tiling_layout(struct gfwl_toplevel *toplevel_to_add,
                           struct gfwl_tiling_state *tiling_state);
-void set_focused_toplevel_container(struct gfwl_container *container);
+EXTERNC void set_focused_toplevel_container(struct gfwl_container *container);

@@ -1,6 +1,6 @@
 project(
 	'gfwl',
-	'c',
+	['c', 'cpp'],
 	version: '0.1',
 	license: 'MIT',
 	meson_version: '>=0.60.0',
@@ -14,10 +14,10 @@ add_project_arguments(
 	[
 		'-DWLR_USE_UNSTABLE',
 	],
-	language: 'c',
+	language: ['c', 'cpp'],
 )
 
-cc = meson.get_compiler('c')
+cc = meson.get_compiler('cpp')
 
 is_freebsd = host_machine.system().startswith('freebsd')
 
