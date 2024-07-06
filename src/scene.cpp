@@ -252,7 +252,7 @@ void set_focused_toplevel_container(struct gfwl_container *container) {
   tiling_state->active_toplevel_container = container;
 }
 
-//bool gfwl_tiling_state::insert(gfwl_container container) { return true; }
+// bool gfwl_tiling_state::insert(gfwl_container container) { return true; }
 
 // TODO: FIX BUG WHERE YOU MAKE A HORI CONTAINER IN A SPLIT CONTAINER. I
 //       JUST COVERED IT UP WITH THE THIRD PART OF THE IF STATEMENT.

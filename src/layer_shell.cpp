@@ -31,8 +31,9 @@ void unfocus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
 }
 
 // Returns false if failed.
-bool center_scene_layer_surface(struct wlr_scene_layer_surface_v1 *scene_layer_surface,
-                 struct wlr_output *wlr_output) {
+bool center_scene_layer_surface(
+    struct wlr_scene_layer_surface_v1 *scene_layer_surface,
+    struct wlr_output *wlr_output) {
   assert(wlr_output);
   if (!wlr_output || !scene_layer_surface)
     return false;
@@ -56,7 +57,7 @@ void handle_layer_surface_map(struct wl_listener *listener, void *data) {
       wl_container_of(listener, gfwl_layer_surface, map);
 
   center_scene_layer_surface(gfwl_layer_surface->scene,
-              gfwl_layer_surface->wlr_layer_surface->output);
+                             gfwl_layer_surface->wlr_layer_surface->output);
   struct gfwl_server *server = gfwl_layer_surface->server;
   focus_layer_surface(gfwl_layer_surface);
 }

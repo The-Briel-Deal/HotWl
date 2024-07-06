@@ -127,7 +127,8 @@ int main(int argc, char *argv[]) {
   server.new_xdg_popup.notify = server_new_xdg_popup;
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
 
-  server.tiling_state.root = (gfwl_container *)calloc(sizeof(*server.tiling_state.root), 1);
+  server.tiling_state.root =
+      (gfwl_container *)calloc(sizeof(*server.tiling_state.root), 1);
 
   server.tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
   server.tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;
