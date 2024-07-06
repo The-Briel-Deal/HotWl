@@ -51,6 +51,7 @@ extern "C" {
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/render/wlr_texture.h>
 #include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_damage_ring.h>
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
@@ -74,15 +75,14 @@ extern "C" {
 #include <wlr/types/wlr_tablet_tool.h>
 #include <wlr/types/wlr_touch.h>
 #include <wlr/types/wlr_viewporter.h>
+#include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <wlr/util/edges.h>
 #include <wlr/util/log.h>
 #include <wlr/util/region.h>
 #include <wlr/util/transform.h>
 #include <xkbcommon/xkbcommon.h>
-#include <wlr/util/transform.h>
-#include <wlr/render/swapchain.h>
-#include <wlr/render/egl.h>
 
 #include <libdrm/drm_fourcc.h>
 
@@ -115,4 +115,3 @@ extern "C" {
 #defin
 #define XWAYLAND true
 #endif
-
