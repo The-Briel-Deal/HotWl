@@ -1,4 +1,5 @@
 #include "state.hpp"
+#include <algorithm>
 #include <cassert>
 #include <tiling/container.hpp>
 
@@ -20,6 +21,15 @@ void gfwl_tiling_state::new_vert_split_container(
     split_container->parent_container = focused_container->parent_container;
     focused_container->parent_container->child_containers.push_back(
         split_container);
+    // I should probably generalize this between new hori and vert.
+    auto position_to_remove =
+        std::find(focused_container->parent_container->child_containers.begin(),
+                  focused_container->parent_container->child_containers.end(),
+                  focused_container);
+    focused_container->parent_container->child_containers.erase(
+        position_to_remove);
+    focused_container->parent_container = split_container;
+    split_container->child_containers.push_back(focused_container);
   } else {
     split_container->parent_container = new_container->tiling_state->root;
     new_container->tiling_state->root->child_containers.push_back(
@@ -36,6 +46,16 @@ void gfwl_tiling_state::new_hori_split_container(
     split_container->parent_container = focused_container->parent_container;
     focused_container->parent_container->child_containers.push_back(
         split_container);
+    // I should probably generalize this between new hori and vert.
+	// The new split container should go in the same position as the previous.
+    auto position_to_remove =
+        std::find(focused_container->parent_container->child_containers.begin(),
+                  focused_container->parent_container->child_containers.end(),
+                  focused_container);
+    focused_container->parent_container->child_containers.erase(
+        position_to_remove);
+    focused_container->parent_container = split_container;
+    split_container->child_containers.push_back(focused_container);
   } else {
     split_container->parent_container = new_container->tiling_state->root;
     new_container->tiling_state->root->child_containers.push_back(
