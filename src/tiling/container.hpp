@@ -1,6 +1,8 @@
 #pragma once
 #include "state.hpp"
 #include <includes.hpp>
+#include <memory>
+#include <vector>
 
 enum gfwl_container_type {
   GFWL_CONTAINER_UNKNOWN = 0,
@@ -10,35 +12,45 @@ enum gfwl_container_type {
   GFWL_CONTAINER_ROOT = 4,
 };
 
-struct gfwl_container *
-create_parent_container(struct gfwl_container *child_container,
-                        enum gfwl_container_type type);
-
-struct gfwl_container {
+class GfContainer : public std::enable_shared_from_this<GfContainer> {
 public:
-  enum gfwl_split_direction get_split_dir();
-  struct gfwl_tiling_state *tiling_state;
-  enum gfwl_container_type e_type;
-  struct gfwl_container *parent_container;
-  bool is_root;
-  struct wlr_box box;
+  GfContainer(bool root, gfwl_tiling_state *state, gfwl_container_type type,
+              std::shared_ptr<GfContainer> parent, gfwl_server *server,
+              gfwl_toplevel *toplevel);
 
-  struct gfwl_toplevel *toplevel;
-  struct gfwl_server *server;
+  // Member Functions
+  gfwl_split_direction get_split_dir();
+  void parse_containers();
+  void split_containers();
+  void vert_split_containers();
+  void hori_split_containers();
+  std::vector<std::shared_ptr<GfContainer>> get_top_level_container_list();
 
-  struct wl_list child_containers;
-  struct wl_list link;
+  // The Container Above and Below this one in the tiling tree
+  std::shared_ptr<GfContainer> parent_container = NULL;
+  std::vector<std::shared_ptr<GfContainer>> child_containers;
+
+  // Descriptors of this container
+  gfwl_container_type e_type = GFWL_CONTAINER_UNKNOWN;
+  bool is_root = false;
+
+  // The Dimensions of a container
+  wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
+
+  // Some relevant state
+  gfwl_tiling_state *tiling_state = NULL;
+  gfwl_toplevel *toplevel = NULL;
+  gfwl_server *server = NULL;
 };
 
-void hori_split_containers(struct gfwl_container *container);
+void set_container_box(std::shared_ptr<GfContainer> toplevel,
+                       struct wlr_box box);
 
-void vert_split_containers(struct gfwl_container *container);
+void set_focused_toplevel_container(std::shared_ptr<GfContainer> container);
 
-void set_container_box(struct gfwl_container *toplevel, struct wlr_box box);
-
-void parse_containers(struct gfwl_container *container);
-
-void set_focused_toplevel_container(struct gfwl_container *container);
-
-struct gfwl_container *
+std::shared_ptr<GfContainer>
 create_container_from_toplevel(struct gfwl_toplevel *toplevel);
+
+std::shared_ptr<GfContainer>
+create_parent_container(std::shared_ptr<GfContainer> child_container,
+                        enum gfwl_container_type type);

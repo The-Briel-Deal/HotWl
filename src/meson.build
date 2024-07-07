@@ -5,7 +5,7 @@ executable(
 		'pointer.cpp',
 		'xdg_shell.cpp',
 		'layer_shell.cpp',
-		'server.cpp',
+		# 'server.cpp', # Currently Not Used.
 		'keyboard.cpp',
 		'output.cpp',
 		'input.cpp',
