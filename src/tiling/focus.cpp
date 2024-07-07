@@ -58,22 +58,35 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
     break;
   }
   case GFWL_TILING_FOCUS_RIGHT: {
-	// TODO: Finish This Dir
+    int shortest_distance = INT_MAX;
+
+    for (auto toplevel : toplevel_container_list) {
+      int distance_right_of_origin = toplevel->box.x - origin.x;
+      if (toplevel->box.x > origin.x && toplevel->box.y < origin.y &&
+          toplevel->box.y + toplevel->box.height > origin.y &&
+          distance_right_of_origin < shortest_distance &&
+          toplevel != toplevel->tiling_state->active_toplevel_container) {
+        // TODO: Actually pass in the currently focused toplevel.
+        // If distance is negative something went wrong.
+        assert(distance_right_of_origin > 0);
+        closest_valid_toplevel = toplevel;
+        shortest_distance = distance_right_of_origin;
+      }
+    }
+    // TODO: Finish This Dir
     break;
   }
   case GFWL_TILING_FOCUS_UP: {
-	// TODO: Finish This Dir
+    // TODO: Finish This Dir
     break;
   }
   case GFWL_TILING_FOCUS_DOWN: {
-	// TODO: Finish This Dir
+    // TODO: Finish This Dir
     break;
   }
   }
 
-  // TODO: Remove
-  assert(false);
-  return NULL;
+  return closest_valid_toplevel;
 }
 
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
@@ -110,19 +123,17 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   std::shared_ptr<GfContainer> to_focus = find_closest_to_origin_in_dir(
       curr_focused_origin, toplevel_container_list, dir);
 
-  // Return found container.
-  //  if (to_focus) {
-  //    assert(to_focus->e_type == GFWL_CONTAINER_TOPLEVEL);
-  //    return to_focus;
-  //}
+  if (to_focus) {
+    assert(to_focus->e_type == GFWL_CONTAINER_TOPLEVEL);
+    return to_focus;
+  }
 
   return NULL;
 }
 
 static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
                                         struct gfwl_tiling_state *state) {
-  assert(container);
-  assert(container->e_type == GFWL_CONTAINER_TOPLEVEL);
+  assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
   struct gfwl_toplevel *toplevel = container->toplevel;
   assert(toplevel);
