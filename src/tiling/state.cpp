@@ -27,7 +27,6 @@ void gfwl_tiling_state::new_vert_split_container(
   }
 }
 
-// I think these need to be changed for nesting.
 void gfwl_tiling_state::new_hori_split_container(
     std::shared_ptr<GfContainer> new_container,
     std::shared_ptr<GfContainer> focused_container) {
@@ -43,6 +42,7 @@ void gfwl_tiling_state::new_hori_split_container(
         split_container);
   }
 }
+
 void gfwl_tiling_state::flip_split_direction() {
   if (this->split_dir == GFWL_SPLIT_DIR_HORI)
     this->split_dir = GFWL_SPLIT_DIR_VERT;

@@ -24,6 +24,7 @@ public:
   void split_containers();
   void vert_split_containers();
   void hori_split_containers();
+  std::vector<std::shared_ptr<GfContainer>> get_top_level_container_list();
 
   // The Container Above and Below this one in the tiling tree
   std::shared_ptr<GfContainer> parent_container = NULL;

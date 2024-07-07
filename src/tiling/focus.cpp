@@ -1,6 +1,6 @@
-#include <includes.hpp>
 #include "xdg_shell.hpp"
 #include <assert.h>
+#include <includes.hpp>
 #include <stdlib.h>
 #include <tiling/focus.hpp>
 #include <wayland-util.h>
@@ -53,9 +53,8 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   struct gfwl_point curr_focused_origin = get_container_origin(curr_focused);
 
   // Get List of all Toplevel Containers.
-  struct wl_list toplevel_container_list;
-  wl_list_init(&toplevel_container_list);
-  // get_toplevel_container_list(state->root, &toplevel_container_list);
+
+  auto toplevel_container_list = state->root->get_top_level_container_list();
 
   assert(false);
   // Iterate through all Toplevel Containers, if we are going left, we
@@ -66,14 +65,14 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   // With this container save it along with the distance
   //        (new_focused_x - curr_focused_center_x)
   // And return the one with the closest distance.
-  std::shared_ptr<GfContainer> to_focus = find_closest_to_origin_in_dir(
-      curr_focused_origin, &toplevel_container_list, dir);
+  //  std::shared_ptr<GfContainer> to_focus = find_closest_to_origin_in_dir(
+  //      curr_focused_origin, &toplevel_container_list, dir);
 
   // Return found container.
-  if (to_focus) {
-    assert(to_focus->e_type == GFWL_CONTAINER_TOPLEVEL);
-    return to_focus;
-  }
+  //  if (to_focus) {
+  //    assert(to_focus->e_type == GFWL_CONTAINER_TOPLEVEL);
+  //    return to_focus;
+  //}
 
   return NULL;
 }

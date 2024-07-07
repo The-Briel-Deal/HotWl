@@ -1,8 +1,11 @@
 #include "container.hpp"
 #include "state.hpp"
+#include <deque>
 #include <includes.hpp>
+#include <memory>
 #include <output.hpp>
 #include <server.hpp>
+#include <vector>
 #include <xdg_shell.hpp>
 
 GfContainer::GfContainer(bool root, gfwl_tiling_state *state,
@@ -101,7 +104,7 @@ void GfContainer::parse_containers() {
   if (this->is_root) {
     struct gfwl_output *output =
         wl_container_of(this->server->outputs.next, output, link);
-	assert(output);
+    assert(output);
     this->box.width = output->wlr_output->width;
     this->box.height = output->wlr_output->height;
   }
@@ -127,3 +130,33 @@ void set_container_box(std::shared_ptr<GfContainer> container,
     wlr_scene_node_set_position(&scene_tree->node, box.x, box.y);
   }
 };
+
+// Get A List of Toplevels below this Container node.
+std::vector<std::shared_ptr<GfContainer>>
+GfContainer::get_top_level_container_list() {
+  std::vector<std::shared_ptr<GfContainer>> list;
+  std::deque<std::shared_ptr<GfContainer>> stack;
+  // I need to figure out what the heck the difference between emplace and push
+  // is. I also need to figure out how to get my lost shared_ptr back ):
+  stack.emplace_back(this);
+
+  while (!stack.empty()) {
+    stack.pop_back();
+    for (auto child : stack.back()->child_containers) {
+      switch (child->e_type) {
+      case GFWL_CONTAINER_TOPLEVEL:
+        list.emplace_back(child);
+        break;
+      case GFWL_CONTAINER_HSPLIT:
+        stack.emplace_back(child);
+        break;
+      case GFWL_CONTAINER_VSPLIT:
+        stack.emplace_back(child);
+        break;
+      default:
+        break;
+      }
+    }
+  }
+  return list;
+}
