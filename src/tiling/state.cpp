@@ -31,7 +31,7 @@ void gfwl_tiling_state::new_vert_split_container(
 void gfwl_tiling_state::new_hori_split_container(
     std::shared_ptr<GfContainer> new_container,
     std::shared_ptr<GfContainer> focused_container) {
-  std::shared_ptr<GfContainer> split_container =
+  auto split_container =
       create_parent_container(new_container, GFWL_CONTAINER_HSPLIT);
   if (focused_container) {
     split_container->parent_container = focused_container->parent_container;
