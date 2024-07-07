@@ -138,20 +138,22 @@ GfContainer::get_top_level_container_list() {
   std::deque<std::shared_ptr<GfContainer>> stack;
   // I need to figure out what the heck the difference between emplace and push
   // is. I also need to figure out how to get my lost shared_ptr back ):
-  stack.emplace_back(this);
+
+  stack.push_back(this->shared_from_this());
 
   while (!stack.empty()) {
+    auto curr_node = stack.back();
     stack.pop_back();
-    for (auto child : stack.back()->child_containers) {
+    for (auto child : curr_node->child_containers) {
       switch (child->e_type) {
       case GFWL_CONTAINER_TOPLEVEL:
-        list.emplace_back(child);
+        list.push_back(child);
         break;
       case GFWL_CONTAINER_HSPLIT:
-        stack.emplace_back(child);
+        stack.push_back(child);
         break;
       case GFWL_CONTAINER_VSPLIT:
-        stack.emplace_back(child);
+        stack.push_back(child);
         break;
       default:
         break;

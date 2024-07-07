@@ -56,7 +56,6 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
 
   auto toplevel_container_list = state->root->get_top_level_container_list();
 
-  assert(false);
   // Iterate through all Toplevel Containers, if we are going left, we
   // should look for a container where the curr focused container's y value
   // is within (new_focused_y < curr_focused_center_y &&

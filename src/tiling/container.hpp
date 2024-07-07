@@ -12,7 +12,7 @@ enum gfwl_container_type {
   GFWL_CONTAINER_ROOT = 4,
 };
 
-class GfContainer {
+class GfContainer : public std::enable_shared_from_this<GfContainer> {
 public:
   GfContainer(bool root, gfwl_tiling_state *state, gfwl_container_type type,
               std::shared_ptr<GfContainer> parent, gfwl_server *server,
