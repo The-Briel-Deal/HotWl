@@ -99,6 +99,15 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
   case XKB_KEY_l:
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
     break;
+  case XKB_KEY_h:
+    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_LEFT, &server->tiling_state);
+    break;
+  case XKB_KEY_j:
+    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_DOWN, &server->tiling_state);
+    break;
+  case XKB_KEY_k:
+    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_UP, &server->tiling_state);
+    break;
   case XKB_KEY_s:
     server->tiling_state.flip_split_direction();
     break;
