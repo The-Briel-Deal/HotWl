@@ -46,15 +46,14 @@ void vert_split_containers(struct std::shared_ptr<GfContainer> container) {
   // Set all sizes. (recycling count for the index)
   count = 0;
   struct GfContainer *curr_toplevel_container;
-  // TODO: Rewrite this loop with Vector.
-  //   wl_list_for_each(curr_toplevel_container, toplevel_containers, link) {
-  //     const struct wlr_box box = {.x = container->box.x,
-  //                                 .y = per_win_height * count,
-  //                                 .width = width,
-  //                                 .height = per_win_height};
-  //     set_container_box(curr_toplevel_container, box);
-  //     count += 1;
-  //   }
+  for (auto curr : container->child_containers) {
+    const struct wlr_box box = {.x = container->box.x,
+                                .y = per_win_height * count,
+                                .width = width,
+                                .height = per_win_height};
+    set_container_box(curr, box);
+    count += 1;
+  }
 }
 
 void hori_split_containers(struct std::shared_ptr<GfContainer> container) {
@@ -64,7 +63,6 @@ void hori_split_containers(struct std::shared_ptr<GfContainer> container) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
   }
-
   // Get Width and Height.
   int width = container->box.width;
   int height = container->box.height;
