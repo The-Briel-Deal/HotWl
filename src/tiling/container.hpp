@@ -20,7 +20,10 @@ public:
 
   // Member Functions
   gfwl_split_direction get_split_dir();
+  void parse_containers();
+  void split_containers();
   void vert_split_containers();
+  void hori_split_containers();
 
   // The Container Above and Below this one in the tiling tree
   std::shared_ptr<GfContainer> parent_container = NULL;
@@ -39,12 +42,8 @@ public:
   gfwl_server *server = NULL;
 };
 
-void hori_split_containers(std::shared_ptr<GfContainer> container);
-
 void set_container_box(std::shared_ptr<GfContainer> toplevel,
                        struct wlr_box box);
-
-void parse_containers(std::shared_ptr<GfContainer> container);
 
 void set_focused_toplevel_container(std::shared_ptr<GfContainer> container);
 

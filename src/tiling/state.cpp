@@ -83,7 +83,9 @@ void gfwl_tiling_state::insert(std::shared_ptr<GfContainer> container) {
     wlr_log(WLR_ERROR, "Split dir shouldn't ever be unknown on a toplevel.");
     break;
   }
-  parse_containers(this->root);
+
+  // After every insertion we want to resize containers to the new state.
+  this->root->parse_containers();
 }
 
 // Insert is overloaded so that you can directly insert toplevels as well.
