@@ -15,14 +15,14 @@ enum gfwl_container_type {
 struct GfContainer {
 public:
   gfwl_split_direction get_split_dir();
-  struct gfwl_tiling_state *tiling_state;
-  gfwl_container_type e_type;
-  struct std::shared_ptr<GfContainer> parent_container;
-  bool is_root;
-  struct wlr_box box;
+  struct gfwl_tiling_state *tiling_state = NULL;
+  gfwl_container_type e_type = GFWL_CONTAINER_UNKNOWN;
+  struct std::shared_ptr<GfContainer> parent_container = NULL;
+  bool is_root = false;
+  struct wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
 
-  struct gfwl_toplevel *toplevel;
-  struct gfwl_server *server;
+  struct gfwl_toplevel *toplevel = NULL;
+  struct gfwl_server *server = NULL;
 
   std::vector<std::shared_ptr<GfContainer>> child_containers;
 

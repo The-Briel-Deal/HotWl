@@ -6,40 +6,24 @@
 #include <server.hpp>
 #include <xdg_shell.hpp>
 
-// TODO: I want to move all tiling and container logic to its own class.
 enum gfwl_split_direction get_split_dir(std::shared_ptr<GfContainer> container);
 void split_containers(std::shared_ptr<GfContainer> container);
 
-// Shouldn't be needed anymore.
-// static u_int16_t count_toplevel_containers(struct wl_list *toplevels) {
-//   assert(toplevels);
-//   if (!toplevels)
-//     return 0;
-//   struct GfContainer *curr_toplevel;
-//   u_int16_t count = 0;
-//   wl_list_for_each(curr_toplevel, toplevels, link) { count += 1; }
-//   return count;
-// }
-
-// It would be nice to log containers during this for debugging.
 void parse_containers(std::shared_ptr<GfContainer> container) {
+  // Get output if we're at the root.
   if (container->is_root) {
-    // Get output.
     struct gfwl_output *output =
         wl_container_of(container->server->outputs.next, output, link);
     container->box.width = output->wlr_output->width;
     container->box.height = output->wlr_output->height;
   }
   split_containers(container);
-  struct GfContainer *cursor;
-  // TODO: Rewrite this with shared_ptr and vector.
-  //  struct wl_list *head = &container->child_containers;
-  //  wl_list_for_each(cursor, head, link) {
-  //    if (cursor->e_type == GFWL_CONTAINER_HSPLIT ||
-  //        cursor->e_type == GFWL_CONTAINER_VSPLIT) {
-  //      parse_containers(cursor);
-  //    }
-  //  }
+  for (auto child : container->child_containers) {
+    if (child->e_type == GFWL_CONTAINER_HSPLIT ||
+        child->e_type == GFWL_CONTAINER_VSPLIT) {
+      parse_containers(child);
+    }
+  }
 }
 
 // TODO: Replace duplicate parts with generalized helpers.
@@ -90,18 +74,17 @@ void hori_split_containers(struct std::shared_ptr<GfContainer> container) {
 
   // Set all sizes. (recycling count for the index)
   count = 0;
-  struct GfContainer *curr_toplevel_container;
-  //   wl_list_for_each(curr_toplevel_container, toplevel_containers, link) {
-  //     const struct wlr_box box = {.x = count * per_win_width,
-  //                                 .y = 0,
-  //                                 .width = per_win_width,
-  //                                 .height = height};
-  //     set_container_box(curr_toplevel_container, box);
-  //     count += 1;
-  //   }
+  for (auto curr : container->child_containers) {
+    const struct wlr_box box = {.x = count * per_win_width,
+                                .y = 0,
+                                .width = per_win_width,
+                                .height = height};
+    set_container_box(curr, box);
+    count += 1;
+  }
 }
 
-void split_containers(std::shared_ptr<GfContainer>container) {
+void split_containers(std::shared_ptr<GfContainer> container) {
   switch (container->get_split_dir()) {
   case GFWL_SPLIT_DIR_HORI:
     hori_split_containers(container);
@@ -115,7 +98,8 @@ void split_containers(std::shared_ptr<GfContainer>container) {
 }
 
 // Only supports toplevels for now.
-void set_container_box(struct GfContainer *container, struct wlr_box box) {
+void set_container_box(std::shared_ptr<GfContainer> container,
+                       struct wlr_box box) {
   container->box = box;
   if (container->e_type == GFWL_CONTAINER_TOPLEVEL) {
     struct wlr_xdg_toplevel *toplevel = container->toplevel->xdg_toplevel;
@@ -133,7 +117,6 @@ create_parent_container(std::shared_ptr<GfContainer> child_container,
   // Just making sure I'm never passing unknown.
   assert(type != GFWL_CONTAINER_UNKNOWN);
 
-  // TODO: Make sure this is good.
   struct std::shared_ptr<GfContainer> parent_container =
       std::make_shared<GfContainer>(false, nullptr, type, nullptr,
                                     child_container->server, nullptr);
@@ -141,16 +124,12 @@ create_parent_container(std::shared_ptr<GfContainer> child_container,
   parent_container->server = child_container->server;
   parent_container->tiling_state = child_container->tiling_state;
   child_container->parent_container = parent_container;
-  // Change these list operations to use the vector.
-  // wl_list_init(&parent_container->child_containers);
-  // wl_list_insert(&parent_container->child_containers,
-  // &child_container->link);
+  parent_container->child_containers.push_back(child_container);
   return parent_container;
 }
 
 std::shared_ptr<GfContainer>
 create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
-  // Replace calloc with new
   std::shared_ptr<GfContainer> container =
       std::make_shared<GfContainer>(false, nullptr, GFWL_CONTAINER_TOPLEVEL,
                                     nullptr, toplevel->server, toplevel);
