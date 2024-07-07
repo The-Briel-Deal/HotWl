@@ -48,7 +48,8 @@ void vert_split_containers(struct std::shared_ptr<GfContainer> container) {
   struct GfContainer *curr_toplevel_container;
   for (auto curr : container->child_containers) {
     const struct wlr_box box = {.x = container->box.x,
-                                .y = per_win_height * count,
+                                .y =
+                                    container->box.y + (per_win_height * count),
                                 .width = width,
                                 .height = per_win_height};
     set_container_box(curr, box);
@@ -73,8 +74,8 @@ void hori_split_containers(struct std::shared_ptr<GfContainer> container) {
   // Set all sizes. (recycling count for the index)
   count = 0;
   for (auto curr : container->child_containers) {
-    const struct wlr_box box = {.x = count * per_win_width,
-                                .y = 0,
+    const struct wlr_box box = {.x = container->box.x + (count * per_win_width),
+                                .y = container->box.y,
                                 .width = per_win_width,
                                 .height = height};
     set_container_box(curr, box);
