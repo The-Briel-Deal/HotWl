@@ -1,8 +1,8 @@
 #pragma once
 #include "wlr/util/box.h"
 #include <scene.hpp>
-#include <tiling/focus.hpp>
 #include <wayland-server-core.h>
+#include <tiling/container.hpp>
 
 enum gfwl_cursor_mode {
   TINYWL_CURSOR_PASSTHROUGH,

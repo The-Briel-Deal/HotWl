@@ -1,9 +1,11 @@
+#include "tiling/container.hpp"
 #include <includes.hpp>
 #include <assert.h>
 #include <getopt.h>
 #include <input.hpp>
 #include <keyboard.hpp>
 #include <layer_shell.hpp>
+#include <memory>
 #include <output.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>
@@ -127,14 +129,18 @@ int main(int argc, char *argv[]) {
   server.new_xdg_popup.notify = server_new_xdg_popup;
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
 
+
+//   GfContainer(bool root, gfwl_tiling_state *state, gfwl_container_type type,
+//               std::shared_ptr<GfContainer> parent, gfwl_server *server,
+//               gfwl_toplevel *toplevel);
   server.tiling_state.root =
-      (gfwl_container *)calloc(sizeof(*server.tiling_state.root), 1);
+      std::make_shared<GfContainer>(true, nullptr, GFWL_CONTAINER_ROOT, nullptr, nullptr, nullptr);
 
   server.tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
   server.tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;
   server.tiling_state.root->server = &server;
   server.tiling_state.root->is_root = true;
-  wl_list_init(&server.tiling_state.root->child_containers);
+//  wl_list_init(&server.tiling_state.root->child_containers);
 
   /*
    * Creates a cursor, which is a wlroots utility for tracking the cursor

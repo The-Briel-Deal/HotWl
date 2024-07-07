@@ -1,6 +1,8 @@
 #pragma once
 #include "state.hpp"
 #include <includes.hpp>
+#include <memory>
+#include <vector>
 
 enum gfwl_container_type {
   GFWL_CONTAINER_UNKNOWN = 0,
@@ -10,35 +12,39 @@ enum gfwl_container_type {
   GFWL_CONTAINER_ROOT = 4,
 };
 
-struct gfwl_container *
-create_parent_container(struct gfwl_container *child_container,
-                        enum gfwl_container_type type);
-
-struct gfwl_container {
+struct GfContainer {
 public:
-  enum gfwl_split_direction get_split_dir();
+  gfwl_split_direction get_split_dir();
   struct gfwl_tiling_state *tiling_state;
-  enum gfwl_container_type e_type;
-  struct gfwl_container *parent_container;
+  gfwl_container_type e_type;
+  struct std::shared_ptr<GfContainer> parent_container;
   bool is_root;
   struct wlr_box box;
 
   struct gfwl_toplevel *toplevel;
   struct gfwl_server *server;
 
-  struct wl_list child_containers;
-  struct wl_list link;
+  std::vector<std::shared_ptr<GfContainer>> child_containers;
+
+  GfContainer(bool root, gfwl_tiling_state *state, gfwl_container_type type,
+              std::shared_ptr<GfContainer> parent, gfwl_server *server,
+              gfwl_toplevel *toplevel);
 };
 
-void hori_split_containers(struct gfwl_container *container);
+void hori_split_containers(std::shared_ptr<GfContainer> container);
 
-void vert_split_containers(struct gfwl_container *container);
+void vert_split_containers(std::shared_ptr<GfContainer> container);
 
-void set_container_box(struct gfwl_container *toplevel, struct wlr_box box);
+void set_container_box(std::shared_ptr<GfContainer> toplevel,
+                       struct wlr_box box);
 
-void parse_containers(struct gfwl_container *container);
+void parse_containers(std::shared_ptr<GfContainer> container);
 
-void set_focused_toplevel_container(struct gfwl_container *container);
+void set_focused_toplevel_container(std::shared_ptr<GfContainer> container);
 
-struct gfwl_container *
+std::shared_ptr<GfContainer>
 create_container_from_toplevel(struct gfwl_toplevel *toplevel);
+
+std::shared_ptr<GfContainer>
+create_parent_container(std::shared_ptr<GfContainer> child_container,
+                        enum gfwl_container_type type);

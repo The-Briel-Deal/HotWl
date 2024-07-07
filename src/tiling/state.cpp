@@ -1,63 +1,69 @@
+#include <cassert>
 #include "state.hpp"
+#include <tiling/container.hpp>
 
-void gfwl_tiling_state::insert_child_container(struct gfwl_container *parent,
-                                               struct gfwl_container *child) {
+void gfwl_tiling_state::insert_child_container(
+    std::shared_ptr<GfContainer> parent, std::shared_ptr<GfContainer> child) {
   child->parent_container = parent;
 
-  if (child->link.next)
-    wl_list_remove(&child->link);
-  wl_list_insert(&parent->child_containers, &child->link);
+  // TODO: Use vectors.
+  //  if (child->link.next)
+  //    wl_list_remove(&child->link);
+  //  wl_list_insert(&parent->child_containers, &child->link);
 }
 
 void gfwl_tiling_state::new_vert_split_container(
-    struct gfwl_container *new_container,
-    struct gfwl_container *focused_container) {
+    std::shared_ptr<GfContainer> new_container,
+    std::shared_ptr<GfContainer> focused_container) {
   assert(new_container);
-  struct gfwl_container *fc_parent;
+  std::shared_ptr<GfContainer> fc_parent;
 
-  struct gfwl_container *split_container =
+  std::shared_ptr<GfContainer> split_container =
       create_parent_container(new_container, GFWL_CONTAINER_VSPLIT);
   if (focused_container) {
     fc_parent = focused_container->parent_container;
     assert(fc_parent);
-    if (focused_container->link.next)
-      wl_list_remove(&focused_container->link);
-    wl_list_insert(&split_container->child_containers,
-                   &focused_container->link);
+    // TODO: Replace with Vector Ops
+    // if (focused_container->link.next)
+    //   wl_list_remove(&focused_container->link);
+    // wl_list_insert(&split_container->child_containers,
+    //               &focused_container->link);
   }
   assert(split_container && split_container->e_type == GFWL_CONTAINER_VSPLIT);
 
-  if (fc_parent)
-    wl_list_insert(&fc_parent->child_containers, &split_container->link);
-  else
-    wl_list_insert(&new_container->tiling_state->root->child_containers,
-                   &split_container->link);
+  // if (fc_parent)
+  //   wl_list_insert(&fc_parent->child_containers, &split_container->link);
+  // else
+  //   wl_list_insert(&new_container->tiling_state->root->child_containers,
+  //                  &split_container->link);
 }
 
 // I think these need to be changed for nesting.
 void gfwl_tiling_state::new_hori_split_container(
-    struct gfwl_container *new_container,
-    struct gfwl_container *focused_container) {
+    std::shared_ptr<GfContainer> new_container,
+    std::shared_ptr<GfContainer> focused_container) {
   assert(new_container);
-  struct gfwl_container *fc_parent = NULL;
+  std::shared_ptr<GfContainer> fc_parent = NULL;
 
-  struct gfwl_container *split_container =
+  std::shared_ptr<GfContainer> split_container =
       create_parent_container(new_container, GFWL_CONTAINER_HSPLIT);
   if (focused_container) {
     fc_parent = focused_container->parent_container;
     assert(fc_parent);
-    if (focused_container->link.next)
-      wl_list_remove(&focused_container->link);
-    wl_list_insert(&split_container->child_containers,
-                   &focused_container->link);
+    // TODO: Vector instead
+    //     if (focused_container->link.next)
+    //       wl_list_remove(&focused_container->link);
+    //     wl_list_insert(&split_container->child_containers,
+    //                   &focused_container->link);
   }
   assert(split_container && split_container->e_type == GFWL_CONTAINER_HSPLIT);
 
-  if (fc_parent)
-    wl_list_insert(&fc_parent->child_containers, &split_container->link);
-  else
-    wl_list_insert(&new_container->tiling_state->root->child_containers,
-                   &split_container->link);
+  // TODO: More vector things.
+  //  if (fc_parent)
+  //    wl_list_insert(&fc_parent->child_containers, &split_container->link);
+  //  else
+  //    wl_list_insert(&new_container->tiling_state->root->child_containers,
+  //                   &split_container->link);
 }
 void gfwl_tiling_state::flip_split_direction() {
   if (this->split_dir == GFWL_SPLIT_DIR_HORI)
@@ -66,11 +72,11 @@ void gfwl_tiling_state::flip_split_direction() {
     this->split_dir = GFWL_SPLIT_DIR_HORI;
 }
 
-void gfwl_tiling_state::insert(gfwl_container *container) {
+void gfwl_tiling_state::insert(std::shared_ptr<GfContainer> container) {
   container->tiling_state = this;
 
   // lf means last focused btw.
-  struct gfwl_container *lft_container = NULL, *lftc_container = NULL;
+  std::shared_ptr<GfContainer> lft_container = NULL, lftc_container = NULL;
   enum gfwl_split_direction split_dir = GFWL_SPLIT_DIR_UNKNOWN;
 
   // TODO: Come up with better names for this.
