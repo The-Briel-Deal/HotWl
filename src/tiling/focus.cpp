@@ -73,15 +73,40 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
         shortest_distance = distance_right_of_origin;
       }
     }
-    // TODO: Finish This Dir
     break;
   }
   case GFWL_TILING_FOCUS_UP: {
-    // TODO: Finish This Dir
+    int shortest_distance = INT_MAX;
+
+    for (auto toplevel : toplevel_container_list) {
+      int distance_above_origin = origin.y - toplevel->box.y;
+      if (toplevel->box.y < origin.y && toplevel->box.x <= origin.x &&
+          toplevel->box.x + toplevel->box.width >= origin.x &&
+          distance_above_origin < shortest_distance &&
+          toplevel != toplevel->tiling_state->active_toplevel_container) {
+        // If distance is negative something went wrong.
+        assert(distance_above_origin > 0);
+        closest_valid_toplevel = toplevel;
+        shortest_distance = distance_above_origin;
+      }
+    }
     break;
   }
   case GFWL_TILING_FOCUS_DOWN: {
-    // TODO: Finish This Dir
+    int shortest_distance = INT_MAX;
+
+    for (auto toplevel : toplevel_container_list) {
+      int distance_below_origin = toplevel->box.y - origin.y;
+      if (toplevel->box.y > origin.y && toplevel->box.x <= origin.x &&
+          toplevel->box.x + toplevel->box.width >= origin.x &&
+          distance_below_origin < shortest_distance &&
+          toplevel != toplevel->tiling_state->active_toplevel_container) {
+        // If distance is negative something went wrong.
+        assert(distance_below_origin > 0);
+        closest_valid_toplevel = toplevel;
+        shortest_distance = distance_below_origin;
+      }
+    }
     break;
   }
   }
