@@ -44,8 +44,8 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
 
     for (auto toplevel : toplevel_container_list) {
       int distance_left_of_origin = origin.x - toplevel->box.x;
-      if (toplevel->box.x < origin.x && toplevel->box.y < origin.y &&
-          toplevel->box.y + toplevel->box.height > origin.y &&
+      if (toplevel->box.x < origin.x && toplevel->box.y <= origin.y &&
+          toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_left_of_origin < shortest_distance &&
           toplevel != toplevel->tiling_state->active_toplevel_container) {
         // TODO: Actually pass in the currently focused toplevel.
@@ -62,8 +62,8 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
 
     for (auto toplevel : toplevel_container_list) {
       int distance_right_of_origin = toplevel->box.x - origin.x;
-      if (toplevel->box.x > origin.x && toplevel->box.y < origin.y &&
-          toplevel->box.y + toplevel->box.height > origin.y &&
+      if (toplevel->box.x > origin.x && toplevel->box.y <= origin.y &&
+          toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_right_of_origin < shortest_distance &&
           toplevel != toplevel->tiling_state->active_toplevel_container) {
         // TODO: Actually pass in the currently focused toplevel.
