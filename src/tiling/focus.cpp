@@ -1,5 +1,4 @@
 #include "xdg_shell.hpp"
-#include <algorithm>
 #include <assert.h>
 #include <climits>
 #include <includes.hpp>

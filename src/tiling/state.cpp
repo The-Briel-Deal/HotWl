@@ -7,9 +7,9 @@
 void gfwl_tiling_state::insert_child_container(
     std::shared_ptr<GfContainer> parent, std::shared_ptr<GfContainer> child) {
 
-  auto position_to_insert = std::find(
-      parent->child_containers.begin(), parent->child_containers.end(),
-      parent->tiling_state->active_toplevel_container);
+  auto position_to_insert = std::find(parent->child_containers.begin(),
+                                      parent->child_containers.end(),
+                                      this->active_toplevel_container);
   if (position_to_insert != parent->child_containers.end())
     parent->child_containers.insert(position_to_insert, child);
   else
