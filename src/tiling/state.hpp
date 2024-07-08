@@ -21,6 +21,8 @@ public:
   void new_hori_split_container(std::shared_ptr<GfContainer> new_container,
                                 std::shared_ptr<GfContainer> focused_container);
   void flip_split_direction();
+  void reparent_container(std::shared_ptr<GfContainer> parent,
+                          std::shared_ptr<GfContainer> child);
   std::shared_ptr<GfContainer> root;
   std::shared_ptr<GfContainer> active_toplevel_container;
   gfwl_split_direction split_dir;
