@@ -1,25 +1,48 @@
 #include "state.hpp"
+#include <algorithm>
 #include <cassert>
+#include <memory>
 #include <tiling/container.hpp>
 
 void gfwl_tiling_state::insert_child_container(
     std::shared_ptr<GfContainer> parent, std::shared_ptr<GfContainer> child) {
+
+  auto position_to_insert = std::find(parent->child_containers.begin(),
+                                      parent->child_containers.end(),
+                                      this->active_toplevel_container);
+  if (position_to_insert != parent->child_containers.end())
+    parent->child_containers.insert(position_to_insert, child);
+  else
+    parent->child_containers.push_back(child);
   child->parent_container = parent;
-  parent->child_containers.push_back(child);
 }
 
+void gfwl_tiling_state::reparent_container(
+    std::shared_ptr<GfContainer> prev_parent,
+    std::shared_ptr<GfContainer> new_parent) {
+  auto position_to_insert = std::find(
+      prev_parent->parent_container->child_containers.begin(),
+      prev_parent->parent_container->child_containers.end(), prev_parent);
+  prev_parent->parent_container->child_containers.insert(position_to_insert,
+                                                         new_parent);
+  auto position_to_erase = std::find(
+      prev_parent->parent_container->child_containers.begin(),
+      prev_parent->parent_container->child_containers.end(), prev_parent);
+  prev_parent->parent_container->child_containers.erase(position_to_erase);
+  prev_parent->parent_container = new_parent;
+  new_parent->child_containers.push_back(prev_parent);
+}
 void gfwl_tiling_state::new_vert_split_container(
     std::shared_ptr<GfContainer> new_container,
     std::shared_ptr<GfContainer> focused_container) {
-  assert(new_container);
   std::shared_ptr<GfContainer> fc_parent;
 
   std::shared_ptr<GfContainer> split_container =
       create_parent_container(new_container, GFWL_CONTAINER_VSPLIT);
   if (focused_container) {
     split_container->parent_container = focused_container->parent_container;
-    focused_container->parent_container->child_containers.push_back(
-        split_container);
+    // I should probably generalize this between new hori and vert.
+    reparent_container(focused_container, split_container);
   } else {
     split_container->parent_container = new_container->tiling_state->root;
     new_container->tiling_state->root->child_containers.push_back(
@@ -34,8 +57,10 @@ void gfwl_tiling_state::new_hori_split_container(
       create_parent_container(new_container, GFWL_CONTAINER_HSPLIT);
   if (focused_container) {
     split_container->parent_container = focused_container->parent_container;
-    focused_container->parent_container->child_containers.push_back(
-        split_container);
+    // I should probably generalize this between new hori and vert.
+    // The new split container should go in the same position as the previous.
+
+    reparent_container(focused_container, split_container);
   } else {
     split_container->parent_container = new_container->tiling_state->root;
     new_container->tiling_state->root->child_containers.push_back(
