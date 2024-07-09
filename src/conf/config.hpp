@@ -33,17 +33,3 @@ public:
 private:
   std::map<std::string, std::string> data;
 };
-/*
-  case XKB_KEY_F1:
-    if (wl_list_length(&server->toplevels) < 2) {
-      break;
-    }
-    struct gfwl_toplevel *next_toplevel = (gfwl_toplevel *)wl_container_of(
-        server->toplevels.prev, next_toplevel, link);
-    focus_toplevel(next_toplevel, next_toplevel->xdg_toplevel->base->surface);
-    break;
-    //  default:
-    //    return false;
-    //    break;
-  }
-**/
