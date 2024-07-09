@@ -33,6 +33,7 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include <xdg_shell.hpp>
+#include <conf/config.hpp>
 #include <xkbcommon/xkbcommon.h>
 
 int main(int argc, char *argv[]) {

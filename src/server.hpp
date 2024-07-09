@@ -1,5 +1,6 @@
 #pragma once
 #include "wlr/util/box.h"
+#include <conf/config.hpp>
 #include <scene.hpp>
 #include <wayland-server-core.h>
 #include <tiling/container.hpp>
@@ -56,4 +57,6 @@ struct gfwl_server {
   struct wlr_output_layout *output_layout;
   struct wl_list outputs;
   struct wl_listener new_output;
+  
+  GfConfig config;
 };

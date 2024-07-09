@@ -1,8 +1,10 @@
 #include "includes.hpp"
+#include "tiling/state.hpp"
 #include <keyboard.hpp>
 #include <scene.hpp>
 #include <server.hpp>
 #include <stdlib.h>
+#include <string>
 #include <tiling/focus.hpp>
 #include <unistd.h>
 #include <wayland-server-core.h>
@@ -76,54 +78,39 @@ static void keyboard_handle_modifiers(struct wl_listener *listener,
                                      &keyboard->wlr_keyboard->modifiers);
 }
 
+static void launch_app(std::string path) {
+  pid_t pid = fork();
+  if (pid == 0) {
+    execv(path.c_str(), NULL);
+  }
+}
+
 static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
-  static char *newargv[] = {NULL};
-  pid_t pid;
   /*
    * Here we handle compositor keybindings. This is when the compositor is
    * processing keys, rather than passing them on to the client for its own
    * processing.
    *
-   * This function assumes Alt is held down.
+   * This function assumes your mod is pressed.
    */
-  switch (sym) {
-  case XKB_KEY_Escape:
+
+  if (sym == server->config.keybinds.new_term)
+    launch_app("/usr/bin/kitty");
+  else if (sym == server->config.keybinds.launcher)
+    launch_app("/usr/bin/fuzzel");
+  else if (sym == server->config.keybinds.exit)
     wl_display_terminate(server->wl_display);
-    break;
-  case XKB_KEY_q:
-    pid = fork();
-    if (pid == 0) {
-      execv("/usr/bin/kitty", newargv);
-    }
-    break;
-  case XKB_KEY_l:
-    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
-    break;
-  case XKB_KEY_h:
+  else if (sym == server->config.keybinds.tiling_focus_left)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_LEFT, &server->tiling_state);
-    break;
-  case XKB_KEY_j:
+  else if (sym == server->config.keybinds.tiling_focus_down)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_DOWN, &server->tiling_state);
-    break;
-  case XKB_KEY_k:
+  else if (sym == server->config.keybinds.tiling_focus_up)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_UP, &server->tiling_state);
-    break;
-  case XKB_KEY_s:
+  else if (sym == server->config.keybinds.tiling_focus_right)
+    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT, &server->tiling_state);
+  else if (sym == server->config.keybinds.flip_split_direction)
     server->tiling_state.flip_split_direction();
-    break;
-  case XKB_KEY_F1:
-    /* Cycle to the next toplevel */
-    if (wl_list_length(&server->toplevels) < 2) {
-      break;
-    }
-    struct gfwl_toplevel *next_toplevel = (gfwl_toplevel *)wl_container_of(
-        server->toplevels.prev, next_toplevel, link);
-    focus_toplevel(next_toplevel, next_toplevel->xdg_toplevel->base->surface);
-    break;
-    //  default:
-    //    return false;
-    //    break;
-  }
+
   return true;
 }
 
