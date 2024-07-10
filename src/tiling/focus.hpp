@@ -24,4 +24,4 @@ struct gfwl_point {
  * Shift the focus to the next window in any of 4 directions.
  */
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
-                              struct gfwl_tiling_state *state);
+                              struct GfTilingState *state);

@@ -6,8 +6,8 @@ struct gfwl_output {
   struct wl_list link;
   struct gfwl_server *server;
   struct wlr_output *wlr_output;
-  struct wlr_output_layout_output *output_layout_output;
   struct wlr_scene_output *scene_output;
+  struct wlr_output_layout_output *output_layout_output;
   struct wl_listener frame;
   struct wl_listener request_state;
   struct wl_listener destroy;

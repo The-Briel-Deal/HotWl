@@ -4,8 +4,8 @@
 #include <memory>
 #include <tiling/container.hpp>
 
-void gfwl_tiling_state::insert_child_container(
-    std::shared_ptr<GfContainer> parent, std::shared_ptr<GfContainer> child) {
+void GfTilingState::insert_child_container(std::shared_ptr<GfContainer> parent,
+                                           std::shared_ptr<GfContainer> child) {
 
   auto position_to_insert = std::find(parent->child_containers.begin(),
                                       parent->child_containers.end(),
@@ -17,7 +17,7 @@ void gfwl_tiling_state::insert_child_container(
   child->parent_container = parent;
 }
 
-void gfwl_tiling_state::reparent_container(
+void GfTilingState::reparent_container(
     std::shared_ptr<GfContainer> prev_parent,
     std::shared_ptr<GfContainer> new_parent) {
   auto position_to_insert = std::find(
@@ -32,7 +32,7 @@ void gfwl_tiling_state::reparent_container(
   prev_parent->parent_container = new_parent;
   new_parent->child_containers.push_back(prev_parent);
 }
-void gfwl_tiling_state::new_vert_split_container(
+void GfTilingState::new_vert_split_container(
     std::shared_ptr<GfContainer> new_container,
     std::shared_ptr<GfContainer> focused_container) {
   std::shared_ptr<GfContainer> fc_parent;
@@ -50,7 +50,7 @@ void gfwl_tiling_state::new_vert_split_container(
   }
 }
 
-void gfwl_tiling_state::new_hori_split_container(
+void GfTilingState::new_hori_split_container(
     std::shared_ptr<GfContainer> new_container,
     std::shared_ptr<GfContainer> focused_container) {
   auto split_container =
@@ -68,14 +68,14 @@ void gfwl_tiling_state::new_hori_split_container(
   }
 }
 
-void gfwl_tiling_state::flip_split_direction() {
+void GfTilingState::flip_split_direction() {
   if (this->split_dir == GFWL_SPLIT_DIR_HORI)
     this->split_dir = GFWL_SPLIT_DIR_VERT;
   else
     this->split_dir = GFWL_SPLIT_DIR_HORI;
 }
 
-void gfwl_tiling_state::insert(std::shared_ptr<GfContainer> container) {
+void GfTilingState::insert(std::shared_ptr<GfContainer> container) {
   container->tiling_state = this;
 
   // lf means last focused btw.
@@ -114,7 +114,7 @@ void gfwl_tiling_state::insert(std::shared_ptr<GfContainer> container) {
 }
 
 // Insert is overloaded so that you can directly insert toplevels as well.
-void gfwl_tiling_state::insert(gfwl_toplevel *toplevel) {
+void GfTilingState::insert(gfwl_toplevel *toplevel) {
   assert(toplevel);
   this->insert(create_container_from_toplevel(toplevel));
 }

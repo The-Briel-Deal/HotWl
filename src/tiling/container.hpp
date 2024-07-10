@@ -14,7 +14,7 @@ enum gfwl_container_type {
 
 class GfContainer : public std::enable_shared_from_this<GfContainer> {
 public:
-  GfContainer(bool root, gfwl_tiling_state *state, gfwl_container_type type,
+  GfContainer(bool root, GfTilingState *state, gfwl_container_type type,
               std::shared_ptr<GfContainer> parent, gfwl_server *server,
               gfwl_toplevel *toplevel);
 
@@ -38,7 +38,7 @@ public:
   wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
 
   // Some relevant state
-  gfwl_tiling_state *tiling_state = NULL;
+  GfTilingState *tiling_state = NULL;
   gfwl_toplevel *toplevel = NULL;
   gfwl_server *server = NULL;
 };

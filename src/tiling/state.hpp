@@ -9,7 +9,7 @@ enum gfwl_split_direction {
 struct GfContainer;
 struct gfwl_toplevel;
 
-struct gfwl_tiling_state {
+struct GfTilingState {
 public:
   void insert(std::shared_ptr<GfContainer> container);
   void insert(gfwl_toplevel *toplevel);

@@ -8,7 +8,7 @@
 #include <vector>
 #include <xdg_shell.hpp>
 
-GfContainer::GfContainer(bool root, gfwl_tiling_state *state,
+GfContainer::GfContainer(bool root, GfTilingState *state,
                          gfwl_container_type type,
                          std::shared_ptr<GfContainer> parent,
                          gfwl_server *server, gfwl_toplevel *toplevel) {

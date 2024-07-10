@@ -2,8 +2,8 @@
 #include "wlr/util/box.h"
 #include <conf/config.hpp>
 #include <scene.hpp>
-#include <wayland-server-core.h>
 #include <tiling/container.hpp>
+#include <wayland-server-core.h>
 
 enum gfwl_cursor_mode {
   TINYWL_CURSOR_PASSTHROUGH,
@@ -30,7 +30,7 @@ struct gfwl_server {
   struct wl_listener new_xdg_toplevel;
   struct wl_listener new_xdg_popup;
   struct wl_list toplevels;
-  struct gfwl_tiling_state tiling_state;
+  struct GfTilingState tiling_state;
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;
@@ -57,6 +57,6 @@ struct gfwl_server {
   struct wlr_output_layout *output_layout;
   struct wl_list outputs;
   struct wl_listener new_output;
-  
+
   GfConfig config;
 };
