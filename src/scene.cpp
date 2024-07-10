@@ -38,7 +38,7 @@ create_container_from_toplevel(struct gfwl_toplevel *toplevel) {
 
 void set_focused_toplevel_container(std::shared_ptr<GfContainer> container) {
   assert(container);
-  struct GfTilingState *tiling_state = container->tiling_state;
+  struct std::shared_ptr<GfTilingState> tiling_state = container->tiling_state;
   assert(tiling_state);
 
   tiling_state->active_toplevel_container = container;

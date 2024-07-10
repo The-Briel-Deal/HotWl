@@ -10,7 +10,7 @@ struct gfwl_output;
 struct GfContainer;
 struct gfwl_toplevel;
 
-struct GfTilingState {
+struct GfTilingState : public std::enable_shared_from_this<GfTilingState> {
 public:
   void insert(std::shared_ptr<GfContainer> container);
   void insert(gfwl_toplevel *toplevel);

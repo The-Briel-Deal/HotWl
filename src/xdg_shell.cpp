@@ -1,7 +1,6 @@
 #include "layer_shell.hpp"
 #include "server.hpp"
 #include "wlr/util/box.h"
-#include "wlr/util/log.h"
 #include <assert.h>
 #include <includes.hpp>
 #include <pointer.hpp>
@@ -80,7 +79,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 
   wl_list_insert(&server->toplevels, &toplevel->link);
 
-  server->focused_output->tiling_state.insert(toplevel);
+  server->focused_output->tiling_state->insert(toplevel);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }

@@ -24,9 +24,9 @@ get_output_from_container(std::shared_ptr<GfContainer> container) {
         .width = output->wlr_output->width,
         .height = output->wlr_output->height,
     };
-    if (output_box.x < container_box.x && output_box.y < container_box.y &&
-        output_box.x + output_box.width > container_box.x &&
-        output_box.y + output_box.height > container_box.y) {
+    if (output_box.x <= container_box.x && output_box.y <= container_box.y &&
+        output_box.x + output_box.width >= container_box.x &&
+        output_box.y + output_box.height >= container_box.y) {
       return output;
     }
   }
@@ -37,7 +37,11 @@ get_output_from_container(std::shared_ptr<GfContainer> container) {
 void focus_output_from_container(std::shared_ptr<GfContainer> container) {
   auto output = get_output_from_container(container);
   auto server = container->server;
-  server->focused_output = output;
+  if (output && server) {
+    server->focused_output = output;
+  } else {
+    wlr_log(WLR_ERROR, "Your container doesn't have an output ):<");
+  }
 }
 
 static void output_frame(struct wl_listener *listener, void *data) {
@@ -126,15 +130,15 @@ void server_new_output(struct wl_listener *listener, void *data) {
   // Setting tiling state_defaults. TODO: Move to its own function.
   server->focused_output = output;
   server->outputs.push_back(output);
-  output->tiling_state.root = std::make_shared<GfContainer>(
+  output->tiling_state->root = std::make_shared<GfContainer>(
       true, nullptr, GFWL_CONTAINER_ROOT, nullptr, nullptr, nullptr);
-  output->tiling_state.root->tiling_state = &output->tiling_state;
+  output->tiling_state->root->tiling_state = output->tiling_state;
 
-  output->tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
-  output->tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;
-  output->tiling_state.root->server = server;
-  output->tiling_state.root->is_root = true;
-  output->tiling_state.output = output;
+  output->tiling_state->root->e_type = GFWL_CONTAINER_ROOT;
+  output->tiling_state->split_dir = GFWL_SPLIT_DIR_HORI;
+  output->tiling_state->root->server = server;
+  output->tiling_state->root->is_root = true;
+  output->tiling_state->output = output;
 
   /* Adds this to the output layout. The add_auto function arranges outputs
    * from left-to-right in the order they appear. A more sophisticated

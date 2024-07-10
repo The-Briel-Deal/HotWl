@@ -102,35 +102,24 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
     wl_display_terminate(server->wl_display);
   else if (sym == server->config.keybinds.tiling_focus_left)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_LEFT,
-                             &server->focused_output->tiling_state);
+                             server->focused_output->tiling_state);
   else if (sym == server->config.keybinds.tiling_focus_down)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_DOWN,
-                             &server->focused_output->tiling_state);
+                             server->focused_output->tiling_state);
   else if (sym == server->config.keybinds.tiling_focus_up)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_UP,
-                             &server->focused_output->tiling_state);
+                             server->focused_output->tiling_state);
   else if (sym == server->config.keybinds.tiling_focus_right)
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT,
-                             &server->focused_output->tiling_state);
+                             server->focused_output->tiling_state);
   else if (sym == server->config.keybinds.flip_split_direction)
-    server->focused_output->tiling_state.flip_split_direction();
+    server->focused_output->tiling_state->flip_split_direction();
+  // TODO: PUT THIS IN CONFIG
   else if (sym == XKB_KEY_0) {
     server->focused_output = server->outputs[0];
-  }
-  else if (sym == XKB_KEY_1) {
+  } else if (sym == XKB_KEY_1) {
     server->focused_output = server->outputs[1];
   }
-  server->focused_output->tiling_state.flip_split_direction();
-  // TODO: PUT THIS IN CONFIG
-  //   else if (sym == XKB_KEY_n) {
-  //     for (auto output : server->outputs) {
-  //       auto last_output = server->outputs[server->outputs.end();
-  //       if (server->focused_output == output) {
-  //         server->focused_output = last_output;
-  //       };
-  //       last_output = output;
-  //     }
-  //   }
 
   return true;
 }

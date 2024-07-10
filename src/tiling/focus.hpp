@@ -4,6 +4,7 @@
 
 #include "state.hpp"
 #include <includes.hpp>
+#include <memory>
 #include <scene.hpp>
 #include <stdbool.h>
 #include <wlr/util/box.h>
@@ -24,4 +25,4 @@ struct gfwl_point {
  * Shift the focus to the next window in any of 4 directions.
  */
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
-                              struct GfTilingState *state);
+                              std::shared_ptr<GfTilingState> state);

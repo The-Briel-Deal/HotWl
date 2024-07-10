@@ -1,21 +1,21 @@
-#include "server.hpp"
-#include "xdg_shell.hpp"
 #include <assert.h>
 #include <climits>
 #include <includes.hpp>
 #include <memory>
+#include <output.hpp>
 #include <stdlib.h>
 #include <tiling/focus.hpp>
 #include <vector>
 #include <wayland-util.h>
+#include <xdg_shell.hpp>
 
 // TODO: Make tiling_state object oriented in cpp.
 static std::shared_ptr<GfContainer>
 get_container_in_dir(enum gfwl_tiling_focus_direction dir,
-                     struct GfTilingState *state);
+                     std::shared_ptr<GfTilingState> state);
 
 static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> contaiener,
-                                        struct GfTilingState *state);
+                                        std::shared_ptr<GfTilingState> state);
 
 static struct gfwl_point
 get_container_origin(std::shared_ptr<GfContainer> container);
@@ -115,7 +115,7 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
 }
 
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
-                              struct GfTilingState *state) {
+                              std::shared_ptr<GfTilingState> state) {
   // Get Container In The Specified Direction.
   std::shared_ptr<GfContainer> container_to_focus =
       get_container_in_dir(dir, state);
@@ -132,7 +132,7 @@ bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
 
 static std::shared_ptr<GfContainer>
 get_container_in_dir(enum gfwl_tiling_focus_direction dir,
-                     struct GfTilingState *state) {
+                     std::shared_ptr<GfTilingState> state) {
   assert(state);
 
   std::shared_ptr<GfContainer> curr_focused = state->active_toplevel_container;
@@ -157,7 +157,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
 }
 
 static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
-                                        struct GfTilingState *state) {
+                                        std::shared_ptr<GfTilingState> state) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
   struct gfwl_toplevel *toplevel = container->toplevel;

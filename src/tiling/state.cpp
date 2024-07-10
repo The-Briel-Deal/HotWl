@@ -76,7 +76,7 @@ void GfTilingState::flip_split_direction() {
 }
 
 void GfTilingState::insert(std::shared_ptr<GfContainer> container) {
-  container->tiling_state = this;
+  container->tiling_state = this->shared_from_this();
 
   // lf means last focused btw.
   std::shared_ptr<GfContainer> lft_container = NULL, lftc_container = NULL;

@@ -10,7 +10,8 @@ struct gfwl_output {
   struct gfwl_server *server;
   struct wlr_output *wlr_output;
   struct wlr_scene_output *scene_output;
-  struct GfTilingState tiling_state;
+  std::shared_ptr<GfTilingState> tiling_state =
+      std::make_shared<GfTilingState>();
   struct wlr_output_layout_output *output_layout_output;
   struct wl_listener frame;
   struct wl_listener request_state;
