@@ -104,10 +104,10 @@ void server_new_output(struct wl_listener *listener, void *data) {
    * display, which Wayland clients can see to find out information about the
    * output (such as DPI, scale factor, manufacturer, etc).
    */
-  struct wlr_output_layout_output *l_output =
+  output->output_layout_output =
       wlr_output_layout_add_auto(server->output_layout, wlr_output);
-  struct wlr_scene_output *scene_output =
+  output->scene_output =
       wlr_scene_output_create(server->scene->root, wlr_output);
-  wlr_scene_output_layout_add_output(server->scene_layout, l_output,
-                                     scene_output);
+  wlr_scene_output_layout_add_output(
+      server->scene_layout, output->output_layout_output, output->scene_output);
 }
