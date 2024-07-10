@@ -6,6 +6,7 @@ enum gfwl_split_direction {
   GFWL_SPLIT_DIR_VERT = 2
 };
 
+struct gfwl_output;
 struct GfContainer;
 struct gfwl_toplevel;
 
@@ -26,6 +27,7 @@ public:
   std::shared_ptr<GfContainer> root;
   std::shared_ptr<GfContainer> active_toplevel_container;
   gfwl_split_direction split_dir;
+  std::shared_ptr<gfwl_output> output = NULL;
 
 private:
   struct gfwl_server *server;

@@ -103,8 +103,10 @@ void GfContainer::parse_containers() {
   // Get output if we're at the root.
   if (this->is_root) {
     // TODO: This also probably shouldn't just grab the first output.
-    struct std::shared_ptr<gfwl_output> output = server->outputs[0];
+    std::shared_ptr<gfwl_output> output = this->tiling_state->output;
     assert(output);
+    this->box.x = output->scene_output->x;
+    this->box.y = output->scene_output->y;
     this->box.width = output->wlr_output->width;
     this->box.height = output->wlr_output->height;
   }

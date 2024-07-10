@@ -20,3 +20,6 @@ struct gfwl_output {
 void server_new_output(struct wl_listener *listener, void *data);
 
 void focus_output_from_container(std::shared_ptr<GfContainer> container);
+
+std::shared_ptr<gfwl_output>
+get_output_from_container(std::shared_ptr<GfContainer> container);
