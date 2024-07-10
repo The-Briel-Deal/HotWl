@@ -102,8 +102,8 @@ void GfContainer::split_containers() {
 void GfContainer::parse_containers() {
   // Get output if we're at the root.
   if (this->is_root) {
-    struct gfwl_output *output =
-        wl_container_of(this->server->outputs.next, output, link);
+    // TODO: This also probably shouldn't just grab the first output.
+    struct std::shared_ptr<gfwl_output> output = server->outputs[0];
     assert(output);
     this->box.width = output->wlr_output->width;
     this->box.height = output->wlr_output->height;

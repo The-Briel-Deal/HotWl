@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <includes.hpp>
 #include <layer_shell.hpp>
+#include <memory>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
@@ -117,9 +118,10 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
       return;
     }
 
+	// TODO: Make this not always just put the layer shell on the first output
+	// lol.
     // Get first output.
-    struct gfwl_output *gfwl_output =
-        wl_container_of(server->outputs.next, gfwl_output, link);
+    struct std::shared_ptr<gfwl_output> gfwl_output = server->outputs[0];
     if (!gfwl_output) {
       wlr_log(WLR_ERROR, "No output.");
       return;

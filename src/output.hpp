@@ -1,3 +1,6 @@
+#pragma once
+#include <memory>
+#include <tiling/state.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 
@@ -7,6 +10,7 @@ struct gfwl_output {
   struct gfwl_server *server;
   struct wlr_output *wlr_output;
   struct wlr_scene_output *scene_output;
+  struct GfTilingState tiling_state;
   struct wlr_output_layout_output *output_layout_output;
   struct wl_listener frame;
   struct wl_listener request_state;
@@ -14,3 +18,5 @@ struct gfwl_output {
 };
 
 void server_new_output(struct wl_listener *listener, void *data);
+
+void focus_output_from_container(std::shared_ptr<GfContainer> container);

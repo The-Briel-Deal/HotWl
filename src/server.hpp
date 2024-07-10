@@ -1,8 +1,11 @@
 #pragma once
 #include "wlr/util/box.h"
 #include <conf/config.hpp>
+#include <memory>
+#include <output.hpp>
 #include <scene.hpp>
 #include <tiling/container.hpp>
+#include <vector>
 #include <wayland-server-core.h>
 
 enum gfwl_cursor_mode {
@@ -30,7 +33,6 @@ struct gfwl_server {
   struct wl_listener new_xdg_toplevel;
   struct wl_listener new_xdg_popup;
   struct wl_list toplevels;
-  struct GfTilingState tiling_state;
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;
@@ -55,7 +57,8 @@ struct gfwl_server {
   enum gfwl_cursor_mode cursor_mode;
 
   struct wlr_output_layout *output_layout;
-  struct wl_list outputs;
+  std::shared_ptr<gfwl_output> focused_output;
+  std::vector<std::shared_ptr<gfwl_output>> outputs;
   struct wl_listener new_output;
 
   GfConfig config;

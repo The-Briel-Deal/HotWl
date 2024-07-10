@@ -1,7 +1,8 @@
 #include "tiling/container.hpp"
-#include <includes.hpp>
 #include <assert.h>
+#include <conf/config.hpp>
 #include <getopt.h>
+#include <includes.hpp>
 #include <input.hpp>
 #include <keyboard.hpp>
 #include <layer_shell.hpp>
@@ -33,7 +34,6 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include <xdg_shell.hpp>
-#include <conf/config.hpp>
 #include <xkbcommon/xkbcommon.h>
 
 int main(int argc, char *argv[]) {
@@ -102,7 +102,8 @@ int main(int argc, char *argv[]) {
 
   /* Configure a listener to be notified when new outputs are available on the
    * backend. */
-  wl_list_init(&server.outputs);
+  // wl_list_init(&server.outputs); // TODO: Make sure I actually don't need
+  // this lol.
   server.new_output.notify = server_new_output;
   wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
@@ -130,29 +131,16 @@ int main(int argc, char *argv[]) {
   server.new_xdg_popup.notify = server_new_xdg_popup;
   wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
 
-
-//   GfContainer(bool root, gfwl_tiling_state *state, gfwl_container_type type,
-//               std::shared_ptr<GfContainer> parent, gfwl_server *server,
-//               gfwl_toplevel *toplevel);
-  server.tiling_state.root =
-      std::make_shared<GfContainer>(true, nullptr, GFWL_CONTAINER_ROOT, nullptr, nullptr, nullptr);
-
-  server.tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
-  server.tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;
-  server.tiling_state.root->server = &server;
-  server.tiling_state.root->is_root = true;
-//  wl_list_init(&server.tiling_state.root->child_containers);
-
-  /*
-   * Creates a cursor, which is a wlroots utility for tracking the cursor
-   * image shown on screen.
-   */
-
   // Init layer shell and setup listeners.
   server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
   server.new_layer_shell_surface.notify = handle_new_layer_shell_surface;
   wl_signal_add(&server.layer_shell->events.new_surface,
                 &server.new_layer_shell_surface);
+
+  /*
+   * Creates a cursor, which is a wlroots utility for tracking the cursor
+   * image shown on screen.
+   */
 
   server.cursor = wlr_cursor_create();
   wlr_cursor_attach_output_layout(server.cursor, server.output_layout);

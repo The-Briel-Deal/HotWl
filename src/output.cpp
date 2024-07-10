@@ -1,4 +1,5 @@
 #include <includes.hpp>
+#include <memory>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
@@ -9,6 +10,35 @@
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/util/box.h>
+
+// Gets the output that a container is in.
+std::shared_ptr<gfwl_output>
+get_output_from_container(std::shared_ptr<GfContainer> container) {
+  auto container_box = container->box;
+  auto server = container->server;
+  auto outputs = server->outputs;
+  for (auto output : outputs) {
+    wlr_box output_box = {
+        .x = output->scene_output->x,
+        .y = output->scene_output->y,
+        .width = output->wlr_output->width,
+        .height = output->wlr_output->height,
+    };
+    if (output_box.x < container_box.x && output_box.y < container_box.y &&
+        output_box.x + output_box.width > container_box.x &&
+        output_box.y + output_box.height > container_box.y) {
+      return output;
+    }
+  }
+  return NULL;
+}
+
+// Focuses the output that the container is in.
+void focus_output_from_container(std::shared_ptr<GfContainer> container) {
+  auto output = get_output_from_container(container);
+  auto server = container->server;
+  server->focused_output = output;
+}
 
 static void output_frame(struct wl_listener *listener, void *data) {
   /* This function is called every time an output is ready to display a frame,
@@ -77,7 +107,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
   wlr_output_state_finish(&state);
 
   /* Allocates and configures our state for this output */
-  struct gfwl_output *output = (gfwl_output *)calloc(1, sizeof(*output));
+  struct std::shared_ptr<gfwl_output> output = std::make_shared<gfwl_output>();
   output->wlr_output = wlr_output;
   output->server = server;
 
@@ -93,7 +123,15 @@ void server_new_output(struct wl_listener *listener, void *data) {
   output->destroy.notify = output_destroy;
   wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 
-  wl_list_insert(&server->outputs, &output->link);
+  server->focused_output = output;
+  server->outputs.push_back(output);
+  output->tiling_state.root = std::make_shared<GfContainer>(
+      true, nullptr, GFWL_CONTAINER_ROOT, nullptr, nullptr, nullptr);
+
+  output->tiling_state.root->e_type = GFWL_CONTAINER_ROOT;
+  output->tiling_state.split_dir = GFWL_SPLIT_DIR_HORI;
+  output->tiling_state.root->server = server;
+  output->tiling_state.root->is_root = true;
 
   /* Adds this to the output layout. The add_auto function arranges outputs
    * from left-to-right in the order they appear. A more sophisticated

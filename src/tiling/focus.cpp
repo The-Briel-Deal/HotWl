@@ -1,3 +1,4 @@
+#include "server.hpp"
 #include "xdg_shell.hpp"
 #include <assert.h>
 #include <climits>
@@ -172,6 +173,9 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
 
   focus_toplevel(container->toplevel,
                  container->toplevel->xdg_toplevel->base->surface);
+
+  focus_output_from_container(container);
+
   return true;
 }
 
