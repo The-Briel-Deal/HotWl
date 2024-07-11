@@ -28,6 +28,9 @@ public:
     xkb_keysym_t tiling_focus_right = XKB_KEY_l;
     /* Flip Split Dir */
     xkb_keysym_t flip_split_direction = XKB_KEY_s;
+    /* Go to Next And Previous Monitor */
+    xkb_keysym_t next_monitor = XKB_KEY_n;
+    xkb_keysym_t prev_monitor = XKB_KEY_p;
   } keybinds;
 
 private:

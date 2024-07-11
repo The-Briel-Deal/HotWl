@@ -1,5 +1,8 @@
 #include "includes.hpp"
 #include "tiling/state.hpp"
+#include <algorithm>
+#include <cmath>
+#include <iterator>
 #include <keyboard.hpp>
 #include <scene.hpp>
 #include <server.hpp>
@@ -115,10 +118,19 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
   else if (sym == server->config.keybinds.flip_split_direction)
     server->focused_output->tiling_state->flip_split_direction();
   // TODO: PUT THIS IN CONFIG
-  else if (sym == XKB_KEY_0) {
-    server->focused_output = server->outputs[0];
-  } else if (sym == XKB_KEY_1) {
-    server->focused_output = server->outputs[1];
+  else if (sym == server->config.keybinds.next_monitor) {
+    // TODO: Figure out why this doesn't work.
+    auto next_output =
+        std::next(std::find(server->outputs.begin(), server->outputs.end(),
+                            server->focused_output));
+    if (next_output != server->outputs.end() && *next_output != nullptr)
+      server->focused_output = *next_output;
+  } else if (sym == server->config.keybinds.prev_monitor) {
+    auto curr_output = std::find(server->outputs.begin(), server->outputs.end(),
+                                 server->focused_output);
+    auto prev_output = std::next(curr_output);
+    if (curr_output != server->outputs.begin() && *prev_output != nullptr)
+      server->focused_output = *prev_output;
   }
 
   return true;
