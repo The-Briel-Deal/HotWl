@@ -127,9 +127,10 @@ void server_new_output(struct wl_listener *listener, void *data) {
   output->destroy.notify = output_destroy;
   wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 
-  // Setting tiling state_defaults. TODO: Move to its own function.
   server->focused_output = output;
   server->outputs.push_back(output);
+
+  // TODO: Maybe move this to the constructor of tiling state.
   output->tiling_state->root = std::make_shared<GfContainer>(
       true, nullptr, GFWL_CONTAINER_ROOT, nullptr, nullptr, nullptr);
   output->tiling_state->root->tiling_state = output->tiling_state;
@@ -137,6 +138,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
   output->tiling_state->root->e_type = GFWL_CONTAINER_ROOT;
   output->tiling_state->split_dir = GFWL_SPLIT_DIR_HORI;
   output->tiling_state->root->server = server;
+  output->tiling_state->server = server;
   output->tiling_state->root->is_root = true;
   output->tiling_state->output = output;
 

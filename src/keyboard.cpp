@@ -117,9 +117,8 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
                              server->focused_output->tiling_state);
   else if (sym == server->config.keybinds.flip_split_direction)
     server->focused_output->tiling_state->flip_split_direction();
-  // TODO: PUT THIS IN CONFIG
   else if (sym == server->config.keybinds.next_monitor) {
-    // TODO: Figure out why this doesn't work.
+    // TODO: Make these a helper function.
     auto next_output =
         std::next(std::find(server->outputs.begin(), server->outputs.end(),
                             server->focused_output));
@@ -128,7 +127,7 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
   } else if (sym == server->config.keybinds.prev_monitor) {
     auto curr_output = std::find(server->outputs.begin(), server->outputs.end(),
                                  server->focused_output);
-    auto prev_output = std::next(curr_output);
+    auto prev_output = std::prev(curr_output);
     if (curr_output != server->outputs.begin() && *prev_output != nullptr)
       server->focused_output = *prev_output;
   }

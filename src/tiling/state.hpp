@@ -1,5 +1,7 @@
 #pragma once
+
 #include <memory>
+
 enum gfwl_split_direction {
   GFWL_SPLIT_DIR_UNKNOWN = 0,
   GFWL_SPLIT_DIR_HORI = 1,
