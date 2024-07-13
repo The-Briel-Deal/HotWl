@@ -40,7 +40,7 @@ public:
   // Some relevant state
   std::shared_ptr<GfTilingState> tiling_state;
   gfwl_toplevel *toplevel = NULL;
-  gfwl_server *server = NULL;
+  struct gfwl_server *server = NULL;
 };
 
 void set_container_box(std::shared_ptr<GfContainer> toplevel,

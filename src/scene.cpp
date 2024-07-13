@@ -42,4 +42,5 @@ void set_focused_toplevel_container(std::shared_ptr<GfContainer> container) {
   assert(tiling_state);
 
   tiling_state->active_toplevel_container = container;
+  tiling_state->server->active_toplevel_container = container;
 }

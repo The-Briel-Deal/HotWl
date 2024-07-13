@@ -140,8 +140,11 @@ GfContainer::get_top_level_container_list() {
   std::deque<std::shared_ptr<GfContainer>> stack;
   // I need to figure out what the heck the difference between emplace and push
   // is. I also need to figure out how to get my lost shared_ptr back ):
+  auto server = this->server;
 
-  stack.push_back(this->shared_from_this());
+  for (auto output : server->outputs) {
+    stack.push_back(output->tiling_state->root);
+  }
 
   while (!stack.empty()) {
     auto curr_node = stack.back();

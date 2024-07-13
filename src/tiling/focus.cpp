@@ -3,6 +3,7 @@
 #include <includes.hpp>
 #include <memory>
 #include <output.hpp>
+#include <server.hpp>
 #include <stdlib.h>
 #include <tiling/focus.hpp>
 #include <vector>
@@ -47,7 +48,7 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.x < origin.x && toplevel->box.y <= origin.y &&
           toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_left_of_origin < shortest_distance &&
-          toplevel != toplevel->tiling_state->active_toplevel_container) {
+          toplevel != toplevel->server->active_toplevel_container) {
         // TODO: Actually pass in the currently focused toplevel.
         // If distance is negative something went wrong.
         assert(distance_left_of_origin > 0);
@@ -65,7 +66,7 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.x > origin.x && toplevel->box.y <= origin.y &&
           toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_right_of_origin < shortest_distance &&
-          toplevel != toplevel->tiling_state->active_toplevel_container) {
+          toplevel != toplevel->server->active_toplevel_container) {
         // TODO: Actually pass in the currently focused toplevel.
         // If distance is negative something went wrong.
         assert(distance_right_of_origin > 0);
@@ -83,7 +84,7 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.y < origin.y && toplevel->box.x <= origin.x &&
           toplevel->box.x + toplevel->box.width >= origin.x &&
           distance_above_origin < shortest_distance &&
-          toplevel != toplevel->tiling_state->active_toplevel_container) {
+          toplevel != toplevel->server->active_toplevel_container) {
         // If distance is negative something went wrong.
         assert(distance_above_origin > 0);
         closest_valid_toplevel = toplevel;
