@@ -18,9 +18,6 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
 static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> contaiener,
                                         std::shared_ptr<GfTilingState> state);
 
-static struct gfwl_point
-get_container_origin(std::shared_ptr<GfContainer> container);
-
 static struct wl_list *
 get_toplevel_container_list(std::shared_ptr<GfContainer> head,
                             struct wl_list *list);
@@ -125,6 +122,7 @@ bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
   }
 
   // Focus container.
+  // TODO: I think I can just return focus_and_warp_to_container
   if (focus_and_warp_to_container(container_to_focus, state) != true) {
     return false;
   };
@@ -180,25 +178,9 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
   return true;
 }
 
-static struct gfwl_point
-get_container_origin(std::shared_ptr<GfContainer> container) {
+gfwl_point get_container_origin(std::shared_ptr<GfContainer> container) {
   struct wlr_box box = container->box;
   struct gfwl_point center = {.x = (box.width / 2) + box.x,
                               .y = (box.height / 2) + box.y};
   return center;
 }
-
-// TODO: Change the loop to use our vector.
-// static struct wl_list *get_toplevel_container_list(struct GfContainer *head,
-//                                                    struct wl_list *list) {
-//   if (head->e_type == GFWL_CONTAINER_TOPLEVEL) {
-//     wl_list_insert(list, &head->link);
-//     return list;
-//   }
-//   struct GfContainer *curs = NULL;
-//   struct wl_list *child_containers = head->child_containers.next;
-//   wl_list_for_each(curs, child_containers, link) {
-//     get_toplevel_container_list(curs, list);
-//   }
-//   return list;
-// }

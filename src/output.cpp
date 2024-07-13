@@ -4,6 +4,7 @@
 #include <scene.hpp>
 #include <server.hpp>
 #include <stdlib.h>
+#include <tiling/focus.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_output.h>
@@ -14,7 +15,7 @@
 // Gets the output that a container is in.
 std::shared_ptr<gfwl_output>
 get_output_from_container(std::shared_ptr<GfContainer> container) {
-  auto container_box = container->box;
+  auto container_point = get_container_origin(container); // container->box;
   auto server = container->server;
   auto outputs = server->outputs;
   for (auto output : outputs) {
@@ -24,9 +25,9 @@ get_output_from_container(std::shared_ptr<GfContainer> container) {
         .width = output->wlr_output->width,
         .height = output->wlr_output->height,
     };
-    if (output_box.x <= container_box.x && output_box.y <= container_box.y &&
-        output_box.x + output_box.width >= container_box.x &&
-        output_box.y + output_box.height >= container_box.y) {
+    if (output_box.x <= container_point.x && output_box.y <= container_point.y &&
+        output_box.x + output_box.width >= container_point.x &&
+        output_box.y + output_box.height >= container_point.y) {
       return output;
     }
   }

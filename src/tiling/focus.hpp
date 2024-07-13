@@ -26,3 +26,5 @@ struct gfwl_point {
  */
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
                               std::shared_ptr<GfTilingState> state);
+
+gfwl_point get_container_origin(std::shared_ptr<GfContainer> container);
