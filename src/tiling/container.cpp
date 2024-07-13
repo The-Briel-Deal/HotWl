@@ -20,6 +20,10 @@ GfContainer::GfContainer(bool root, std::shared_ptr<GfTilingState> state,
   this->toplevel = toplevel;
 };
 
+void GfContainer::close() {
+	// I need to rethink ownership of containers.
+}
+
 enum gfwl_split_direction GfContainer::get_split_dir() {
   switch (this->e_type) {
   case GFWL_CONTAINER_VSPLIT:
