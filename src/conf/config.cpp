@@ -54,7 +54,6 @@ bool set_mod(xkb_mod_mask_t &modmask, json modname_json) {
   return true;
 }
 
-// TODO: Add Ability to close window and move.
 // Return true if it succeeds.
 bool GfConfig::parse_file(std::string config_path) {
   // Create input filestream for config file.
@@ -80,6 +79,7 @@ bool GfConfig::parse_file(std::string config_path) {
     /* Flip Split Dir */
     set_keybind(this->keybinds.flip_split_direction,
                 data["flip_split_direction"]);
+    set_keybind(this->keybinds.close_surface, data["tiling_focus_right"]);
 
     return true;
   }
@@ -89,4 +89,5 @@ bool GfConfig::parse_file(std::string config_path) {
 GfConfig::GfConfig() {
   parse_file(std::string(std::getenv("HOME")) + "/.config/gfwl.json");
 }
+
 GfConfig::GfConfig(std::string config_path) { parse_file(config_path); }

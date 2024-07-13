@@ -34,6 +34,7 @@ public:
     /* Go to Next And Previous Monitor */
     xkb_keysym_t next_monitor = XKB_KEY_n;
     xkb_keysym_t prev_monitor = XKB_KEY_p;
+	xkb_keysym_t close_surface = XKB_KEY_c;
   } keybinds;
 
 private:
