@@ -151,9 +151,9 @@ static void keyboard_handle_key(struct wl_listener *listener, void *data) {
 
   bool handled = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
-  
+
   // TODO: Make this modifier configurable.
-  if ((modifiers & WLR_MODIFIER_LOGO) &&
+  if ((modifiers & server->config.keybinds.modmask) &&
       event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
     /* If alt is held down and this button was _pressed_, we attempt to
      * process it as a compositor keybinding. */

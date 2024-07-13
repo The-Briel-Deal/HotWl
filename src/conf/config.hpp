@@ -1,9 +1,11 @@
 #pragma once
 
+#include <includes.hpp>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <xkbcommon/xkbcommon-keysyms.h>
+#include <xkbcommon/xkbcommon-names.h>
 #include <xkbcommon/xkbcommon.h>
 
 class GfConfig {
@@ -15,6 +17,7 @@ public:
   bool parse_file(std::string);
 
   struct GfKeybinds {
+    xkb_mod_mask_t modmask = WLR_MODIFIER_CTRL;
     /* Open Kitty */
     xkb_keysym_t new_term = XKB_KEY_q;
     /* Open Launcher */
