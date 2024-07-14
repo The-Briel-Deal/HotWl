@@ -128,7 +128,7 @@ void GfTilingState::flip_split_direction() {
 void GfTilingState::insert(gfwl_toplevel *toplevel) {
   auto focused = this->active_toplevel_container.lock();
   if (focused) {
-    focused->insert_child(toplevel);
+    focused->parent_container.lock()->insert_child(toplevel);
     // TODO: Move this to insert_child
     this->root->parse_containers();
     return;
