@@ -18,6 +18,9 @@ std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
               GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
           ->weak_from_this();
   toplevel->parent_container = toplevel_container;
+  // As an optimization down the road, I can try just parsing the changes
+  // containers.
+  this->tiling_state.lock()->root->parse_containers();
   return toplevel_container;
 }
 

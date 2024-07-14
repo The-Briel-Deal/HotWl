@@ -124,26 +124,17 @@ void GfTilingState::flip_split_direction() {
  * }
  */
 
-// Insert is overloaded so that you can directly insert toplevels as well.
+// TODO: I think once GfTilingState inserts into the container, it should be up
+// to the container to decide how to insert it.
 void GfTilingState::insert(gfwl_toplevel *toplevel) {
-  auto focused = this->active_toplevel_container.lock();
-  if (focused) {
-    focused->parent_container.lock()->insert_child(toplevel);
-    // TODO: Move this to insert_child
-    this->root->parse_containers();
+  // Ideally insert into the active container in this tiling state.
+  auto focused_container = this->active_toplevel_container.lock();
+  if (focused_container) {
+    focused_container->parent_container.lock()->insert_child(toplevel);
     return;
   }
 
-  auto server = this->server;
-  if (server) {
-    auto active_toplevel_container = server->active_toplevel_container.lock();
-    if (active_toplevel_container) {
-      active_toplevel_container->insert_child(toplevel);
-      this->root->parse_containers();
-      return;
-    }
-  }
-
+  // In some cases (like when the last focused has been freed, we will insert
+  // in the root node.
   this->root->insert_child(toplevel);
-  this->root->parse_containers();
 }
