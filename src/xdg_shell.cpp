@@ -19,7 +19,7 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
   struct gfwl_server *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
-  set_focused_toplevel_container(toplevel->parent_container);
+  toplevel->parent_container.lock()->set_focused_toplevel_container();
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */

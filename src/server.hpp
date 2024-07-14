@@ -33,7 +33,7 @@ struct gfwl_server {
   struct wl_listener new_xdg_toplevel;
   struct wl_listener new_xdg_popup;
   struct wl_list toplevels;
-  std::shared_ptr<GfContainer> active_toplevel_container;
+  std::weak_ptr<GfContainer> active_toplevel_container;
 
   struct wlr_layer_shell_v1 *layer_shell;
   struct wl_listener new_layer_shell_surface;

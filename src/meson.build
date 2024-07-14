@@ -9,7 +9,6 @@ executable(
     'keyboard.cpp',
     'output.cpp',
     'input.cpp',
-    'scene.cpp',
 
     # Tiling
     'tiling/focus.cpp',

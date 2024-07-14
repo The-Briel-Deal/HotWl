@@ -1,5 +1,6 @@
 #include "container.hpp"
 #include "state.hpp"
+#include <cassert>
 #include <deque>
 #include <includes.hpp>
 #include <memory>
@@ -8,15 +9,37 @@
 #include <vector>
 #include <xdg_shell.hpp>
 
+// Inserting the toplevel directly, returns a weak pointer to the new container.
 std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
-  // TODO: Add the ablility to insert more than toplevels.
+  auto toplevel_container =
+      this->child_containers
+          .emplace_back(std::make_shared<GfContainer>(
+              toplevel, *toplevel->server, this->weak_from_this(),
+              GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+          ->weak_from_this();
+  toplevel->parent_container = toplevel_container;
+  return toplevel_container;
+}
 
-  // Inserting the toplevel directly.
+// Inserts a toplevel nested in a new split_container.
+std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
+    gfwl_toplevel *toplevel, enum gfwl_container_type split_container_type) {
+  assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
+
   return this->child_containers
       .emplace_back(std::make_shared<GfContainer>(
-          toplevel, toplevel->server, this->weak_from_this(),
-          GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
-      ->weak_from_this();
+          toplevel, *toplevel->server, this->weak_from_this(),
+          split_container_type, this->tiling_state, false))
+      ->insert_child(toplevel);
+}
+
+void GfContainer::set_focused_toplevel_container() {
+
+  auto tiling_state = this->tiling_state.lock();
+  if (tiling_state) {
+    tiling_state->active_toplevel_container = this->weak_from_this();
+    tiling_state->server->active_toplevel_container = this->weak_from_this();
+  }
 }
 
 void GfContainer::close() {
@@ -106,7 +129,7 @@ void GfContainer::parse_containers() {
   // Get output if we're at the root.
   if (this->is_root) {
     // TODO: This also probably shouldn't just grab the first output.
-    std::shared_ptr<gfwl_output> output = this->tiling_state->output;
+    std::shared_ptr<gfwl_output> output = this->tiling_state.lock()->output;
     assert(output);
     this->box.x = output->scene_output->x;
     this->box.y = output->scene_output->y;
@@ -123,11 +146,12 @@ void GfContainer::parse_containers() {
 }
 
 // Only supports toplevels for now.
-void set_container_box(std::shared_ptr<GfContainer> container,
+void set_container_box(std::weak_ptr<GfContainer> container,
                        struct wlr_box box) {
-  container->box = box;
-  if (container->e_type == GFWL_CONTAINER_TOPLEVEL) {
-    struct wlr_xdg_toplevel *toplevel = container->toplevel->xdg_toplevel;
+  container.lock()->box = box;
+  if (container.lock()->e_type == GFWL_CONTAINER_TOPLEVEL) {
+    struct wlr_xdg_toplevel *toplevel =
+        container.lock()->toplevel->xdg_toplevel;
     // Set the size.
     wlr_xdg_toplevel_set_size(toplevel, box.width, box.height);
     // Set the position.
@@ -137,22 +161,22 @@ void set_container_box(std::shared_ptr<GfContainer> container,
 };
 
 // Get A List of Toplevels below this Container node.
-std::vector<std::shared_ptr<GfContainer>>
+std::vector<std::weak_ptr<GfContainer>>
 GfContainer::get_top_level_container_list() {
-  std::vector<std::shared_ptr<GfContainer>> list;
-  std::deque<std::shared_ptr<GfContainer>> stack;
+  std::vector<std::weak_ptr<GfContainer>> list;
+  std::deque<std::weak_ptr<GfContainer>> stack;
   // I need to figure out what the heck the difference between emplace and push
   // is. I also need to figure out how to get my lost shared_ptr back ):
   auto server = this->server;
 
-  for (auto output : server->outputs) {
+  for (auto output : server.outputs) {
     stack.push_back(output->tiling_state->root);
   }
 
   while (!stack.empty()) {
     auto curr_node = stack.back();
     stack.pop_back();
-    for (auto child : curr_node->child_containers) {
+    for (auto child : curr_node.lock()->child_containers) {
       switch (child->e_type) {
       case GFWL_CONTAINER_TOPLEVEL:
         list.push_back(child);

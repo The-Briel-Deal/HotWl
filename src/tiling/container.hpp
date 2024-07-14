@@ -15,15 +15,30 @@ enum gfwl_container_type {
 
 class GfContainer : public std::enable_shared_from_this<GfContainer> {
 public:
-  explicit GfContainer(const gfwl_toplevel *toplevel, const gfwl_server &server,
+  // This will be used for non root containers in theory.
+  explicit GfContainer(gfwl_toplevel *const toplevel, const gfwl_server &server,
                        std::weak_ptr<GfContainer> parent_container,
                        const gfwl_container_type e_type,
                        std::weak_ptr<GfTilingState> tiling_state,
                        const bool is_root)
       : toplevel(toplevel), server(server), parent_container(parent_container),
-        e_type(e_type), is_root(is_root){};
+        e_type(e_type), tiling_state(tiling_state), is_root(is_root){};
+
+  // I have this constructor without a parent container for root containers.
+  explicit GfContainer(gfwl_toplevel *const toplevel, const gfwl_server &server,
+                       const gfwl_container_type e_type,
+                       std::weak_ptr<GfTilingState> tiling_state,
+                       const bool is_root)
+      : toplevel(toplevel), server(server), e_type(e_type),
+        tiling_state(tiling_state), is_root(is_root){};
   // Member Functions
   std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
+  std::weak_ptr<GfContainer>
+  insert_child_in_split(gfwl_toplevel *toplevel,
+                        enum gfwl_container_type split_container_type);
+
+  void set_focused_toplevel_container();
+
   std::vector<std::weak_ptr<GfContainer>> get_top_level_container_list();
   gfwl_split_direction get_split_dir();
   void vert_split_containers();
@@ -47,7 +62,9 @@ public:
   std::weak_ptr<GfTilingState> tiling_state;
 
   // References to the associated toplevel and server
-  const gfwl_toplevel *toplevel;
+  // TODO: I would later like to make this a shared pointer, container should be
+  // the owner.
+  gfwl_toplevel *const toplevel;
   const gfwl_server &server;
 };
 

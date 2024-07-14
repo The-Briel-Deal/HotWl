@@ -18,7 +18,7 @@ std::shared_ptr<gfwl_output>
 get_output_from_container(std::shared_ptr<GfContainer> container) {
   auto container_point = get_container_origin(container); // container->box;
   auto server = container->server;
-  auto outputs = server->outputs;
+  auto outputs = server.outputs;
   for (auto output : outputs) {
     wlr_box output_box = {
         .x = output->scene_output->x,
@@ -40,8 +40,8 @@ get_output_from_container(std::shared_ptr<GfContainer> container) {
 void focus_output_from_container(std::shared_ptr<GfContainer> container) {
   auto output = get_output_from_container(container);
   auto server = container->server;
-  if (output && server) {
-    server->focused_output = output;
+  if (output) {
+    server.focused_output = output;
   } else {
     wlr_log(WLR_ERROR, "Your container doesn't have an output ):<");
   }
@@ -134,8 +134,9 @@ void server_new_output(struct wl_listener *listener, void *data) {
   server->outputs.push_back(output);
 
   // TODO: Maybe move this to the constructor of tiling state.
+  // (I actually think this may be worth doing inheritance for)
   output->tiling_state->root = std::make_shared<GfContainer>(
-      nullptr, server, nullptr, GFWL_CONTAINER_ROOT,
+      nullptr, *server, GFWL_CONTAINER_ROOT,
       output->tiling_state->weak_from_this(), true);
 
   output->tiling_state->split_dir = GFWL_SPLIT_DIR_HORI;

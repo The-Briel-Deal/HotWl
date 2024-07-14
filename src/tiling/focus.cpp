@@ -22,9 +22,9 @@ static struct wl_list *
 get_toplevel_container_list(std::shared_ptr<GfContainer> head,
                             struct wl_list *list);
 
-static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
+static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
     struct gfwl_point origin,
-    const std::vector<std::shared_ptr<GfContainer>> &toplevel_container_list,
+    const std::vector<std::weak_ptr<GfContainer>> &toplevel_container_list,
     enum gfwl_tiling_focus_direction dir) {
   // Iterate through all Toplevel Containers, if we are going left, we
   // should look for a container where the curr focused container's y value
@@ -35,17 +35,20 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
   //        (new_focused_x - curr_focused_center_x)
   // And return the one with the closest distance.
 
-  std::shared_ptr<GfContainer> closest_valid_toplevel = NULL;
+  std::weak_ptr<GfContainer> closest_valid_toplevel;
   switch (dir) {
   case GFWL_TILING_FOCUS_LEFT: {
     int shortest_distance = INT_MAX;
 
-    for (auto toplevel : toplevel_container_list) {
+    for (auto toplevel_weak : toplevel_container_list) {
+      auto toplevel = toplevel_weak.lock();
+      if (!toplevel)
+        continue;
       int distance_left_of_origin = origin.x - toplevel->box.x;
       if (toplevel->box.x < origin.x && toplevel->box.y <= origin.y &&
           toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_left_of_origin < shortest_distance &&
-          toplevel != toplevel->server->active_toplevel_container) {
+          toplevel != toplevel->server.active_toplevel_container.lock()) {
         // TODO: Actually pass in the currently focused toplevel.
         // If distance is negative something went wrong.
         assert(distance_left_of_origin > 0);
@@ -58,12 +61,15 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
   case GFWL_TILING_FOCUS_RIGHT: {
     int shortest_distance = INT_MAX;
 
-    for (auto toplevel : toplevel_container_list) {
+    for (auto toplevel_weak : toplevel_container_list) {
+      auto toplevel = toplevel_weak.lock();
+      if (!toplevel)
+        continue;
       int distance_right_of_origin = toplevel->box.x - origin.x;
       if (toplevel->box.x > origin.x && toplevel->box.y <= origin.y &&
           toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_right_of_origin < shortest_distance &&
-          toplevel != toplevel->server->active_toplevel_container) {
+          toplevel != toplevel->server.active_toplevel_container.lock()) {
         // TODO: Actually pass in the currently focused toplevel.
         // If distance is negative something went wrong.
         assert(distance_right_of_origin > 0);
@@ -76,12 +82,15 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
   case GFWL_TILING_FOCUS_UP: {
     int shortest_distance = INT_MAX;
 
-    for (auto toplevel : toplevel_container_list) {
+    for (auto toplevel_weak : toplevel_container_list) {
+      auto toplevel = toplevel_weak.lock();
+      if (!toplevel)
+        continue;
       int distance_above_origin = origin.y - toplevel->box.y;
       if (toplevel->box.y < origin.y && toplevel->box.x <= origin.x &&
           toplevel->box.x + toplevel->box.width >= origin.x &&
           distance_above_origin < shortest_distance &&
-          toplevel != toplevel->server->active_toplevel_container) {
+          toplevel != toplevel->server.active_toplevel_container.lock()) {
         // If distance is negative something went wrong.
         assert(distance_above_origin > 0);
         closest_valid_toplevel = toplevel;
@@ -93,12 +102,15 @@ static std::shared_ptr<GfContainer> find_closest_to_origin_in_dir(
   case GFWL_TILING_FOCUS_DOWN: {
     int shortest_distance = INT_MAX;
 
-    for (auto toplevel : toplevel_container_list) {
+    for (auto toplevel_weak : toplevel_container_list) {
+      auto toplevel = toplevel_weak.lock();
+      if (!toplevel)
+        continue;
       int distance_below_origin = toplevel->box.y - origin.y;
       if (toplevel->box.y > origin.y && toplevel->box.x <= origin.x &&
           toplevel->box.x + toplevel->box.width >= origin.x &&
           distance_below_origin < shortest_distance &&
-          toplevel != toplevel->tiling_state->active_toplevel_container) {
+          toplevel != toplevel->server.active_toplevel_container.lock()) {
         // If distance is negative something went wrong.
         assert(distance_below_origin > 0);
         closest_valid_toplevel = toplevel;
@@ -134,7 +146,8 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
                      std::shared_ptr<GfTilingState> state) {
   assert(state);
 
-  std::shared_ptr<GfContainer> curr_focused = state->active_toplevel_container;
+  std::shared_ptr<GfContainer> curr_focused =
+      state->active_toplevel_container.lock();
   assert(curr_focused);
 
   // Get Currently Focused Container Origin, X and Y position.
@@ -144,8 +157,10 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
 
   auto toplevel_container_list = state->root->get_top_level_container_list();
 
-  std::shared_ptr<GfContainer> to_focus = find_closest_to_origin_in_dir(
-      curr_focused_origin, toplevel_container_list, dir);
+  std::shared_ptr<GfContainer> to_focus =
+      find_closest_to_origin_in_dir(curr_focused_origin,
+                                    toplevel_container_list, dir)
+          .lock();
 
   if (to_focus) {
     assert(to_focus->e_type == GFWL_CONTAINER_TOPLEVEL);
@@ -159,7 +174,7 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
                                         std::shared_ptr<GfTilingState> state) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
-  struct gfwl_toplevel *toplevel = container->toplevel;
+  const gfwl_toplevel *toplevel = container->toplevel;
   assert(toplevel);
 
   struct wlr_surface *surface = toplevel->xdg_toplevel->base->surface;
@@ -170,6 +185,7 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
     return false;
   }
 
+  // TODO: Pickup here, I can't use a const pointer for toplevel here.
   focus_toplevel(container->toplevel,
                  container->toplevel->xdg_toplevel->base->surface);
 

@@ -14,7 +14,7 @@ struct gfwl_toplevel;
 
 struct GfTilingState : public std::enable_shared_from_this<GfTilingState> {
 public:
-  void insert(std::shared_ptr<GfContainer> container);
+  void insert(std::weak_ptr<GfContainer> container);
   void insert(gfwl_toplevel *toplevel);
 
   void insert_child_container(std::shared_ptr<GfContainer> parent,
