@@ -45,11 +45,18 @@ void GfContainer::set_focused_toplevel_container() {
   }
 }
 
+gfwl_split_direction GfContainer::get_split_dir_longer() {
+  assert(this->box.height && this->box.height);
+  if (this->box.width >= this->box.height)
+    return GFWL_SPLIT_DIR_HORI;
+  return GFWL_SPLIT_DIR_VERT;
+}
+
 void GfContainer::close() {
   // I need to rethink ownership of containers.
 }
 
-enum gfwl_split_direction GfContainer::get_split_dir() {
+enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {
   switch (this->e_type) {
   case GFWL_CONTAINER_VSPLIT:
     return GFWL_SPLIT_DIR_VERT;
@@ -84,7 +91,7 @@ void GfContainer::vert_split_containers() {
                    .y = this->box.y + (per_win_height * count),
                    .width = width,
                    .height = per_win_height};
-    set_container_box(curr, box);
+    curr->set_container_box(box);
     count += 1;
   }
 }
@@ -110,13 +117,13 @@ void GfContainer::hori_split_containers() {
                    .y = this->box.y,
                    .width = per_win_width,
                    .height = height};
-    set_container_box(curr, box);
+    curr->set_container_box(box);
     count += 1;
   }
 }
 
 void GfContainer::split_containers() {
-  switch (this->get_split_dir()) {
+  switch (this->get_split_dir_from_container_type()) {
   case GFWL_SPLIT_DIR_HORI:
     this->hori_split_containers();
     break;
@@ -148,13 +155,11 @@ void GfContainer::parse_containers() {
   }
 }
 
-// Only supports toplevels for now.
-void set_container_box(std::weak_ptr<GfContainer> container,
-                       struct wlr_box box) {
-  container.lock()->box = box;
-  if (container.lock()->e_type == GFWL_CONTAINER_TOPLEVEL) {
-    struct wlr_xdg_toplevel *toplevel =
-        container.lock()->toplevel->xdg_toplevel;
+// Sets the size and position of a container based on a wlr_box.
+void GfContainer::set_container_box(struct wlr_box box) {
+  this->box = box;
+  if (e_type == GFWL_CONTAINER_TOPLEVEL) {
+    struct wlr_xdg_toplevel *toplevel = this->toplevel->xdg_toplevel;
     // Set the size.
     wlr_xdg_toplevel_set_size(toplevel, box.width, box.height);
     // Set the position.
