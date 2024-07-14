@@ -27,7 +27,7 @@ public:
   void reparent_container(std::shared_ptr<GfContainer> parent,
                           std::shared_ptr<GfContainer> child);
   std::shared_ptr<GfContainer> root;
-  std::shared_ptr<GfContainer> active_toplevel_container;
+  std::weak_ptr<GfContainer> active_toplevel_container;
   gfwl_split_direction split_dir;
   std::shared_ptr<gfwl_output> output = NULL;
   struct gfwl_server *server;

@@ -1,5 +1,6 @@
 #pragma once
 #include "state.hpp"
+#include "xdg_shell.hpp"
 #include <includes.hpp>
 #include <memory>
 #include <vector>
@@ -14,12 +15,16 @@ enum gfwl_container_type {
 
 class GfContainer : public std::enable_shared_from_this<GfContainer> {
 public:
-  GfContainer(bool root, std::shared_ptr<GfTilingState> state,
-              gfwl_container_type type, std::shared_ptr<GfContainer> parent,
-              gfwl_server *server, gfwl_toplevel *toplevel);
-
+  explicit GfContainer(const gfwl_toplevel *toplevel, const gfwl_server &server,
+                       std::weak_ptr<GfContainer> parent_container,
+                       const gfwl_container_type e_type,
+                       std::weak_ptr<GfTilingState> tiling_state,
+                       const bool is_root)
+      : toplevel(toplevel), server(server), parent_container(parent_container),
+        e_type(e_type), is_root(is_root){};
   // Member Functions
-  std::vector<std::shared_ptr<GfContainer>> get_top_level_container_list();
+  std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
+  std::vector<std::weak_ptr<GfContainer>> get_top_level_container_list();
   gfwl_split_direction get_split_dir();
   void vert_split_containers();
   void hori_split_containers();
@@ -27,31 +32,25 @@ public:
   void parse_containers();
   void close();
 
-  // The Container Above and Below this one in the tiling tree
-  std::shared_ptr<GfContainer> parent_container = NULL;
-  std::vector<std::shared_ptr<GfContainer>> child_containers;
-
   // Descriptors of this container
-  gfwl_container_type e_type = GFWL_CONTAINER_UNKNOWN;
-  bool is_root = false;
+  const gfwl_container_type e_type = GFWL_CONTAINER_UNKNOWN;
+  const bool is_root = false;
+
+  // The Container Above and Below this one in the tiling tree
+  std::weak_ptr<GfContainer> parent_container;
+  std::vector<std::shared_ptr<GfContainer>> child_containers;
 
   // The Dimensions of a container
   wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
 
-  // Some relevant state
-  std::shared_ptr<GfTilingState> tiling_state;
-  gfwl_toplevel *toplevel = NULL;
-  struct gfwl_server *server = NULL;
+  // Tiling State of The Current Output
+  std::weak_ptr<GfTilingState> tiling_state;
+
+  // References to the associated toplevel and server
+  const gfwl_toplevel *toplevel;
+  const gfwl_server &server;
 };
 
-void set_container_box(std::shared_ptr<GfContainer> toplevel,
-                       struct wlr_box box);
+void set_container_box(std::weak_ptr<GfContainer> toplevel, struct wlr_box box);
 
-void set_focused_toplevel_container(std::shared_ptr<GfContainer> container);
-
-std::shared_ptr<GfContainer>
-create_container_from_toplevel(struct gfwl_toplevel *toplevel);
-
-std::shared_ptr<GfContainer>
-create_parent_container(std::shared_ptr<GfContainer> child_container,
-                        enum gfwl_container_type type);
+void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);

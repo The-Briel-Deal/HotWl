@@ -8,20 +8,19 @@
 #include <vector>
 #include <xdg_shell.hpp>
 
-GfContainer::GfContainer(bool root, std::shared_ptr<GfTilingState> state,
-                         gfwl_container_type type,
-                         std::shared_ptr<GfContainer> parent,
-                         gfwl_server *server, gfwl_toplevel *toplevel) {
-  this->is_root = root;
-  this->tiling_state = state;
-  this->e_type = type;
-  this->parent_container = parent;
-  this->server = server;
-  this->toplevel = toplevel;
-};
+std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
+  // TODO: Add the ablility to insert more than toplevels.
+
+  // Inserting the toplevel directly.
+  return this->child_containers
+      .emplace_back(std::make_shared<GfContainer>(
+          toplevel, toplevel->server, this->weak_from_this(),
+          GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+      ->weak_from_this();
+}
 
 void GfContainer::close() {
-	// I need to rethink ownership of containers.
+  // I need to rethink ownership of containers.
 }
 
 enum gfwl_split_direction GfContainer::get_split_dir() {
