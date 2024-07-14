@@ -17,6 +17,7 @@ public:
   /* Inserts a toplevel into the tiling state. */
   std::weak_ptr<GfContainer> insert(gfwl_toplevel *toplevel);
 
+  /* TODO: Remove */
   void flip_split_direction();
 
   std::shared_ptr<GfContainer> root;
