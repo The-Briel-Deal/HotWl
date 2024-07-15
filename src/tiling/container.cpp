@@ -23,16 +23,15 @@ GfContainer::insert_sibling(gfwl_toplevel *toplevel) {
   /* Emplace a new container before the afformentioned pos in the parent. */
   auto toplevel_container =
       parent->child_containers
-          .emplace(pos, std::make_shared<GfContainer>(
-                            toplevel, *toplevel->server, this->weak_from_this(),
-                            GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+          .emplace(pos,
+                   std::make_shared<GfContainer>(
+                       toplevel, *toplevel->server, parent->weak_from_this(),
+                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
           ->get()
           ->weak_from_this();
 
   /* Set the new container as the parent in the toplevel. */
   toplevel->parent_container = toplevel_container;
-  toplevel_container.lock()->parent_container = parent;
-
   this->tiling_state.lock()->root->parse_containers();
 
   return toplevel_container;
