@@ -23,12 +23,12 @@ GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {
 
   switch (split_dir_longer) {
   case GFWL_SPLIT_DIR_HORI:
-    new_toplevel_container =
-        parent->insert_child_in_split(toplevel, GFWL_CONTAINER_HSPLIT);
+    new_toplevel_container = parent->insert_child_in_split(
+        toplevel, this->weak_from_this(), GFWL_CONTAINER_HSPLIT);
     break;
   case GFWL_SPLIT_DIR_VERT:
-    new_toplevel_container =
-        parent->insert_child_in_split(toplevel, GFWL_CONTAINER_VSPLIT);
+    new_toplevel_container = parent->insert_child_in_split(
+        toplevel, this->weak_from_this(), GFWL_CONTAINER_VSPLIT);
     break;
   case GFWL_SPLIT_DIR_UNKNOWN:
     assert(false); // Split dir should never be unknown.
@@ -105,6 +105,22 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
       .emplace_back(std::make_shared<GfContainer>(
           toplevel, *toplevel->server, this->weak_from_this(),
           split_container_type, this->tiling_state, false))
+      ->insert_child(toplevel);
+}
+
+// Inserts a toplevel nested in a new split_container.
+std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
+    gfwl_toplevel *toplevel, std::weak_ptr<GfContainer> insert_after,
+    enum gfwl_container_type split_container_type) {
+  assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
+
+  return this->child_containers
+      .emplace(std::find(this->child_containers.begin(),
+                         this->child_containers.end(), insert_after.lock()),
+               std::make_shared<GfContainer>(
+                   toplevel, *toplevel->server, this->weak_from_this(),
+                   split_container_type, this->tiling_state, false))
+      ->get()
       ->insert_child(toplevel);
 }
 

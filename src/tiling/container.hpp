@@ -45,6 +45,11 @@ public:
   insert_child_in_split(gfwl_toplevel *toplevel,
                         enum gfwl_container_type split_container_type);
 
+  std::weak_ptr<GfContainer>
+  insert_child_in_split(gfwl_toplevel *toplevel,
+                        std::weak_ptr<GfContainer> insert_after,
+                        enum gfwl_container_type split_container_type);
+
   void set_focused_toplevel_container();
 
   std::vector<std::weak_ptr<GfContainer>> get_top_level_container_list();
