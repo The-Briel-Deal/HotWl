@@ -1,5 +1,6 @@
 #include "container.hpp"
 #include "state.hpp"
+#include <algorithm>
 #include <cassert>
 #include <deque>
 #include <includes.hpp>
@@ -8,6 +9,34 @@
 #include <server.hpp>
 #include <vector>
 #include <xdg_shell.hpp>
+
+/* Insert directly after this container, returns a weak pointer to the new
+ * container. */
+std::weak_ptr<GfContainer>
+GfContainer::insert_sibling(gfwl_toplevel *toplevel) {
+  auto parent = parent_container.lock();
+  assert(parent);
+  /* Get position of this container in its parent. */
+  auto pos =
+      std::find(parent->child_containers.begin(),
+                parent->child_containers.end(), this->shared_from_this());
+  /* Emplace a new container before the afformentioned pos in the parent. */
+  auto toplevel_container =
+      parent->child_containers
+          .emplace(pos, std::make_shared<GfContainer>(
+                            toplevel, *toplevel->server, this->weak_from_this(),
+                            GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+          ->get()
+          ->weak_from_this();
+
+  /* Set the new container as the parent in the toplevel. */
+  toplevel->parent_container = toplevel_container;
+  toplevel_container.lock()->parent_container = parent;
+
+  this->tiling_state.lock()->root->parse_containers();
+
+  return toplevel_container;
+}
 
 // Inserting the toplevel directly, returns a weak pointer to the new container.
 std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {

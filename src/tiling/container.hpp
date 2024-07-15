@@ -32,6 +32,8 @@ public:
       : toplevel(toplevel), server(server), e_type(e_type),
         tiling_state(tiling_state), is_root(is_root){};
   /* Member Functions */
+  std::weak_ptr<GfContainer> insert_sibling(gfwl_toplevel *toplevel);
+  /* TODO: I think I want to make these private and only make insert public. */
   std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
   std::weak_ptr<GfContainer>
   insert_child_in_split(gfwl_toplevel *toplevel,
@@ -69,8 +71,8 @@ public:
   std::weak_ptr<GfTilingState> tiling_state;
 
   /* References to the associated toplevel and server
-   * TODO: I would later like to make this a shared pointer, container should be
-   * the owner. */
+   * TODO: I would later like to make this a shared pointer, container should
+   * be the owner. */
   gfwl_toplevel *const toplevel;
   const gfwl_server &server;
 
