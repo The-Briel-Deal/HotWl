@@ -1,5 +1,6 @@
 #include "container.hpp"
 #include "state.hpp"
+#include "wlr/util/log.h"
 #include <algorithm>
 #include <cassert>
 #include <deque>
@@ -9,6 +10,47 @@
 #include <server.hpp>
 #include <vector>
 #include <xdg_shell.hpp>
+
+// This is intended for toplevel containers.
+std::weak_ptr<GfContainer>
+GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {
+  // TODO: I will likely have to make sure the container is inserted at the
+  // right position.
+  assert(this->e_type == GFWL_CONTAINER_TOPLEVEL);
+  auto parent = this->parent_container.lock();
+  auto split_dir_longer = this->get_split_dir_longer();
+  std::weak_ptr<GfContainer> new_toplevel_container;
+
+  switch (split_dir_longer) {
+  case GFWL_SPLIT_DIR_HORI:
+    new_toplevel_container =
+        parent->insert_child_in_split(toplevel, GFWL_CONTAINER_HSPLIT);
+    break;
+  case GFWL_SPLIT_DIR_VERT:
+    new_toplevel_container =
+        parent->insert_child_in_split(toplevel, GFWL_CONTAINER_VSPLIT);
+    break;
+  case GFWL_SPLIT_DIR_UNKNOWN:
+    assert(false); // Split dir should never be unknown.
+    wlr_log(WLR_ERROR, "Split dir is unknown, this should be the case.");
+    break;
+  }
+  this->move_container_to(new_toplevel_container.lock()->parent_container);
+  return this->parent_container;
+}
+
+void GfContainer::move_container_to(std::weak_ptr<GfContainer> new_parent) {
+  auto this_locked = this->shared_from_this();
+  auto &prev_parent_child_containers =
+      this->parent_container.lock()->child_containers;
+
+  prev_parent_child_containers.erase(
+      std::find(prev_parent_child_containers.begin(),
+                prev_parent_child_containers.end(), this_locked));
+
+  new_parent.lock()->child_containers.push_back(this_locked);
+  this->parent_container = new_parent;
+}
 
 /* Insert directly after this container, returns a weak pointer to the new
  * container. */
@@ -37,7 +79,8 @@ GfContainer::insert_sibling(gfwl_toplevel *toplevel) {
   return toplevel_container;
 }
 
-// Inserting the toplevel directly, returns a weak pointer to the new container.
+// Inserting the toplevel directly, returns a weak pointer to the new
+// container.
 std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
   auto toplevel_container =
       this->child_containers
@@ -201,8 +244,8 @@ std::vector<std::weak_ptr<GfContainer>>
 GfContainer::get_top_level_container_list() {
   std::vector<std::weak_ptr<GfContainer>> list;
   std::deque<std::weak_ptr<GfContainer>> stack;
-  // I need to figure out what the heck the difference between emplace and push
-  // is. I also need to figure out how to get my lost shared_ptr back ):
+  // I need to figure out what the heck the difference between emplace and
+  // push is. I also need to figure out how to get my lost shared_ptr back ):
   auto server = this->server;
 
   for (auto output : server.outputs) {

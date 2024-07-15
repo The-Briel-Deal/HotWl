@@ -32,9 +32,15 @@ public:
       : toplevel(toplevel), server(server), e_type(e_type),
         tiling_state(tiling_state), is_root(is_root){};
   /* Member Functions */
+  void move_container_to(std::weak_ptr<GfContainer> new_parent);
+
   std::weak_ptr<GfContainer> insert_sibling(gfwl_toplevel *toplevel);
   /* TODO: I think I want to make these private and only make insert public. */
   std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
+
+  std::weak_ptr<GfContainer>
+  insert_based_on_longer_dir(gfwl_toplevel *toplevel);
+
   std::weak_ptr<GfContainer>
   insert_child_in_split(gfwl_toplevel *toplevel,
                         enum gfwl_container_type split_container_type);

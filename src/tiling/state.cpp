@@ -20,7 +20,7 @@ std::weak_ptr<GfContainer> GfTilingState::insert(gfwl_toplevel *toplevel) {
   /* Ideally insert into the active container in this tiling state. */
   auto focused_container = this->active_toplevel_container.lock();
   if (focused_container) {
-    return focused_container->insert_sibling(toplevel);
+    return focused_container->insert_based_on_longer_dir(toplevel);
   }
 
   /* If the root already has its split container this insert into it. */
