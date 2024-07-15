@@ -36,6 +36,7 @@ GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {
     break;
   }
   this->move_container_to(new_toplevel_container.lock()->parent_container);
+  this->tiling_state.lock()->root->parse_containers();
   return this->parent_container;
 }
 
