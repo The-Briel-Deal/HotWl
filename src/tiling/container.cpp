@@ -96,6 +96,25 @@ std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
   return toplevel_container;
 }
 
+std::weak_ptr<GfContainer>
+GfContainer::insert_child(gfwl_toplevel *toplevel,
+                          std::weak_ptr<GfContainer> insert_before) {
+  auto toplevel_container =
+      this->child_containers
+          .emplace(std::find(this->child_containers.begin(),
+                             this->child_containers.end(), insert_before.lock()),
+                   std::make_shared<GfContainer>(
+                       toplevel, *toplevel->server, this->weak_from_this(),
+                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+          ->get()
+          ->weak_from_this();
+  toplevel->parent_container = toplevel_container;
+  // As an optimization down the road, I can try just parsing the changes
+  // containers.
+  this->tiling_state.lock()->root->parse_containers();
+  return toplevel_container;
+}
+
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
     gfwl_toplevel *toplevel, enum gfwl_container_type split_container_type) {
@@ -134,6 +153,8 @@ void GfContainer::set_focused_toplevel_container() {
 }
 
 gfwl_split_direction GfContainer::get_split_dir_longer() {
+  // TODO: This will fail once too many windows are open. Maybe do something
+  // about this?
   assert(this->box.height && this->box.height);
   if (this->box.width >= this->box.height)
     return GFWL_SPLIT_DIR_HORI;

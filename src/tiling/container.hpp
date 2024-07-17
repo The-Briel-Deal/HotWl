@@ -39,6 +39,10 @@ public:
   std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
 
   std::weak_ptr<GfContainer>
+  insert_child(gfwl_toplevel *toplevel,
+               std::weak_ptr<GfContainer> insert_before);
+
+  std::weak_ptr<GfContainer>
   insert_based_on_longer_dir(gfwl_toplevel *toplevel);
 
   std::weak_ptr<GfContainer>
