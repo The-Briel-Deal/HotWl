@@ -13,7 +13,7 @@
 
 GfContainer::~GfContainer() {
   auto tl = this->toplevel;
-  if (tl) {
+  if (tl && this->e_type ==	GFWL_CONTAINER_TOPLEVEL) {
     wlr_xdg_toplevel_send_close(tl->xdg_toplevel);
     this->tiling_state.lock()->root->parse_containers();
   };
@@ -178,6 +178,9 @@ void GfContainer::close() {
                 parent->child_containers.end(), this->shared_from_this());
 
   parent->child_containers.erase(position_in_parent);
+  if (parent->child_containers.empty()) {
+    parent->close();
+  }
   if (parent->server.active_toplevel_container.front().lock().get() == this) {
     parent->server.active_toplevel_container.pop_front();
   }

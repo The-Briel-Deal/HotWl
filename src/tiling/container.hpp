@@ -90,7 +90,7 @@ public:
   /* References to the associated toplevel and server
    * TODO: I would later like to make this a shared pointer, container should
    * be the owner. */
-  gfwl_toplevel *const toplevel;
+  gfwl_toplevel *const toplevel = NULL;
   gfwl_server &server;
 
 private:
