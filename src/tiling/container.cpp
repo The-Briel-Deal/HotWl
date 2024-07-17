@@ -49,7 +49,8 @@ void GfContainer::move_container_to(std::weak_ptr<GfContainer> new_parent) {
       std::find(prev_parent_child_containers.begin(),
                 prev_parent_child_containers.end(), this_locked));
 
-  new_parent.lock()->child_containers.push_back(this_locked);
+  new_parent.lock()->child_containers.insert(
+      new_parent.lock()->child_containers.begin(), this_locked);
   this->parent_container = new_parent;
 }
 
