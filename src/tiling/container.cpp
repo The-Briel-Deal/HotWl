@@ -12,10 +12,8 @@
 #include <xdg_shell.hpp>
 
 GfContainer::~GfContainer() {
-  wlr_log(WLR_ERROR, "DESTRUCTION HAS BEGUN");
   auto tl = this->toplevel;
   if (tl) {
-    // tl->destroy.notify();
     wlr_xdg_toplevel_send_close(tl->xdg_toplevel);
     this->tiling_state.lock()->root->parse_containers();
   };
@@ -159,7 +157,8 @@ void GfContainer::set_focused_toplevel_container() {
   auto tiling_state = this->tiling_state.lock();
   if (tiling_state) {
     tiling_state->active_toplevel_container = this->weak_from_this();
-    tiling_state->server->active_toplevel_container = this->weak_from_this();
+    tiling_state->server->active_toplevel_container.push_front(
+        this->weak_from_this());
   }
 }
 
@@ -179,6 +178,9 @@ void GfContainer::close() {
                 parent->child_containers.end(), this->shared_from_this());
 
   parent->child_containers.erase(position_in_parent);
+  if (parent->server.active_toplevel_container.front().lock().get() == this) {
+    parent->server.active_toplevel_container.pop_front();
+  }
   // I need to rethink ownership of containers.
 }
 

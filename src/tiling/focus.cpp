@@ -48,7 +48,8 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.x < origin.x && toplevel->box.y <= origin.y &&
           toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_left_of_origin < shortest_distance &&
-          toplevel != toplevel->server.active_toplevel_container.lock()) {
+          toplevel !=
+              toplevel->server.active_toplevel_container.front().lock()) {
         // TODO: Actually pass in the currently focused toplevel.
         // If distance is negative something went wrong.
         assert(distance_left_of_origin > 0);
@@ -69,7 +70,8 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.x > origin.x && toplevel->box.y <= origin.y &&
           toplevel->box.y + toplevel->box.height >= origin.y &&
           distance_right_of_origin < shortest_distance &&
-          toplevel != toplevel->server.active_toplevel_container.lock()) {
+          toplevel !=
+              toplevel->server.active_toplevel_container.front().lock()) {
         // TODO: Actually pass in the currently focused toplevel.
         // If distance is negative something went wrong.
         assert(distance_right_of_origin > 0);
@@ -90,7 +92,8 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.y < origin.y && toplevel->box.x <= origin.x &&
           toplevel->box.x + toplevel->box.width >= origin.x &&
           distance_above_origin < shortest_distance &&
-          toplevel != toplevel->server.active_toplevel_container.lock()) {
+          toplevel !=
+              toplevel->server.active_toplevel_container.front().lock()) {
         // If distance is negative something went wrong.
         assert(distance_above_origin > 0);
         closest_valid_toplevel = toplevel;
@@ -110,7 +113,8 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       if (toplevel->box.y > origin.y && toplevel->box.x <= origin.x &&
           toplevel->box.x + toplevel->box.width >= origin.x &&
           distance_below_origin < shortest_distance &&
-          toplevel != toplevel->server.active_toplevel_container.lock()) {
+          toplevel !=
+              toplevel->server.active_toplevel_container.front().lock()) {
         // If distance is negative something went wrong.
         assert(distance_below_origin > 0);
         closest_valid_toplevel = toplevel;
@@ -146,9 +150,12 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
                      std::shared_ptr<GfTilingState> state) {
   assert(state);
 
- 
+  // TODO: I may want to use the servers active toplevel instead.
+  if (state->server->active_toplevel_container.empty() ||
+      state->server->active_toplevel_container.front().expired())
+    return NULL;
   std::shared_ptr<GfContainer> curr_focused =
-      state->active_toplevel_container.lock();
+      state->server->active_toplevel_container.front().lock();
   // TODO: This fails after trying to move afterr closing a container.
   assert(curr_focused);
 
