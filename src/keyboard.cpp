@@ -130,7 +130,8 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
     auto prev_output = std::prev(curr_output);
     if (curr_output != server->outputs.begin() && *prev_output != nullptr)
       server->focused_output = *prev_output;
-  } else if (sym == server->config.keybinds.close_surface) {
+  } else if (sym == server->config.keybinds.close_surface &&
+             !server->active_toplevel_container.expired()) {
     server->active_toplevel_container.lock()->close();
   }
 

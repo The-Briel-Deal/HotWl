@@ -31,6 +31,8 @@ public:
                        const bool is_root)
       : toplevel(toplevel), server(server), e_type(e_type),
         tiling_state(tiling_state), is_root(is_root){};
+
+  ~GfContainer();
   /* Member Functions */
   void move_container_to(std::weak_ptr<GfContainer> new_parent);
 

@@ -11,6 +11,15 @@
 #include <vector>
 #include <xdg_shell.hpp>
 
+GfContainer::~GfContainer() {
+  wlr_log(WLR_ERROR, "DESTRUCTION HAS BEGUN");
+  auto tl = this->toplevel;
+  if (tl) {
+    // tl->destroy.notify();
+    wlr_xdg_toplevel_send_close(tl->xdg_toplevel);
+    this->tiling_state.lock()->root->parse_containers();
+  };
+}
 // This is intended for toplevel containers.
 std::weak_ptr<GfContainer>
 GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {
@@ -103,7 +112,8 @@ GfContainer::insert_child(gfwl_toplevel *toplevel,
   auto toplevel_container =
       this->child_containers
           .emplace(std::find(this->child_containers.begin(),
-                             this->child_containers.end(), insert_before.lock()),
+                             this->child_containers.end(),
+                             insert_before.lock()),
                    std::make_shared<GfContainer>(
                        toplevel, *toplevel->server, this->weak_from_this(),
                        GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
@@ -163,6 +173,14 @@ gfwl_split_direction GfContainer::get_split_dir_longer() {
 }
 
 void GfContainer::close() {
+  if (this->parent_container.expired())
+    return;
+  auto parent = this->parent_container.lock();
+  auto position_in_parent =
+      std::find(parent->child_containers.begin(),
+                parent->child_containers.end(), this->shared_from_this());
+
+  parent->child_containers.erase(position_in_parent);
   // I need to rethink ownership of containers.
 }
 
