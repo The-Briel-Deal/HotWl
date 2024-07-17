@@ -150,13 +150,11 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
                      std::shared_ptr<GfTilingState> state) {
   assert(state);
 
-  // TODO: I may want to use the servers active toplevel instead.
   if (state->server->active_toplevel_container.empty() ||
       state->server->active_toplevel_container.front().expired())
     return NULL;
   std::shared_ptr<GfContainer> curr_focused =
       state->server->active_toplevel_container.front().lock();
-  // TODO: This fails after trying to move afterr closing a container.
   assert(curr_focused);
 
   // Get Currently Focused Container Origin, X and Y position.
