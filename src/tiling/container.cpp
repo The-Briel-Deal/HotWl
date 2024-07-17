@@ -173,8 +173,6 @@ gfwl_split_direction GfContainer::get_split_dir_longer() {
 }
 
 void GfContainer::close() {
-  if (this->parent_container.expired())
-    return;
   auto parent = this->parent_container.lock();
   auto position_in_parent =
       std::find(parent->child_containers.begin(),
