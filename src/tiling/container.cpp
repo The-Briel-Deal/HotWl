@@ -33,6 +33,12 @@ GfContainer::~GfContainer() {
   };
 }
 
+std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel *toplevel) {
+  if (this->is_root)
+    return this->insert_child_in_split(toplevel, GFWL_CONTAINER_HSPLIT);
+
+  return this->insert_based_on_longer_dir(toplevel);
+}
 // Return const reference to containers box.
 const wlr_box &GfContainer::get_box() { return this->box; }
 

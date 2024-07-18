@@ -33,30 +33,9 @@ public:
       : toplevel(toplevel), server(server), e_type(e_type),
         tiling_state(tiling_state), is_root(is_root){};
 
+  std::weak_ptr<GfContainer> insert(gfwl_toplevel *toplevel);
   const wlr_box &get_box();
   ~GfContainer();
-  /* Member Functions */
-  void move_container_to(std::weak_ptr<GfContainer> new_parent);
-
-  std::weak_ptr<GfContainer> insert_sibling(gfwl_toplevel *toplevel);
-  /* TODO: I think I want to make these private and only make insert public. */
-  std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
-
-  std::weak_ptr<GfContainer>
-  insert_child(gfwl_toplevel *toplevel,
-               std::weak_ptr<GfContainer> insert_before);
-
-  std::weak_ptr<GfContainer>
-  insert_based_on_longer_dir(gfwl_toplevel *toplevel);
-
-  std::weak_ptr<GfContainer>
-  insert_child_in_split(gfwl_toplevel *toplevel,
-                        enum gfwl_container_type split_container_type);
-
-  std::weak_ptr<GfContainer>
-  insert_child_in_split(gfwl_toplevel *toplevel,
-                        std::weak_ptr<GfContainer> insert_after,
-                        enum gfwl_container_type split_container_type);
 
   void set_focused_toplevel_container();
 
@@ -104,6 +83,28 @@ private:
 
   /* The Dimensions of a container. */
   wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
+
+  /* Position Manipulation */
+  void move_container_to(std::weak_ptr<GfContainer> new_parent);
+
+  std::weak_ptr<GfContainer> insert_sibling(gfwl_toplevel *toplevel);
+
+  std::weak_ptr<GfContainer> insert_child(gfwl_toplevel *toplevel);
+  std::weak_ptr<GfContainer>
+  insert_child(gfwl_toplevel *toplevel,
+               std::weak_ptr<GfContainer> insert_before);
+
+  std::weak_ptr<GfContainer>
+  insert_based_on_longer_dir(gfwl_toplevel *toplevel);
+
+  std::weak_ptr<GfContainer>
+  insert_child_in_split(gfwl_toplevel *toplevel,
+                        enum gfwl_container_type split_container_type);
+
+  std::weak_ptr<GfContainer>
+  insert_child_in_split(gfwl_toplevel *toplevel,
+                        std::weak_ptr<GfContainer> insert_after,
+                        enum gfwl_container_type split_container_type);
 };
 
 void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);
