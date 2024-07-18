@@ -1,5 +1,6 @@
 #include "container.hpp"
 #include "state.hpp"
+#include "wlr/util/box.h"
 #include "wlr/util/log.h"
 #include <algorithm>
 #include <cassert>
@@ -31,6 +32,10 @@ GfContainer::~GfContainer() {
     this->tiling_state.lock()->root->parse_containers();
   };
 }
+
+// Return const reference to containers box.
+const wlr_box &GfContainer::get_box() { return this->box; }
+
 // This is intended for toplevel containers.
 std::weak_ptr<GfContainer>
 GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {

@@ -1,5 +1,6 @@
 #pragma once
 #include "state.hpp"
+#include "wlr/util/box.h"
 #include "xdg_shell.hpp"
 #include <includes.hpp>
 #include <memory>
@@ -32,6 +33,7 @@ public:
       : toplevel(toplevel), server(server), e_type(e_type),
         tiling_state(tiling_state), is_root(is_root){};
 
+  const wlr_box &get_box();
   ~GfContainer();
   /* Member Functions */
   void move_container_to(std::weak_ptr<GfContainer> new_parent);
@@ -81,9 +83,6 @@ public:
   std::weak_ptr<GfContainer> parent_container;
   std::vector<std::shared_ptr<GfContainer>> child_containers;
 
-  /* The Dimensions of a container. */
-  wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
-
   /* Tiling State of The Current Output. */
   std::weak_ptr<GfTilingState> tiling_state;
 
@@ -102,6 +101,9 @@ private:
 
   /* Sets the size and position of a container based on a wlr_box. */
   void set_container_box(struct wlr_box box);
+
+  /* The Dimensions of a container. */
+  wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
 };
 
 void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);

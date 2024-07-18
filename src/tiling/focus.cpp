@@ -44,9 +44,10 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       auto toplevel = toplevel_weak.lock();
       if (!toplevel)
         continue;
-      int distance_left_of_origin = origin.x - toplevel->box.x;
-      if (toplevel->box.x < origin.x && toplevel->box.y <= origin.y &&
-          toplevel->box.y + toplevel->box.height >= origin.y &&
+      auto tl_box = toplevel->get_box();
+      int distance_left_of_origin = origin.x - tl_box.x;
+      if (tl_box.x < origin.x && tl_box.y <= origin.y &&
+          tl_box.y + tl_box.height >= origin.y &&
           distance_left_of_origin < shortest_distance &&
           toplevel !=
               toplevel->server.active_toplevel_container.front().lock()) {
@@ -66,9 +67,10 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       auto toplevel = toplevel_weak.lock();
       if (!toplevel)
         continue;
-      int distance_right_of_origin = toplevel->box.x - origin.x;
-      if (toplevel->box.x > origin.x && toplevel->box.y <= origin.y &&
-          toplevel->box.y + toplevel->box.height >= origin.y &&
+      auto tl_box = toplevel->get_box();
+      int distance_right_of_origin = tl_box.x - origin.x;
+      if (tl_box.x > origin.x && tl_box.y <= origin.y &&
+          tl_box.y + tl_box.height >= origin.y &&
           distance_right_of_origin < shortest_distance &&
           toplevel !=
               toplevel->server.active_toplevel_container.front().lock()) {
@@ -88,9 +90,10 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       auto toplevel = toplevel_weak.lock();
       if (!toplevel)
         continue;
-      int distance_above_origin = origin.y - toplevel->box.y;
-      if (toplevel->box.y < origin.y && toplevel->box.x <= origin.x &&
-          toplevel->box.x + toplevel->box.width >= origin.x &&
+      auto tl_box = toplevel->get_box();
+      int distance_above_origin = origin.y - tl_box.y;
+      if (tl_box.y < origin.y && tl_box.x <= origin.x &&
+          tl_box.x + tl_box.width >= origin.x &&
           distance_above_origin < shortest_distance &&
           toplevel !=
               toplevel->server.active_toplevel_container.front().lock()) {
@@ -109,9 +112,10 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
       auto toplevel = toplevel_weak.lock();
       if (!toplevel)
         continue;
-      int distance_below_origin = toplevel->box.y - origin.y;
-      if (toplevel->box.y > origin.y && toplevel->box.x <= origin.x &&
-          toplevel->box.x + toplevel->box.width >= origin.x &&
+      auto tl_box = toplevel->get_box();
+      int distance_below_origin = tl_box.y - origin.y;
+      if (tl_box.y > origin.y && tl_box.x <= origin.x &&
+          tl_box.x + tl_box.width >= origin.x &&
           distance_below_origin < shortest_distance &&
           toplevel !=
               toplevel->server.active_toplevel_container.front().lock()) {
@@ -202,7 +206,7 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
 }
 
 gfwl_point get_container_origin(std::shared_ptr<GfContainer> container) {
-  struct wlr_box box = container->box;
+  auto box = container->get_box();
   struct gfwl_point center = {.x = (box.width / 2) + box.x,
                               .y = (box.height / 2) + box.y};
   return center;
