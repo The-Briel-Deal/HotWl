@@ -11,6 +11,19 @@
 #include <vector>
 #include <xdg_shell.hpp>
 
+void focus_next_in_stack(std::weak_ptr<GfContainer> curr,
+                         std::deque<std::weak_ptr<GfContainer>> stack) {
+  while (!stack.empty()) {
+    if (!stack.front().expired() && stack.front().lock() != curr.lock() &&
+        stack.front().lock()->e_type == GFWL_CONTAINER_TOPLEVEL) {
+      focus_toplevel(
+          stack.front().lock()->toplevel,
+          stack.front().lock()->toplevel->xdg_toplevel->base->surface);
+      return;
+    }
+    stack.pop_front();
+  }
+}
 GfContainer::~GfContainer() {
   auto tl = this->toplevel;
   if (tl && this->e_type == GFWL_CONTAINER_TOPLEVEL) {
@@ -184,7 +197,8 @@ void GfContainer::close() {
   if (parent->server.active_toplevel_container.front().lock().get() == this) {
     parent->server.active_toplevel_container.pop_front();
   }
-  // I need to rethink ownership of containers.
+  focus_next_in_stack(this->weak_from_this(),
+                      parent->server.active_toplevel_container);
 }
 
 enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {

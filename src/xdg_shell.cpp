@@ -56,15 +56,22 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
 }
 
+// TODO: Remove - This has side effects. Removing this makes it so that
+// keyboard focus doesn't happen on close.
 void unfocus_toplevel(struct gfwl_toplevel *toplevel) {
   struct wlr_surface *prev_focused = toplevel->prev_focused;
   struct wlr_seat *seat = toplevel->server->seat;
   struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
   if (prev_focused && keyboard && seat) {
-    wlr_seat_keyboard_notify_enter(seat, toplevel->prev_focused,
-                                   keyboard->keycodes, keyboard->num_keycodes,
-                                   &keyboard->modifiers);
+    // TODO: Use shared pointers for toplevel. Also, this shouldn't really be
+    // the way I manage going to last focused anymore. My method now is the
+    // container stack.
+    /*
+     * wlr_seat_keyboard_notify_enter(seat, toplevel->prev_focused,
+     *                                keyboard->keycodes,
+     * keyboard->num_keycodes, &keyboard->modifiers);
+     */
   }
 }
 
