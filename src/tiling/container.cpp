@@ -239,32 +239,32 @@ enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {
 // Change this to get output size from the parent.
 void GfContainer::vert_split_containers() {
   // Get count.
-  int count = this->child_containers.size();
+  auto count = int(this->child_containers.size());
   if (count == 0) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
   }
 
-  int width = this->box.width;
-  int height = this->box.height;
+  auto width = this->box.width;
+  auto height = this->box.height;
 
-  int per_win_height = height / count;
+  auto per_win_height = height / count;
 
   // Set all sizes. (recycling count for the index)
   count = 0;
   for (auto curr : this->child_containers) {
-    wlr_box box = {.x = this->box.x,
-                   .y = this->box.y + (per_win_height * count),
-                   .width = width,
-                   .height = per_win_height};
-    curr->set_container_box(box);
+    wlr_box curr_box = {.x = this->box.x,
+                        .y = this->box.y + (per_win_height * count),
+                        .width = width,
+                        .height = per_win_height};
+    curr->set_container_box(curr_box);
     count += 1;
   }
 }
 
 void GfContainer::hori_split_containers() {
   // Get count.
-  int count = this->child_containers.size();
+  auto count = int(this->child_containers.size());
   if (count == 0) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
@@ -279,11 +279,11 @@ void GfContainer::hori_split_containers() {
   // Set all sizes. (recycling count for the index)
   count = 0;
   for (auto curr : this->child_containers) {
-    wlr_box box = {.x = this->box.x + (count * per_win_width),
-                   .y = this->box.y,
-                   .width = per_win_width,
-                   .height = height};
-    curr->set_container_box(box);
+    wlr_box curr_box = {.x = this->box.x + (count * per_win_width),
+                        .y = this->box.y,
+                        .width = per_win_width,
+                        .height = height};
+    curr->set_container_box(curr_box);
     count += 1;
   }
 }
@@ -295,6 +295,8 @@ void GfContainer::split_containers() {
     break;
   case GFWL_SPLIT_DIR_VERT:
     this->vert_split_containers();
+    break;
+  case GFWL_SPLIT_DIR_UNKNOWN:
     break;
   default:
     break;
@@ -322,17 +324,17 @@ void GfContainer::parse_containers() {
 }
 
 // Sets the size and position of a container based on a wlr_box.
-void GfContainer::set_container_box(struct wlr_box box) {
-  this->box = box;
+void GfContainer::set_container_box(struct wlr_box box_in) {
+  this->box = box_in;
   if (e_type == GFWL_CONTAINER_TOPLEVEL) {
     struct wlr_xdg_toplevel *toplevel = this->toplevel->xdg_toplevel;
     // Set the size.
-    wlr_xdg_toplevel_set_size(toplevel, box.width, box.height);
+    wlr_xdg_toplevel_set_size(toplevel, box_in.width, box_in.height);
     // Set the position.
     struct wlr_scene_tree *scene_tree = (wlr_scene_tree *)toplevel->base->data;
-    wlr_scene_node_set_position(&scene_tree->node, box.x, box.y);
+    wlr_scene_node_set_position(&scene_tree->node, box_in.x, box_in.y);
   }
-};
+}
 
 // Get A List of Toplevels below this Container node.
 std::vector<std::weak_ptr<GfContainer>>
