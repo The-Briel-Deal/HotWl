@@ -53,36 +53,31 @@ bool center_scene_layer_surface(
   return true;
 }
 
-void handle_layer_surface_map(struct wl_listener *listener, void *data) {
+void handle_layer_surface_map(struct wl_listener *listener, [[maybe_unused]] void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
   center_scene_layer_surface(gfwl_layer_surface->scene,
                              gfwl_layer_surface->wlr_layer_surface->output);
-  struct gfwl_server *server = gfwl_layer_surface->server;
   focus_layer_surface(gfwl_layer_surface);
 }
 
-void handle_layer_surface_unmap(struct wl_listener *listener, void *data) {
+void handle_layer_surface_unmap(struct wl_listener *listener, [[maybe_unused]] void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, unmap);
   unfocus_layer_surface(gfwl_layer_surface);
 }
 
-void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit started.");
-  struct wlr_surface *wlr_surface = (struct wlr_surface *)data;
+void handle_layer_surface_commit(struct wl_listener *listener, [[maybe_unused]] void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
     wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
   }
-  wlr_log(WLR_INFO, "GFLOG: handle_layer_surface_commit finished.");
 }
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
-  wlr_log(WLR_DEBUG, "GFLOG: handle_new_layer_shell_surface started.");
   // Grab our server (parent of the listener).
   struct gfwl_server *server =
       wl_container_of(listener, server, new_layer_shell_surface);
@@ -111,15 +106,14 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   // Check for layer surface output.
   if (!wlr_layer_surface->output) {
     wlr_log(WLR_INFO, "No output on layer surface.");
-    struct gfwl_output *output = NULL;
     struct wlr_seat *seat = server->seat;
     if (!seat) {
       wlr_log(WLR_ERROR, "No seat.");
       return;
     }
 
-	// TODO: Make this not always just put the layer shell on the first output
-	// lol.
+    // TODO: Make this not always just put the layer shell on the first output
+    // lol.
     // Get first output.
     struct std::shared_ptr<gfwl_output> gfwl_output = server->outputs[0];
     if (!gfwl_output) {
@@ -145,8 +139,6 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   gfwl_layer_surface->output = gfwl_output;
 
-  enum zwlr_layer_shell_v1_layer layer_type = wlr_layer_surface->pending.layer;
-
   // Create the scene.
   struct wlr_scene_layer_surface_v1 *scene_surface =
       wlr_scene_layer_surface_v1_create(server->scene->layer.top,
@@ -167,6 +159,4 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   gfwl_layer_surface->unmap.notify = handle_layer_surface_unmap;
   wl_signal_add(&wlr_layer_surface->surface->events.unmap,
                 &gfwl_layer_surface->unmap);
-
-  wlr_log(WLR_INFO, "GFLOG: handle_new_layer_shell_surface finished.");
 }

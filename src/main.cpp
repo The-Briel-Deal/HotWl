@@ -1,4 +1,3 @@
-#include "tiling/container.hpp"
 #include <assert.h>
 #include <conf/config.hpp>
 #include <getopt.h>
@@ -6,7 +5,6 @@
 #include <input.hpp>
 #include <keyboard.hpp>
 #include <layer_shell.hpp>
-#include <memory>
 #include <output.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>

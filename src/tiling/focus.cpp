@@ -182,7 +182,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
 }
 
 static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
-                                        std::shared_ptr<GfTilingState> state) {
+                                        std::shared_ptr<GfTilingState> _) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
   const gfwl_toplevel *toplevel = container->toplevel;

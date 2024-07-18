@@ -1,29 +1,24 @@
 project(
-  'gfwl',
-  ['c', 'cpp'],
-  version: '0.1',
-  license: 'MIT',
-  meson_version: '>=0.60.0',
-  default_options: [
-    'warning_level=0',
-    'werror=false',
-  ],
+	'gfwl',
+	['c', 'cpp'],
+	version: '0.1',
+	license: 'MIT',
+	meson_version: '>=0.60.0',
+	default_options: [
+		'cpp_std=c++20',
+		'warning_level=3',
+		'werror=true',
+	],
 )
 
 add_project_arguments(
-  [
-    '-DWLR_USE_UNSTABLE',
-  ],
-  language: ['c', 'cpp'],
+	[
+		'-DWLR_USE_UNSTABLE',
+	],
+	language: ['c', 'cpp'],
 )
 
 cc = meson.get_compiler('cpp')
-
-is_freebsd = host_machine.system().startswith('freebsd')
-
-if is_freebsd
-  add_project_arguments('-D_C11_SOURCE', language: 'c')
-endif
 
 subproject('json')
 
@@ -31,14 +26,14 @@ subproject('json')
 wlroots_version = ['>=0.17.0', '<0.19.0']
 wlroots = dependency('wlroots-0.18', version: wlroots_version, fallback: 'wlroots')
 wlroots_features = {
-  'xwayland': false,
-  'libinput_backend': false,
-  'session': false,
+	'xwayland': false,
+	'libinput_backend': false,
+	'session': false,
 }
 foreach name, _ : wlroots_features
-  var_name = 'have_' + name.underscorify()
-  have = wlroots.get_variable(pkgconfig: var_name, internal: var_name) == 'true'
-  wlroots_features += {name: have}
+	var_name = 'have_' + name.underscorify()
+	have = wlroots.get_variable(pkgconfig: var_name, internal: var_name) == 'true'
+	wlroots_features += {name: have}
 endforeach
 
 null_dep = dependency('', required: false)

@@ -25,7 +25,7 @@ void reset_cursor_mode(struct gfwl_server *server) {
   server->grabbed_toplevel = NULL;
 }
 
-static void process_cursor_move(struct gfwl_server *server, uint32_t time) {
+static void process_cursor_move(struct gfwl_server *server, uint32_t _) {
   /* Move the grabbed toplevel to the new position. */
   struct gfwl_toplevel *toplevel = server->grabbed_toplevel;
   wlr_scene_node_set_position(&toplevel->scene_tree->node,
@@ -33,7 +33,7 @@ static void process_cursor_move(struct gfwl_server *server, uint32_t time) {
                               server->cursor->y - server->grab_y);
 }
 
-static void process_cursor_resize(struct gfwl_server *server, uint32_t time) {
+static void process_cursor_resize(struct gfwl_server *server, uint32_t _) {
   /*
    * Resizing the grabbed toplevel can be a little bit complicated, because we
    * could be resizing from any corner or edge. This not only resizes the
@@ -102,9 +102,6 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
   // TODO: This has yet to be tested. First I need to add a check to make sure
   // desktop_toplevel_at isn't overriding this. Also, fuzzel doesn't do any
   // mouse things. And Wofi is crashing.
-  struct wlr_scene_layer_surface_v1 *scene_layer_surface =
-      desktop_layersurface_at(server, server->cursor->x, server->cursor->y,
-                              &wlr_surface, &sx, &sy);
 
   struct gfwl_toplevel *toplevel = desktop_toplevel_at(
       server, server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
@@ -201,7 +198,8 @@ void server_cursor_axis(struct wl_listener *listener, void *data) {
       event->delta_discrete, event->source, event->relative_direction);
 }
 
-void server_cursor_frame(struct wl_listener *listener, void *data) {
+void server_cursor_frame(struct wl_listener *listener,
+                         [[maybe_unused]] void *data) {
   /* This event is forwarded by the cursor when a pointer emits an frame
    * event. Frame events are sent after regular pointer events to group
    * multiple events together. For instance, two axis events may happen at the

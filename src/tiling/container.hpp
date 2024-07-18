@@ -22,16 +22,16 @@ public:
                        const gfwl_container_type e_type,
                        std::weak_ptr<GfTilingState> tiling_state,
                        const bool is_root)
-      : toplevel(toplevel), server(server), parent_container(parent_container),
-        e_type(e_type), tiling_state(tiling_state), is_root(is_root){};
+      : e_type(e_type), is_root(is_root), parent_container(parent_container),
+        tiling_state(tiling_state), toplevel(toplevel), server(server){};
 
   /* I have this constructor without a parent container for root containers. */
   explicit GfContainer(gfwl_toplevel *const toplevel, gfwl_server &server,
                        const gfwl_container_type e_type,
                        std::weak_ptr<GfTilingState> tiling_state,
                        const bool is_root)
-      : toplevel(toplevel), server(server), e_type(e_type),
-        tiling_state(tiling_state), is_root(is_root){};
+      : e_type(e_type), is_root(is_root), tiling_state(tiling_state),
+        toplevel(toplevel), server(server){};
 
   std::weak_ptr<GfContainer> insert(gfwl_toplevel *toplevel);
   const wlr_box &get_box();

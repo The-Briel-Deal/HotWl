@@ -9,7 +9,7 @@ enum gfwl_split_direction {
 };
 
 struct gfwl_output;
-struct GfContainer;
+class GfContainer;
 struct gfwl_toplevel;
 
 struct GfTilingState : public std::enable_shared_from_this<GfTilingState> {
