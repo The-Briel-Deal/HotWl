@@ -33,11 +33,11 @@ GfContainer::~GfContainer() {
   };
 }
 
-std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel *toplevel) {
+std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel *to_insert) {
   if (this->is_root)
-    return this->insert_child_in_split(toplevel, GFWL_CONTAINER_HSPLIT);
+    return this->insert_child_in_split(to_insert, GFWL_CONTAINER_HSPLIT);
 
-  return this->insert_based_on_longer_dir(toplevel);
+  return this->insert_based_on_longer_dir(to_insert);
 }
 
 // Return const reference to containers box.
@@ -94,7 +94,7 @@ void GfContainer::move_container_to(std::weak_ptr<GfContainer> new_parent) {
 /* Insert directly after this container, returns a weak pointer to the new
  * container. */
 std::weak_ptr<GfContainer>
-GfContainer::insert_sibling(gfwl_toplevel *toplevel) {
+GfContainer::insert_sibling(gfwl_toplevel *to_insert) {
   auto parent = parent_container.lock();
   assert(parent);
   /* Get position of this container in its parent. */
@@ -106,13 +106,13 @@ GfContainer::insert_sibling(gfwl_toplevel *toplevel) {
       parent->child_containers
           .emplace(pos,
                    std::make_shared<GfContainer>(
-                       toplevel, *toplevel->server, parent->weak_from_this(),
+                       to_insert, *to_insert->server, parent->weak_from_this(),
                        GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
           ->get()
           ->weak_from_this();
 
   /* Set the new container as the parent in the toplevel. */
-  toplevel->parent_container = toplevel_container;
+  to_insert->parent_container = toplevel_container;
   this->tiling_state.lock()->root->parse_containers();
 
   return toplevel_container;
@@ -120,14 +120,14 @@ GfContainer::insert_sibling(gfwl_toplevel *toplevel) {
 
 // Inserting the toplevel directly, returns a weak pointer to the new
 // container.
-std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
+std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *to_insert) {
   auto toplevel_container =
       this->child_containers
           .emplace_back(std::make_shared<GfContainer>(
-              toplevel, *toplevel->server, this->weak_from_this(),
+              to_insert, *to_insert->server, this->weak_from_this(),
               GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
           ->weak_from_this();
-  toplevel->parent_container = toplevel_container;
+  to_insert->parent_container = toplevel_container;
   // As an optimization down the road, I can try just parsing the changes
   // containers.
   this->tiling_state.lock()->root->parse_containers();
@@ -135,7 +135,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *toplevel) {
 }
 
 std::weak_ptr<GfContainer>
-GfContainer::insert_child(gfwl_toplevel *toplevel,
+GfContainer::insert_child(gfwl_toplevel *to_insert,
                           std::weak_ptr<GfContainer> insert_before) {
   auto toplevel_container =
       this->child_containers
@@ -143,11 +143,11 @@ GfContainer::insert_child(gfwl_toplevel *toplevel,
                              this->child_containers.end(),
                              insert_before.lock()),
                    std::make_shared<GfContainer>(
-                       toplevel, *toplevel->server, this->weak_from_this(),
+                       to_insert, *to_insert->server, this->weak_from_this(),
                        GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
           ->get()
           ->weak_from_this();
-  toplevel->parent_container = toplevel_container;
+  to_insert->parent_container = toplevel_container;
   // As an optimization down the road, I can try just parsing the changes
   // containers.
   this->tiling_state.lock()->root->parse_containers();
@@ -156,19 +156,19 @@ GfContainer::insert_child(gfwl_toplevel *toplevel,
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    gfwl_toplevel *toplevel, enum gfwl_container_type split_container_type) {
+    gfwl_toplevel *to_insert, enum gfwl_container_type split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
       .emplace_back(std::make_shared<GfContainer>(
-          toplevel, *toplevel->server, this->weak_from_this(),
+          to_insert, *to_insert->server, this->weak_from_this(),
           split_container_type, this->tiling_state, false))
-      ->insert_child(toplevel);
+      ->insert_child(to_insert);
 }
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    gfwl_toplevel *toplevel, std::weak_ptr<GfContainer> insert_after,
+    gfwl_toplevel *to_insert, std::weak_ptr<GfContainer> insert_after,
     enum gfwl_container_type split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
@@ -176,18 +176,18 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
       .emplace(std::find(this->child_containers.begin(),
                          this->child_containers.end(), insert_after.lock()),
                std::make_shared<GfContainer>(
-                   toplevel, *toplevel->server, this->weak_from_this(),
+                   to_insert, *to_insert->server, this->weak_from_this(),
                    split_container_type, this->tiling_state, false))
       ->get()
-      ->insert_child(toplevel);
+      ->insert_child(to_insert);
 }
 
 void GfContainer::set_focused_toplevel_container() {
 
-  auto tiling_state = this->tiling_state.lock();
-  if (tiling_state) {
-    tiling_state->active_toplevel_container = this->weak_from_this();
-    tiling_state->server->active_toplevel_container.push_front(
+  auto sp_tiling_state = this->tiling_state.lock();
+  if (sp_tiling_state) {
+    sp_tiling_state->active_toplevel_container = this->weak_from_this();
+    sp_tiling_state->server->active_toplevel_container.push_front(
         this->weak_from_this());
   }
 }
@@ -226,6 +226,10 @@ enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {
     return GFWL_SPLIT_DIR_HORI;
   case GFWL_CONTAINER_ROOT:
     return GFWL_SPLIT_DIR_HORI;
+  case GFWL_CONTAINER_TOPLEVEL:
+    return GFWL_SPLIT_DIR_UNKNOWN;
+  case GFWL_CONTAINER_UNKNOWN:
+    return GFWL_SPLIT_DIR_UNKNOWN;
   default:
     return GFWL_SPLIT_DIR_UNKNOWN;
   }
