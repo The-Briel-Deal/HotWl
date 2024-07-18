@@ -39,12 +39,13 @@ std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel *toplevel) {
 
   return this->insert_based_on_longer_dir(toplevel);
 }
+
 // Return const reference to containers box.
 const wlr_box &GfContainer::get_box() { return this->box; }
 
 // This is intended for toplevel containers.
 std::weak_ptr<GfContainer>
-GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {
+GfContainer::insert_based_on_longer_dir(gfwl_toplevel *to_insert) {
   // TODO: I will likely have to make sure the container is inserted at the
   // right position.
   assert(this->e_type == GFWL_CONTAINER_TOPLEVEL);
@@ -55,15 +56,20 @@ GfContainer::insert_based_on_longer_dir(gfwl_toplevel *toplevel) {
   switch (split_dir_longer) {
   case GFWL_SPLIT_DIR_HORI:
     new_toplevel_container = parent->insert_child_in_split(
-        toplevel, this->weak_from_this(), GFWL_CONTAINER_HSPLIT);
+        to_insert, this->weak_from_this(), GFWL_CONTAINER_HSPLIT);
     break;
   case GFWL_SPLIT_DIR_VERT:
     new_toplevel_container = parent->insert_child_in_split(
-        toplevel, this->weak_from_this(), GFWL_CONTAINER_VSPLIT);
+        to_insert, this->weak_from_this(), GFWL_CONTAINER_VSPLIT);
     break;
   case GFWL_SPLIT_DIR_UNKNOWN:
     assert(false); // Split dir should never be unknown.
-    wlr_log(WLR_ERROR, "Split dir is unknown, this should be the case.");
+    wlr_log(WLR_ERROR, "Split dir is unknown, this should not be the case.");
+    break;
+  default:
+    assert(false); // Split dir should never be unknown.
+    wlr_log(WLR_ERROR,
+            "Split dir is an invalid enum value, this should not be the case.");
     break;
   }
   this->move_container_to(new_toplevel_container.lock()->parent_container);
