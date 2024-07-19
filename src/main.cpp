@@ -73,22 +73,6 @@ int main(int argc, char *argv[]) {
     wlr_log(WLR_ERROR, "failed to create wlr_allocator");
     return 1;
   }
-
-
-  /*
-   * Creates a cursor, which is a wlroots utility for tracking the cursor
-   * image shown on screen.
-   */
-
-  server.cursor = wlr_cursor_create();
-  wlr_cursor_attach_output_layout(server.cursor, server.output_layout);
-
-  /* Creates an xcursor manager, another wlroots utility which loads up
-   * Xcursor themes to source cursor images from and makes sure that cursor
-   * images are available at all scale factors on the screen (necessary for
-   * HiDPI support). */
-  server.cursor_mgr = wlr_xcursor_manager_create(NULL, 24);
-
   /*
    * wlr_cursor *only* displays an image on screen. It does not move around
    * when the pointer moves. However, we can attach input devices to it, and
@@ -99,36 +83,6 @@ int main(int argc, char *argv[]) {
    *
    * And more comments are sprinkled throughout the notify functions above.
    */
-  server.cursor_mode = TINYWL_CURSOR_PASSTHROUGH;
-  server.cursor_motion.notify = server_cursor_motion;
-  wl_signal_add(&server.cursor->events.motion, &server.cursor_motion);
-  server.cursor_motion_absolute.notify = server_cursor_motion_absolute;
-  wl_signal_add(&server.cursor->events.motion_absolute,
-                &server.cursor_motion_absolute);
-  server.cursor_button.notify = server_cursor_button;
-  wl_signal_add(&server.cursor->events.button, &server.cursor_button);
-  server.cursor_axis.notify = server_cursor_axis;
-  wl_signal_add(&server.cursor->events.axis, &server.cursor_axis);
-  server.cursor_frame.notify = server_cursor_frame;
-  wl_signal_add(&server.cursor->events.frame, &server.cursor_frame);
-
-  /*
-   * Configures a seat, which is a single "seat" at which a user sits and
-   * operates the computer. This conceptually includes up to one keyboard,
-   * pointer, touch, and drawing tablet device. We also rig up a listener to
-   * let us know when new input devices are available on the backend.
-   */
-  wl_list_init(&server.keyboards);
-  server.new_input.notify = server_new_input;
-  wl_signal_add(&server.backend->events.new_input, &server.new_input);
-  server.seat = wlr_seat_create(server.wl_display, "seat0");
-  server.request_cursor.notify = seat_request_cursor;
-  wl_signal_add(&server.seat->events.request_set_cursor,
-                &server.request_cursor);
-  server.request_set_selection.notify = seat_request_set_selection;
-  wl_signal_add(&server.seat->events.request_set_selection,
-                &server.request_set_selection);
-
   /* Add a Unix socket to the Wayland display. */
   const char *socket = wl_display_add_socket_auto(server.wl_display);
   if (!socket) {
