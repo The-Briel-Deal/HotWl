@@ -5,7 +5,7 @@
 #include <scene.hpp>
 #include <server.hpp>
 
-gfwl_server::gfwl_server() {
+GfServer::GfServer() {
 
   wl_display = wl_display_create();
   backend = wlr_backend_autocreate(wl_display_get_event_loop(wl_display), NULL);

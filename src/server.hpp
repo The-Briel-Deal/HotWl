@@ -17,8 +17,9 @@ enum gfwl_cursor_mode {
 };
 
 // This server struct is for holding our compositors state.
-struct gfwl_server {
-  gfwl_server();
+class GfServer {
+public:
+  GfServer();
   // This is the core object in wayland. Its a special singleton.
   struct wl_display *wl_display;
   // Provides a set of input and output devices. Has signals for when inputs

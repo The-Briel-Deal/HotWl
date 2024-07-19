@@ -89,7 +89,7 @@ static void output_destroy(struct wl_listener *listener,
 void server_new_output(struct wl_listener *listener, void *data) {
   /* This event is raised by the backend when a new output (aka a display or
    * monitor) becomes available. */
-  struct gfwl_server *server = wl_container_of(listener, server, new_output);
+  GfServer *server = wl_container_of(listener, server, new_output);
   struct wlr_output *wlr_output = (struct wlr_output *)data;
 
   /* Configures the output created by the backend to use our allocator

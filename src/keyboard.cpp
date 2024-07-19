@@ -55,7 +55,7 @@ static void launch_app(std::string path) {
   }
 }
 
-static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
+static bool handle_keybinding(class GfServer *server, xkb_keysym_t sym) {
   /*
    * Here we handle compositor keybindings. This is when the compositor is
    * processing keys, rather than passing them on to the client for its own
@@ -109,7 +109,7 @@ static bool handle_keybinding(struct gfwl_server *server, xkb_keysym_t sym) {
 static void keyboard_handle_key(struct wl_listener *listener, void *data) {
   /* This event is raised when a key is pressed or released. */
   struct gfwl_keyboard *keyboard = wl_container_of(listener, keyboard, key);
-  struct gfwl_server *server = keyboard->server;
+  class GfServer *server = keyboard->server;
   struct wlr_keyboard_key_event *event = (wlr_keyboard_key_event *)data;
   struct wlr_seat *seat = server->seat;
 
@@ -141,7 +141,7 @@ static void keyboard_handle_key(struct wl_listener *listener, void *data) {
   }
 }
 
-void server_new_keyboard(struct gfwl_server *server,
+void server_new_keyboard(class GfServer *server,
                          struct wlr_input_device *device) {
   struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
 

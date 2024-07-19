@@ -4,7 +4,7 @@
 
 struct gfwl_keyboard {
   struct wl_list link;
-  struct gfwl_server *server;
+  class GfServer *server;
   struct wlr_keyboard *wlr_keyboard;
 
   struct wl_listener modifiers;
@@ -12,5 +12,5 @@ struct gfwl_keyboard {
   struct wl_listener destroy;
 };
 
-void server_new_keyboard(struct gfwl_server *server,
+void server_new_keyboard(class GfServer *server,
                          struct wlr_input_device *device);

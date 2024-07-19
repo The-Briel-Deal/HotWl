@@ -8,10 +8,9 @@
 #include <xdg_shell.hpp>
 
 struct wlr_scene_layer_surface_v1 *
-desktop_layersurface_at(struct gfwl_server *server, double lx, double ly,
+desktop_layersurface_at(GfServer *server, double lx, double ly,
                         struct wlr_surface **surface, double *sx, double *sy);
-void server_new_pointer(struct gfwl_server *server,
-                        struct wlr_input_device *device) {
+void server_new_pointer(GfServer *server, struct wlr_input_device *device) {
   /* We don't do anything special with pointers. All of our pointer handling
    * is proxied through wlr_cursor. On another compositor, you might take this
    * opportunity to do libinput configuration on the device to set
@@ -19,13 +18,13 @@ void server_new_pointer(struct gfwl_server *server,
   wlr_cursor_attach_input_device(server->cursor, device);
 }
 
-void reset_cursor_mode(struct gfwl_server *server) {
+void reset_cursor_mode(GfServer *server) {
   /* Reset the cursor mode to passthrough. */
   server->cursor_mode = TINYWL_CURSOR_PASSTHROUGH;
   server->grabbed_toplevel = NULL;
 }
 
-static void process_cursor_move(struct gfwl_server *server, uint32_t _) {
+static void process_cursor_move(GfServer *server, uint32_t _) {
   /* Move the grabbed toplevel to the new position. */
   struct gfwl_toplevel *toplevel = server->grabbed_toplevel;
   wlr_scene_node_set_position(&toplevel->scene_tree->node,
@@ -33,7 +32,7 @@ static void process_cursor_move(struct gfwl_server *server, uint32_t _) {
                               server->cursor->y - server->grab_y);
 }
 
-static void process_cursor_resize(struct gfwl_server *server, uint32_t _) {
+static void process_cursor_resize(GfServer *server, uint32_t _) {
   /*
    * Resizing the grabbed toplevel can be a little bit complicated, because we
    * could be resizing from any corner or edge. This not only resizes the
@@ -85,7 +84,7 @@ static void process_cursor_resize(struct gfwl_server *server, uint32_t _) {
   wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, new_width, new_height);
 }
 
-static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
+static void process_cursor_motion(GfServer *server, uint32_t time) {
   /* If the mode is non-passthrough, delegate to those functions. */
   if (server->cursor_mode == TINYWL_CURSOR_MOVE) {
     process_cursor_move(server, time);
@@ -136,7 +135,7 @@ static void process_cursor_motion(struct gfwl_server *server, uint32_t time) {
 void server_cursor_motion(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits a _relative_
    * pointer motion event (i.e. a delta) */
-  struct gfwl_server *server = wl_container_of(listener, server, cursor_motion);
+  GfServer *server = wl_container_of(listener, server, cursor_motion);
   struct wlr_pointer_motion_event *event = (wlr_pointer_motion_event *)data;
   /* The cursor doesn't move unless we tell it to. The cursor automatically
    * handles constraining the motion to the output layout, as well as any
@@ -157,8 +156,7 @@ void server_cursor_motion_absolute(struct wl_listener *listener, void *data) {
    * move the mouse over the window. You could enter the window from any edge,
    * so we have to warp the mouse there. There is also some hardware which
    * emits these events. */
-  struct gfwl_server *server =
-      wl_container_of(listener, server, cursor_motion_absolute);
+  GfServer *server = wl_container_of(listener, server, cursor_motion_absolute);
   struct wlr_pointer_motion_absolute_event *event =
       (wlr_pointer_motion_absolute_event *)data;
   wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x,
@@ -169,7 +167,7 @@ void server_cursor_motion_absolute(struct wl_listener *listener, void *data) {
 void server_cursor_button(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits a button
    * event. */
-  struct gfwl_server *server = wl_container_of(listener, server, cursor_button);
+  GfServer *server = wl_container_of(listener, server, cursor_button);
   struct wlr_pointer_button_event *event = (wlr_pointer_button_event *)data;
   /* Notify the client with pointer focus that a button press has occurred */
   wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button,
@@ -190,7 +188,7 @@ void server_cursor_button(struct wl_listener *listener, void *data) {
 void server_cursor_axis(struct wl_listener *listener, void *data) {
   /* This event is forwarded by the cursor when a pointer emits an axis event,
    * for example when you move the scroll wheel. */
-  struct gfwl_server *server = wl_container_of(listener, server, cursor_axis);
+  GfServer *server = wl_container_of(listener, server, cursor_axis);
   struct wlr_pointer_axis_event *event = (wlr_pointer_axis_event *)data;
   /* Notify the client with pointer focus of the axis event. */
   wlr_seat_pointer_notify_axis(
@@ -204,12 +202,12 @@ void server_cursor_frame(struct wl_listener *listener,
    * event. Frame events are sent after regular pointer events to group
    * multiple events together. For instance, two axis events may happen at the
    * same time, in which case a frame event won't be sent in between. */
-  struct gfwl_server *server = wl_container_of(listener, server, cursor_frame);
+  GfServer *server = wl_container_of(listener, server, cursor_frame);
   /* Notify the client with pointer focus of the frame event. */
   wlr_seat_pointer_notify_frame(server->seat);
 }
 
-struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server, double lx,
+struct gfwl_toplevel *desktop_toplevel_at(GfServer *server, double lx,
                                           double ly,
                                           struct wlr_surface **surface,
                                           double *sx, double *sy) {
@@ -242,7 +240,7 @@ struct gfwl_toplevel *desktop_toplevel_at(struct gfwl_server *server, double lx,
 }
 
 struct wlr_scene_layer_surface_v1 *
-desktop_layersurface_at(struct gfwl_server *server, double lx, double ly,
+desktop_layersurface_at(GfServer *server, double lx, double ly,
                         struct wlr_surface **surface, double *sx, double *sy) {
   /* This returns the topmost node in the scene at the given layout coords.
    * We only care about surface nodes as we are specifically looking for a

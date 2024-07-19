@@ -17,7 +17,7 @@ enum gfwl_container_type {
 class GfContainer : public std::enable_shared_from_this<GfContainer> {
 public:
   /* This will be used for non root containers in theory. */
-  explicit GfContainer(gfwl_toplevel *const toplevel, gfwl_server &server,
+  explicit GfContainer(gfwl_toplevel *const toplevel, GfServer &server,
                        std::weak_ptr<GfContainer> parent_container,
                        const gfwl_container_type e_type,
                        std::weak_ptr<GfTilingState> tiling_state,
@@ -26,7 +26,7 @@ public:
         tiling_state(tiling_state), toplevel(toplevel), server(server){};
 
   /* I have this constructor without a parent container for root containers. */
-  explicit GfContainer(gfwl_toplevel *const toplevel, gfwl_server &server,
+  explicit GfContainer(gfwl_toplevel *const toplevel, GfServer &server,
                        const gfwl_container_type e_type,
                        std::weak_ptr<GfTilingState> tiling_state,
                        const bool is_root)
@@ -69,7 +69,7 @@ public:
    * TODO: I would later like to make this a shared pointer, container should
    * be the owner. */
   gfwl_toplevel *const toplevel = NULL;
-  gfwl_server &server;
+  GfServer &server;
 
 private:
   /* These should only be called on split containers. These methods iterate

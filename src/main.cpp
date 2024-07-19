@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* Create Server - This is where all important state is stored. */
-  gfwl_server server;
+  GfServer server;
 
   // TODO: Move these checks to another function.
   if (server.backend == NULL) {

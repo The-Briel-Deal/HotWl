@@ -53,7 +53,8 @@ bool center_scene_layer_surface(
   return true;
 }
 
-void handle_layer_surface_map(struct wl_listener *listener, [[maybe_unused]] void *data) {
+void handle_layer_surface_map(struct wl_listener *listener,
+                              [[maybe_unused]] void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
@@ -62,13 +63,15 @@ void handle_layer_surface_map(struct wl_listener *listener, [[maybe_unused]] voi
   focus_layer_surface(gfwl_layer_surface);
 }
 
-void handle_layer_surface_unmap(struct wl_listener *listener, [[maybe_unused]] void *data) {
+void handle_layer_surface_unmap(struct wl_listener *listener,
+                                [[maybe_unused]] void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, unmap);
   unfocus_layer_surface(gfwl_layer_surface);
 }
 
-void handle_layer_surface_commit(struct wl_listener *listener, [[maybe_unused]] void *data) {
+void handle_layer_surface_commit(struct wl_listener *listener,
+                                 [[maybe_unused]] void *data) {
   struct gfwl_layer_surface *gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
@@ -79,7 +82,7 @@ void handle_layer_surface_commit(struct wl_listener *listener, [[maybe_unused]] 
 
 void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   // Grab our server (parent of the listener).
-  struct gfwl_server *server =
+  class GfServer *server =
       wl_container_of(listener, server, new_layer_shell_surface);
   if (!server) {
     wlr_log(WLR_ERROR, "No server from listener.");

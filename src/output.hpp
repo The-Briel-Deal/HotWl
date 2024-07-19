@@ -7,7 +7,7 @@
 struct gfwl_output {
   // For wlr_layer_surface
   struct wl_list link;
-  struct gfwl_server *server;
+  GfServer *server;
   struct wlr_output *wlr_output;
   struct wlr_scene_output *scene_output;
   std::shared_ptr<GfTilingState> tiling_state =

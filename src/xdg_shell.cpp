@@ -17,7 +17,7 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   if (toplevel == NULL) {
     return;
   }
-  struct gfwl_server *server = toplevel->server;
+  GfServer *server = toplevel->server;
   struct wlr_seat *seat = server->seat;
   toplevel->parent_container.lock()->set_focused_toplevel_container();
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
@@ -56,14 +56,13 @@ void focus_toplevel(struct gfwl_toplevel *toplevel,
   }
 }
 
-static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
+static void xdg_toplevel_map(struct wl_listener *listener,
+                             [[maybe_unused]] void *data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, map);
-  struct gfwl_server *server = toplevel->server;
+  GfServer *server = toplevel->server;
 
   assert(server);
-
-  struct wlr_box box;
 
   wl_list_insert(&server->toplevels, &toplevel->link);
 
@@ -72,7 +71,8 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }
 
-static void xdg_toplevel_unmap(struct wl_listener *listener, void *data) {
+static void xdg_toplevel_unmap(struct wl_listener *listener,
+                               [[maybe_unused]] void *data) {
   /* Called when the surface is unmapped, and should no longer be shown. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
@@ -84,7 +84,8 @@ static void xdg_toplevel_unmap(struct wl_listener *listener, void *data) {
   wl_list_remove(&toplevel->link);
 }
 
-static void xdg_toplevel_commit(struct wl_listener *listener, void *data) {
+static void xdg_toplevel_commit(struct wl_listener *listener,
+                                [[maybe_unused]] void *data) {
   /* Called when a new surface state is committed. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
@@ -97,7 +98,8 @@ static void xdg_toplevel_commit(struct wl_listener *listener, void *data) {
   }
 }
 
-static void xdg_toplevel_destroy(struct wl_listener *listener, void *data) {
+static void xdg_toplevel_destroy(struct wl_listener *listener,
+                                 [[maybe_unused]] void *data) {
   /* Called when the xdg_toplevel is destroyed. */
   struct gfwl_toplevel *toplevel = wl_container_of(listener, toplevel, destroy);
 
@@ -118,7 +120,7 @@ static void begin_interactive(struct gfwl_toplevel *toplevel,
   /* This function sets up an interactive move or resize operation, where the
    * compositor stops propegating pointer events to clients and instead
    * consumes them itself, to move or resize windows. */
-  struct gfwl_server *server = toplevel->server;
+  struct GfServer *server = toplevel->server;
   struct wlr_surface *focused_surface =
       server->seat->pointer_state.focused_surface;
   if (toplevel->xdg_toplevel->base->surface !=
@@ -194,7 +196,7 @@ static void xdg_toplevel_request_maximize(struct wl_listener *listener,
 }
 
 static void xdg_toplevel_request_fullscreen(struct wl_listener *listener,
-                                            void *data) {
+                                            [[maybe_unused]]  void *data) {
   /* Just as with request_maximize, we must send a configure here. */
   struct gfwl_toplevel *toplevel =
       wl_container_of(listener, toplevel, request_fullscreen);
@@ -209,8 +211,7 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
 
   /* We are first getting our compositors state (the server object) from the
    * callback. */
-  struct gfwl_server *server =
-      wl_container_of(listener, server, new_xdg_toplevel);
+  class GfServer *server = wl_container_of(listener, server, new_xdg_toplevel);
   /* We are typing the generic callback's data pointer to an xdg_toplevel
    * object. */
   struct wlr_xdg_toplevel *xdg_toplevel = (wlr_xdg_toplevel *)data;

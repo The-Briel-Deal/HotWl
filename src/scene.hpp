@@ -1,7 +1,7 @@
 #pragma once
 #include <includes.hpp>
 #include <wlr/util/box.h>
-struct gfwl_server;
+class GfServer;
 
 struct gfwl_scene {
   gfwl_scene() {

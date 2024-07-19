@@ -1,4 +1,5 @@
 #pragma once
+#include <server.hpp>
 #include <includes.hpp>
 
 struct gfwl_layer_surface {
@@ -7,7 +8,7 @@ struct gfwl_layer_surface {
   struct wlr_scene_layer_surface_v1 *scene;
   struct wlr_layer_surface_v1 *wlr_layer_surface;
   struct wlr_surface *prev_focused;
-  struct gfwl_server *server;
+  GfServer *server;
   struct wl_listener map;
   struct wl_listener unmap;
   struct wl_listener commit;
