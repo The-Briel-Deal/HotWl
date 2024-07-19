@@ -54,9 +54,11 @@ int main(int argc, char *argv[]) {
     printf("Usage: %s [-s startup command]\n", argv[0]);
     return 0;
   }
+
+  /* Create Server - This is where all important state is stored. */
   gfwl_server server;
 
-  // Create the wayland server/compositor.
+  // TODO: Move these checks to another function.
   if (server.backend == NULL) {
     wlr_log(WLR_ERROR, "failed to create wlr_backend");
     return 1;
@@ -67,28 +69,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  // TODO: Move this to constructor.
-  wlr_renderer_init_wl_display(server.renderer, server.wl_display);
-
-  /* Autocreates an allocator for us.
-   * The allocator is the bridge between the renderer and the backend. It
-   * handles the buffer creation, allowing wlroots to render onto the
-   * screen */
   if (server.allocator == NULL) {
     wlr_log(WLR_ERROR, "failed to create wlr_allocator");
     return 1;
   }
 
-  /* This creates some hands-off wlroots interfaces. The compositor is
-   * necessary for clients to allocate surfaces, the subcompositor allows to
-   * assign the role of subsurfaces to surfaces and the data device manager
-   * handles the clipboard. Each of these wlroots interfaces has room for you
-   * to dig your fingers in and play with their behavior if you want. Note that
-   * the clients cannot set the selection directly without compositor approval,
-   * see the handling of the request_set_selection event below.*/
-  wlr_compositor_create(server.wl_display, 5, server.renderer);
-  wlr_subcompositor_create(server.wl_display);
-  wlr_data_device_manager_create(server.wl_display);
 
   /* Creates an output layout, which a wlroots utility for working with an
    * arrangement of screens in a physical layout. */
