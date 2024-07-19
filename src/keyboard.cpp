@@ -16,41 +16,8 @@
 #include <wlr/util/box.h>
 #include <xdg_shell.hpp>
 
-void server_new_keyboard(struct gfwl_server *server,
-                         struct wlr_input_device *device) {
-  struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
-
-  struct gfwl_keyboard *keyboard =
-      (gfwl_keyboard *)calloc(1, sizeof(*keyboard));
-  keyboard->server = server;
-  keyboard->wlr_keyboard = wlr_keyboard;
-
-  /* We need to prepare an XKB keymap and assign it to the keyboard. This
-   * assumes the defaults (e.g. layout = "us"). */
-  struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-  struct xkb_keymap *keymap =
-      xkb_keymap_new_from_names(context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
-
-  wlr_keyboard_set_keymap(wlr_keyboard, keymap);
-  xkb_keymap_unref(keymap);
-  xkb_context_unref(context);
-  wlr_keyboard_set_repeat_info(wlr_keyboard, 25, 600);
-
-  /* Here we set up listeners for keyboard events. */
-  keyboard->modifiers.notify = keyboard_handle_modifiers;
-  wl_signal_add(&wlr_keyboard->events.modifiers, &keyboard->modifiers);
-  keyboard->key.notify = keyboard_handle_key;
-  wl_signal_add(&wlr_keyboard->events.key, &keyboard->key);
-  keyboard->destroy.notify = keyboard_handle_destroy;
-  wl_signal_add(&device->events.destroy, &keyboard->destroy);
-
-  wlr_seat_set_keyboard(server->seat, keyboard->wlr_keyboard);
-
-  /* And add the keyboard to our list of keyboards */
-  wl_list_insert(&server->keyboards, &keyboard->link);
-}
-
-static void keyboard_handle_destroy(struct wl_listener *listener, void *data) {
+static void keyboard_handle_destroy(struct wl_listener *listener,
+                                    [[maybe_unused]] void *data) {
   /* This event is raised by the keyboard base wlr_input_device to signal
    * the destruction of the wlr_keyboard. It will no longer receive events
    * and should be destroyed.
@@ -64,7 +31,7 @@ static void keyboard_handle_destroy(struct wl_listener *listener, void *data) {
 }
 
 static void keyboard_handle_modifiers(struct wl_listener *listener,
-                                      void *data) {
+                                      [[maybe_unused]] void *data) {
   /* This event is raised when a modifier key, such as shift or alt, is
    * pressed. We simply communicate this to the client. */
   struct gfwl_keyboard *keyboard =
@@ -172,4 +139,38 @@ static void keyboard_handle_key(struct wl_listener *listener, void *data) {
     wlr_seat_keyboard_notify_key(seat, event->time_msec, event->keycode,
                                  event->state);
   }
+}
+
+void server_new_keyboard(struct gfwl_server *server,
+                         struct wlr_input_device *device) {
+  struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
+
+  struct gfwl_keyboard *keyboard =
+      (gfwl_keyboard *)calloc(1, sizeof(*keyboard));
+  keyboard->server = server;
+  keyboard->wlr_keyboard = wlr_keyboard;
+
+  /* We need to prepare an XKB keymap and assign it to the keyboard. This
+   * assumes the defaults (e.g. layout = "us"). */
+  struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+  struct xkb_keymap *keymap =
+      xkb_keymap_new_from_names(context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
+
+  wlr_keyboard_set_keymap(wlr_keyboard, keymap);
+  xkb_keymap_unref(keymap);
+  xkb_context_unref(context);
+  wlr_keyboard_set_repeat_info(wlr_keyboard, 25, 600);
+
+  /* Here we set up listeners for keyboard events. */
+  keyboard->modifiers.notify = keyboard_handle_modifiers;
+  wl_signal_add(&wlr_keyboard->events.modifiers, &keyboard->modifiers);
+  keyboard->key.notify = keyboard_handle_key;
+  wl_signal_add(&wlr_keyboard->events.key, &keyboard->key);
+  keyboard->destroy.notify = keyboard_handle_destroy;
+  wl_signal_add(&device->events.destroy, &keyboard->destroy);
+
+  wlr_seat_set_keyboard(server->seat, keyboard->wlr_keyboard);
+
+  /* And add the keyboard to our list of keyboards */
+  wl_list_insert(&server->keyboards, &keyboard->link);
 }

@@ -141,7 +141,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
 
   // Create the scene.
   struct wlr_scene_layer_surface_v1 *scene_surface =
-      wlr_scene_layer_surface_v1_create(server->scene->layer.top,
+      wlr_scene_layer_surface_v1_create(server->scene.layer.top,
                                         wlr_layer_surface);
   // Add to layer_surface object.
   gfwl_layer_surface->scene = scene_surface;

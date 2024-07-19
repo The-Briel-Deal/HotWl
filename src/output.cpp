@@ -52,7 +52,7 @@ static void output_frame(struct wl_listener *listener,
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
   struct gfwl_output *output = wl_container_of(listener, output, frame);
-  struct wlr_scene *scene = output->server->scene->root;
+  struct wlr_scene *scene = output->server->scene.root;
 
   struct wlr_scene_output *scene_output =
       wlr_scene_get_scene_output(scene, output->wlr_output);
@@ -157,7 +157,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
   output->output_layout_output =
       wlr_output_layout_add_auto(server->output_layout, wlr_output);
   output->scene_output =
-      wlr_scene_output_create(server->scene->root, wlr_output);
+      wlr_scene_output_create(server->scene.root, wlr_output);
   wlr_scene_output_layout_add_output(
       server->scene_layout, output->output_layout_output, output->scene_output);
 }

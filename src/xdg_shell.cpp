@@ -224,7 +224,7 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data) {
    * from the data field. */
   toplevel->xdg_toplevel = xdg_toplevel;
   toplevel->scene_tree = wlr_scene_xdg_surface_create(
-      toplevel->server->scene->layer.base, xdg_toplevel->base);
+      toplevel->server->scene.layer.base, xdg_toplevel->base);
   // Setting the root node of scene_tree to have toplevel as data?
   toplevel->scene_tree->node.data = toplevel;
   xdg_toplevel->base->data = toplevel->scene_tree;

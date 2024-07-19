@@ -54,30 +54,26 @@ int main(int argc, char *argv[]) {
     printf("Usage: %s [-s startup command]\n", argv[0]);
     return 0;
   }
+  gfwl_server server;
 
   // Create the wayland server/compositor.
-  struct gfwl_server server = {0};
-  server.wl_display = wl_display_create();
-  server.backend = wlr_backend_autocreate(
-      wl_display_get_event_loop(server.wl_display), NULL);
   if (server.backend == NULL) {
     wlr_log(WLR_ERROR, "failed to create wlr_backend");
     return 1;
   }
 
-  server.renderer = wlr_renderer_autocreate(server.backend);
   if (server.renderer == NULL) {
     wlr_log(WLR_ERROR, "failed to create wlr_renderer");
     return 1;
   }
 
+  // TODO: Move this to constructor.
   wlr_renderer_init_wl_display(server.renderer, server.wl_display);
 
   /* Autocreates an allocator for us.
    * The allocator is the bridge between the renderer and the backend. It
    * handles the buffer creation, allowing wlroots to render onto the
    * screen */
-  server.allocator = wlr_allocator_autocreate(server.backend, server.renderer);
   if (server.allocator == NULL) {
     wlr_log(WLR_ERROR, "failed to create wlr_allocator");
     return 1;
@@ -96,26 +92,11 @@ int main(int argc, char *argv[]) {
 
   /* Creates an output layout, which a wlroots utility for working with an
    * arrangement of screens in a physical layout. */
-  server.output_layout = wlr_output_layout_create(server.wl_display);
 
   /* Configure a listener to be notified when new outputs are available on the
    * backend. */
-  // wl_list_init(&server.outputs); // TODO: Make sure I actually don't need
-  // this lol.
-  server.new_output.notify = server_new_output;
-  wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
   // Create root scene and the layer roots.
-  server.scene = (gfwl_scene *)calloc(sizeof(*server.scene), 1);
-  server.scene->root = wlr_scene_create();
-  server.scene_layout =
-      wlr_scene_attach_output_layout(server.scene->root, server.output_layout);
-  // Create tiling first so its the lowest.
-  server.scene->layer.base = wlr_scene_tree_create(&server.scene->root->tree);
-
-  // Create shell_top after so that it displays over layer_roots.
-  server.scene->layer.top = wlr_scene_tree_create(&server.scene->root->tree);
-  // TODO: Add more layers.
 
   /* Set up xdg-shell version 3. The xdg-shell is a Wayland protocol which is
    * used for application windows. For more detail on shells, refer to
@@ -222,7 +203,7 @@ int main(int argc, char *argv[]) {
   /* Once wl_display_run returns, we destroy all clients then shut down the
    * server. */
   wl_display_destroy_clients(server.wl_display);
-  wlr_scene_node_destroy(&server.scene->root->tree.node);
+  wlr_scene_node_destroy(&server.scene.root->tree.node);
   wlr_xcursor_manager_destroy(server.cursor_mgr);
   wlr_cursor_destroy(server.cursor);
   wlr_allocator_destroy(server.allocator);

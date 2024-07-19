@@ -1,4 +1,5 @@
 #pragma once
+#include "includes.hpp"
 #include "wlr/util/box.h"
 #include <conf/config.hpp>
 #include <deque>
@@ -17,6 +18,7 @@ enum gfwl_cursor_mode {
 
 // This server struct is for holding our compositors state.
 struct gfwl_server {
+  gfwl_server();
   // This is the core object in wayland. Its a special singleton.
   struct wl_display *wl_display;
   // Provides a set of input and output devices. Has signals for when inputs
@@ -27,7 +29,7 @@ struct gfwl_server {
   struct wlr_renderer *renderer;
   // The allocator allocates memory for pixel buffers.
   struct wlr_allocator *allocator;
-  struct gfwl_scene *scene;
+  struct gfwl_scene scene;
   struct wlr_scene_output_layout *scene_layout;
 
   struct wlr_xdg_shell *xdg_shell;
