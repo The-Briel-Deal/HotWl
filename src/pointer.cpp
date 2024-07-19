@@ -270,9 +270,6 @@ desktop_layersurface_at(GfServer *server, double lx, double ly,
         wl_container_of(tree, maybe_scene_layer_surface, tree);
     tree = tree->node.parent;
   }
-  if (maybe_scene_layer_surface) {
-    wlr_log(WLR_INFO, "GOLLY GORSH, I FOUND A SCENE_LAYER_SURFACE");
-  }
 
   return maybe_scene_layer_surface;
 }
