@@ -75,32 +75,6 @@ int main(int argc, char *argv[]) {
   }
 
 
-  /* Creates an output layout, which a wlroots utility for working with an
-   * arrangement of screens in a physical layout. */
-
-  /* Configure a listener to be notified when new outputs are available on the
-   * backend. */
-
-  // Create root scene and the layer roots.
-
-  /* Set up xdg-shell version 3. The xdg-shell is a Wayland protocol which is
-   * used for application windows. For more detail on shells, refer to
-   * https://drewdevault.com/2018/07/29/Wayland-shells.html.
-   */
-  wl_list_init(&server.toplevels);
-  server.xdg_shell = wlr_xdg_shell_create(server.wl_display, 3);
-  server.new_xdg_toplevel.notify = server_new_xdg_toplevel;
-  wl_signal_add(&server.xdg_shell->events.new_toplevel,
-                &server.new_xdg_toplevel);
-  server.new_xdg_popup.notify = server_new_xdg_popup;
-  wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
-
-  // Init layer shell and setup listeners.
-  server.layer_shell = wlr_layer_shell_v1_create(server.wl_display, 1);
-  server.new_layer_shell_surface.notify = handle_new_layer_shell_surface;
-  wl_signal_add(&server.layer_shell->events.new_surface,
-                &server.new_layer_shell_surface);
-
   /*
    * Creates a cursor, which is a wlroots utility for tracking the cursor
    * image shown on screen.
