@@ -39,7 +39,7 @@ get_output_from_container(std::shared_ptr<GfContainer> container) {
 // Focuses the output that the container is in.
 void focus_output_from_container(std::shared_ptr<GfContainer> container) {
   auto output = get_output_from_container(container);
-  auto server = container->server;
+  auto &server = container->server;
   if (output) {
     server.focused_output = output;
   } else {

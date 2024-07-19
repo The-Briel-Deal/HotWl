@@ -21,7 +21,6 @@ public:
   void flip_split_direction();
 
   std::shared_ptr<GfContainer> root;
-  std::weak_ptr<GfContainer> active_toplevel_container;
   gfwl_split_direction split_dir;
   std::shared_ptr<gfwl_output> output = NULL;
   class GfServer *server;

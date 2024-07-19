@@ -20,7 +20,7 @@
 struct gfwl_toplevel {
   struct wl_list link;
   std::weak_ptr<GfContainer> parent_container;
-  struct GfServer *server;
+  GfServer *server;
   struct wlr_xdg_toplevel *xdg_toplevel;
   struct wlr_scene_tree *scene_tree;
   struct wlr_surface *prev_focused;
