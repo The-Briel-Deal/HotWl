@@ -137,7 +137,7 @@ void server_new_output(struct wl_listener *listener, void *data) {
 
   // TODO: Maybe move this to the constructor of tiling state.
   // (I actually think this may be worth doing inheritance for)
-  output->tiling_state->root = std::make_shared<GfContainer>(
+  output->tiling_state->root = std::make_shared<GfContainerRoot>(
       nullptr, *server, GFWL_CONTAINER_ROOT,
       output->tiling_state->weak_from_this(), true);
 

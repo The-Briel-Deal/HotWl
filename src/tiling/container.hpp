@@ -106,5 +106,13 @@ private:
                         std::weak_ptr<GfContainer> insert_after,
                         enum gfwl_container_type split_container_type);
 };
+class GfContainerRoot : public GfContainer {
+public:
+  explicit GfContainerRoot(gfwl_toplevel *const toplevel, GfServer &server,
+                           const gfwl_container_type e_type,
+                           std::weak_ptr<GfTilingState> tiling_state,
+                           const bool is_root)
+      : GfContainer(toplevel, server, e_type, tiling_state, is_root){};
+};
 
 void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);

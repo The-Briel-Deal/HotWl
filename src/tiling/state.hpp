@@ -10,6 +10,7 @@ enum gfwl_split_direction {
 
 struct gfwl_output;
 class GfContainer;
+class GfContainerRoot;
 struct gfwl_toplevel;
 
 struct GfTilingState : public std::enable_shared_from_this<GfTilingState> {
@@ -20,7 +21,7 @@ public:
   /* TODO: Remove */
   void flip_split_direction();
 
-  std::shared_ptr<GfContainer> root;
+  std::shared_ptr<GfContainerRoot> root;
   gfwl_split_direction split_dir;
   std::shared_ptr<gfwl_output> output = NULL;
   class GfServer *server;
