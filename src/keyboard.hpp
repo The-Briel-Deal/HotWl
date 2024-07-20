@@ -3,14 +3,14 @@
 #include <wlr/types/wlr_seat.h>
 
 struct gfwl_keyboard {
-  struct wl_list link;
-  class GfServer *server;
-  struct wlr_keyboard *wlr_keyboard;
+  struct wl_list       link;
+  class GfServer*      server;
+  struct wlr_keyboard* wlr_keyboard;
 
-  struct wl_listener modifiers;
-  struct wl_listener key;
-  struct wl_listener destroy;
+  struct wl_listener   modifiers;
+  struct wl_listener   key;
+  struct wl_listener   destroy;
 };
 
-void server_new_keyboard(class GfServer *server,
-                         struct wlr_input_device *device);
+void server_new_keyboard(class GfServer*          server,
+                         struct wlr_input_device* device);

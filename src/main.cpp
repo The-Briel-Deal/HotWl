@@ -34,20 +34,16 @@
 #include <xdg_shell.hpp>
 #include <xkbcommon/xkbcommon.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   wlr_log_init(WLR_DEBUG, NULL);
-  char *startup_cmd = NULL;
+  char* startup_cmd = NULL;
 
   // Iterate through args until it finds a -s then save to startup_cmd.
   int c;
   while ((c = getopt(argc, argv, "s:h")) != -1) {
     switch (c) {
-    case 's':
-      startup_cmd = optarg;
-      break;
-    default:
-      printf("Usage: %s [-s startup command]\n", argv[0]);
-      return 0;
+      case 's': startup_cmd = optarg; break;
+      default: printf("Usage: %s [-s startup command]\n", argv[0]); return 0;
     }
   }
   if (optind < argc) {
@@ -84,7 +80,7 @@ int main(int argc, char *argv[]) {
    * And more comments are sprinkled throughout the notify functions above.
    */
   /* Add a Unix socket to the Wayland display. */
-  const char *socket = wl_display_add_socket_auto(server.wl_display);
+  const char* socket = wl_display_add_socket_auto(server.wl_display);
   if (!socket) {
     wlr_backend_destroy(server.backend);
     return 1;
@@ -103,7 +99,7 @@ int main(int argc, char *argv[]) {
   setenv("WAYLAND_DISPLAY", socket, true);
   if (startup_cmd) {
     if (fork() == 0) {
-      execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void *)NULL);
+      execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void*)NULL);
     }
   }
   /* Run the Wayland event loop. This does not return until you exit the

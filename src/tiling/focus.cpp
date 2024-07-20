@@ -12,20 +12,20 @@
 
 // TODO: Make tiling_state object oriented in cpp.
 static std::shared_ptr<GfContainer>
-get_container_in_dir(enum gfwl_tiling_focus_direction dir,
-                     std::shared_ptr<GfTilingState> state);
+            get_container_in_dir(enum gfwl_tiling_focus_direction dir,
+                                 std::shared_ptr<GfTilingState>   state);
 
 static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> contaiener,
                                         std::shared_ptr<GfTilingState> state);
 
-static struct wl_list *
+static struct wl_list*
 get_toplevel_container_list(std::shared_ptr<GfContainer> head,
-                            struct wl_list *list);
+                            struct wl_list*              list);
 
 static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
-    struct gfwl_point origin,
-    const std::vector<std::weak_ptr<GfContainer>> &toplevel_container_list,
-    enum gfwl_tiling_focus_direction dir) {
+    struct gfwl_point                              origin,
+    const std::vector<std::weak_ptr<GfContainer>>& toplevel_container_list,
+    enum gfwl_tiling_focus_direction               dir) {
   // Iterate through all Toplevel Containers, if we are going left, we
   // should look for a container where the curr focused container's y value
   // is within (new_focused_y < curr_focused_center_y &&
@@ -37,103 +37,103 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
 
   std::weak_ptr<GfContainer> closest_valid_toplevel;
   switch (dir) {
-  case GFWL_TILING_FOCUS_LEFT: {
-    int shortest_distance = INT_MAX;
+    case GFWL_TILING_FOCUS_LEFT: {
+      int shortest_distance = INT_MAX;
 
-    for (auto toplevel_weak : toplevel_container_list) {
-      auto toplevel = toplevel_weak.lock();
-      if (!toplevel)
-        continue;
-      auto tl_box = toplevel->get_box();
-      int distance_left_of_origin = origin.x - tl_box.x;
-      if (tl_box.x < origin.x && tl_box.y <= origin.y &&
-          tl_box.y + tl_box.height >= origin.y &&
-          distance_left_of_origin < shortest_distance &&
-          toplevel !=
-              toplevel->server.active_toplevel_container.front().lock()) {
-        // TODO: Actually pass in the currently focused toplevel.
-        // If distance is negative something went wrong.
-        assert(distance_left_of_origin > 0);
-        closest_valid_toplevel = toplevel;
-        shortest_distance = distance_left_of_origin;
+      for (auto toplevel_weak : toplevel_container_list) {
+        auto toplevel = toplevel_weak.lock();
+        if (!toplevel)
+          continue;
+        auto tl_box                  = toplevel->get_box();
+        int  distance_left_of_origin = origin.x - tl_box.x;
+        if (tl_box.x < origin.x && tl_box.y <= origin.y &&
+            tl_box.y + tl_box.height >= origin.y &&
+            distance_left_of_origin < shortest_distance &&
+            toplevel !=
+                toplevel->server.active_toplevel_container.front().lock()) {
+          // TODO: Actually pass in the currently focused toplevel.
+          // If distance is negative something went wrong.
+          assert(distance_left_of_origin > 0);
+          closest_valid_toplevel = toplevel;
+          shortest_distance      = distance_left_of_origin;
+        }
       }
+      break;
     }
-    break;
-  }
-  case GFWL_TILING_FOCUS_RIGHT: {
-    int shortest_distance = INT_MAX;
+    case GFWL_TILING_FOCUS_RIGHT: {
+      int shortest_distance = INT_MAX;
 
-    for (auto toplevel_weak : toplevel_container_list) {
-      auto toplevel = toplevel_weak.lock();
-      if (!toplevel)
-        continue;
-      auto tl_box = toplevel->get_box();
-      int distance_right_of_origin = tl_box.x - origin.x;
-      if (tl_box.x > origin.x && tl_box.y <= origin.y &&
-          tl_box.y + tl_box.height >= origin.y &&
-          distance_right_of_origin < shortest_distance &&
-          toplevel !=
-              toplevel->server.active_toplevel_container.front().lock()) {
-        // TODO: Actually pass in the currently focused toplevel.
-        // If distance is negative something went wrong.
-        assert(distance_right_of_origin > 0);
-        closest_valid_toplevel = toplevel;
-        shortest_distance = distance_right_of_origin;
+      for (auto toplevel_weak : toplevel_container_list) {
+        auto toplevel = toplevel_weak.lock();
+        if (!toplevel)
+          continue;
+        auto tl_box                   = toplevel->get_box();
+        int  distance_right_of_origin = tl_box.x - origin.x;
+        if (tl_box.x > origin.x && tl_box.y <= origin.y &&
+            tl_box.y + tl_box.height >= origin.y &&
+            distance_right_of_origin < shortest_distance &&
+            toplevel !=
+                toplevel->server.active_toplevel_container.front().lock()) {
+          // TODO: Actually pass in the currently focused toplevel.
+          // If distance is negative something went wrong.
+          assert(distance_right_of_origin > 0);
+          closest_valid_toplevel = toplevel;
+          shortest_distance      = distance_right_of_origin;
+        }
       }
+      break;
     }
-    break;
-  }
-  case GFWL_TILING_FOCUS_UP: {
-    int shortest_distance = INT_MAX;
+    case GFWL_TILING_FOCUS_UP: {
+      int shortest_distance = INT_MAX;
 
-    for (auto toplevel_weak : toplevel_container_list) {
-      auto toplevel = toplevel_weak.lock();
-      if (!toplevel)
-        continue;
-      auto tl_box = toplevel->get_box();
-      int distance_above_origin = origin.y - tl_box.y;
-      if (tl_box.y < origin.y && tl_box.x <= origin.x &&
-          tl_box.x + tl_box.width >= origin.x &&
-          distance_above_origin < shortest_distance &&
-          toplevel !=
-              toplevel->server.active_toplevel_container.front().lock()) {
-        // If distance is negative something went wrong.
-        assert(distance_above_origin > 0);
-        closest_valid_toplevel = toplevel;
-        shortest_distance = distance_above_origin;
+      for (auto toplevel_weak : toplevel_container_list) {
+        auto toplevel = toplevel_weak.lock();
+        if (!toplevel)
+          continue;
+        auto tl_box                = toplevel->get_box();
+        int  distance_above_origin = origin.y - tl_box.y;
+        if (tl_box.y < origin.y && tl_box.x <= origin.x &&
+            tl_box.x + tl_box.width >= origin.x &&
+            distance_above_origin < shortest_distance &&
+            toplevel !=
+                toplevel->server.active_toplevel_container.front().lock()) {
+          // If distance is negative something went wrong.
+          assert(distance_above_origin > 0);
+          closest_valid_toplevel = toplevel;
+          shortest_distance      = distance_above_origin;
+        }
       }
+      break;
     }
-    break;
-  }
-  case GFWL_TILING_FOCUS_DOWN: {
-    int shortest_distance = INT_MAX;
+    case GFWL_TILING_FOCUS_DOWN: {
+      int shortest_distance = INT_MAX;
 
-    for (auto toplevel_weak : toplevel_container_list) {
-      auto toplevel = toplevel_weak.lock();
-      if (!toplevel)
-        continue;
-      auto tl_box = toplevel->get_box();
-      int distance_below_origin = tl_box.y - origin.y;
-      if (tl_box.y > origin.y && tl_box.x <= origin.x &&
-          tl_box.x + tl_box.width >= origin.x &&
-          distance_below_origin < shortest_distance &&
-          toplevel !=
-              toplevel->server.active_toplevel_container.front().lock()) {
-        // If distance is negative something went wrong.
-        assert(distance_below_origin > 0);
-        closest_valid_toplevel = toplevel;
-        shortest_distance = distance_below_origin;
+      for (auto toplevel_weak : toplevel_container_list) {
+        auto toplevel = toplevel_weak.lock();
+        if (!toplevel)
+          continue;
+        auto tl_box                = toplevel->get_box();
+        int  distance_below_origin = tl_box.y - origin.y;
+        if (tl_box.y > origin.y && tl_box.x <= origin.x &&
+            tl_box.x + tl_box.width >= origin.x &&
+            distance_below_origin < shortest_distance &&
+            toplevel !=
+                toplevel->server.active_toplevel_container.front().lock()) {
+          // If distance is negative something went wrong.
+          assert(distance_below_origin > 0);
+          closest_valid_toplevel = toplevel;
+          shortest_distance      = distance_below_origin;
+        }
       }
+      break;
     }
-    break;
-  }
   }
 
   return closest_valid_toplevel;
 }
 
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
-                              std::shared_ptr<GfTilingState> state) {
+                              std::shared_ptr<GfTilingState>   state) {
   // Get Container In The Specified Direction.
   std::shared_ptr<GfContainer> container_to_focus =
       get_container_in_dir(dir, state);
@@ -151,7 +151,7 @@ bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
 
 static std::shared_ptr<GfContainer>
 get_container_in_dir(enum gfwl_tiling_focus_direction dir,
-                     std::shared_ptr<GfTilingState> state) {
+                     std::shared_ptr<GfTilingState>   state) {
   assert(state);
 
   if (state->server->active_toplevel_container.empty() ||
@@ -185,10 +185,10 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
                                         std::shared_ptr<GfTilingState> _) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
-  const gfwl_toplevel *toplevel = container->toplevel;
+  const gfwl_toplevel* toplevel = container->toplevel;
   assert(toplevel);
 
-  struct wlr_surface *surface = toplevel->xdg_toplevel->base->surface;
+  struct wlr_surface* surface = toplevel->xdg_toplevel->base->surface;
   assert(surface);
 
   if (toplevel == NULL || surface == NULL) {
@@ -206,7 +206,7 @@ static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
 }
 
 gfwl_point get_container_origin(std::shared_ptr<GfContainer> container) {
-  auto box = container->get_box();
+  auto              box    = container->get_box();
   struct gfwl_point center = {.x = (box.width / 2) + box.x,
                               .y = (box.height / 2) + box.y};
   return center;

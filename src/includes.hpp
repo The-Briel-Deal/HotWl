@@ -30,7 +30,7 @@
 // that...
 #include <pthread.h>
 
-#define class _class
+#define class     _class
 #define namespace _namespace
 #define static
 #define delete delete_

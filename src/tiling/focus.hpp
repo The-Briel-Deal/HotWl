@@ -24,7 +24,7 @@ struct gfwl_point {
 /*
  * Shift the focus to the next window in any of 4 directions.
  */
-bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
-                              std::shared_ptr<GfTilingState> state);
+bool       tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
+                                    std::shared_ptr<GfTilingState>   state);
 
 gfwl_point get_container_origin(std::shared_ptr<GfContainer> container);

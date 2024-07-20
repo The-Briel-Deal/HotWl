@@ -10,11 +10,11 @@
 
 using json = nlohmann::json;
 
-bool set_keybind(xkb_keysym_t &bind, json keyname_json) {
+bool set_keybind(xkb_keysym_t& bind, json keyname_json) {
   if (!keyname_json.is_string())
     return false;
 
-  std::string keyname = keyname_json;
+  std::string  keyname = keyname_json;
   xkb_keysym_t new_bind =
       xkb_keysym_from_name(keyname.c_str(), XKB_KEYSYM_CASE_INSENSITIVE);
 
@@ -40,11 +40,11 @@ wlr_keyboard_modifier get_mod_from_string(std::string mod_str) {
   return (wlr_keyboard_modifier)NULL;
 }
 
-bool set_mod(xkb_mod_mask_t &modmask, json modname_json) {
+bool set_mod(xkb_mod_mask_t& modmask, json modname_json) {
   if (!modname_json.is_string())
     return false;
 
-  std::string keyname = modname_json;
+  std::string    keyname  = modname_json;
   xkb_mod_mask_t new_mask = get_mod_from_string(keyname);
 
   if (modmask && new_mask)
@@ -90,4 +90,6 @@ GfConfig::GfConfig() {
   parse_file(std::string(std::getenv("HOME")) + "/.config/gfwl.json");
 }
 
-GfConfig::GfConfig(std::string config_path) { parse_file(config_path); }
+GfConfig::GfConfig(std::string config_path) {
+  parse_file(config_path);
+}

@@ -14,7 +14,7 @@ public:
   GfConfig(std::string config_path);
   std::string get_option(std::string);
   std::string set_option(std::string);
-  bool parse_file(std::string);
+  bool        parse_file(std::string);
 
   struct GfKeybinds {
     xkb_mod_mask_t modmask = WLR_MODIFIER_CTRL;
@@ -25,16 +25,16 @@ public:
     /* Exit WM */
     xkb_keysym_t exit = XKB_KEY_m;
     /* Tiling Focus Directions */
-    xkb_keysym_t tiling_focus_left = XKB_KEY_h;
-    xkb_keysym_t tiling_focus_down = XKB_KEY_j;
-    xkb_keysym_t tiling_focus_up = XKB_KEY_k;
+    xkb_keysym_t tiling_focus_left  = XKB_KEY_h;
+    xkb_keysym_t tiling_focus_down  = XKB_KEY_j;
+    xkb_keysym_t tiling_focus_up    = XKB_KEY_k;
     xkb_keysym_t tiling_focus_right = XKB_KEY_l;
     /* Flip Split Dir */
     xkb_keysym_t flip_split_direction = XKB_KEY_s;
     /* Go to Next And Previous Monitor */
-    xkb_keysym_t next_monitor = XKB_KEY_n;
-    xkb_keysym_t prev_monitor = XKB_KEY_p;
-	xkb_keysym_t close_surface = XKB_KEY_c;
+    xkb_keysym_t next_monitor  = XKB_KEY_n;
+    xkb_keysym_t prev_monitor  = XKB_KEY_p;
+    xkb_keysym_t close_surface = XKB_KEY_c;
   } keybinds;
 
 private:

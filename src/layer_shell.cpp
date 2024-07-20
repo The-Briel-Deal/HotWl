@@ -12,9 +12,9 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 
-void focus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
-  struct wlr_seat *seat = gfwl_layer_surface->server->seat;
-  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+void focus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
+  struct wlr_seat*     seat        = gfwl_layer_surface->server->seat;
+  struct wlr_keyboard* keyboard    = wlr_seat_get_keyboard(seat);
   gfwl_layer_surface->prev_focused = seat->keyboard_state.focused_surface;
 
   wlr_seat_keyboard_notify_enter(
@@ -22,9 +22,9 @@ void focus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
       keyboard->num_keycodes, &keyboard->modifiers);
 }
 
-void unfocus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
-  struct wlr_seat *seat = gfwl_layer_surface->server->seat;
-  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
+  struct wlr_seat*     seat     = gfwl_layer_surface->server->seat;
+  struct wlr_keyboard* keyboard = wlr_seat_get_keyboard(seat);
 
   wlr_seat_keyboard_notify_enter(seat, gfwl_layer_surface->prev_focused,
                                  keyboard->keycodes, keyboard->num_keycodes,
@@ -33,8 +33,8 @@ void unfocus_layer_surface(struct gfwl_layer_surface *gfwl_layer_surface) {
 
 // Returns false if failed.
 bool center_scene_layer_surface(
-    struct wlr_scene_layer_surface_v1 *scene_layer_surface,
-    struct wlr_output *wlr_output) {
+    struct wlr_scene_layer_surface_v1* scene_layer_surface,
+    struct wlr_output*                 wlr_output) {
   assert(wlr_output);
   if (!wlr_output || !scene_layer_surface)
     return false;
@@ -53,9 +53,9 @@ bool center_scene_layer_surface(
   return true;
 }
 
-void handle_layer_surface_map(struct wl_listener *listener,
-                              [[maybe_unused]] void *data) {
-  struct gfwl_layer_surface *gfwl_layer_surface =
+void handle_layer_surface_map(struct wl_listener*    listener,
+                              [[maybe_unused]] void* data) {
+  struct gfwl_layer_surface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
   center_scene_layer_surface(gfwl_layer_surface->scene,
@@ -63,16 +63,16 @@ void handle_layer_surface_map(struct wl_listener *listener,
   focus_layer_surface(gfwl_layer_surface);
 }
 
-void handle_layer_surface_unmap(struct wl_listener *listener,
-                                [[maybe_unused]] void *data) {
-  struct gfwl_layer_surface *gfwl_layer_surface =
+void handle_layer_surface_unmap(struct wl_listener*    listener,
+                                [[maybe_unused]] void* data) {
+  struct gfwl_layer_surface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, unmap);
   unfocus_layer_surface(gfwl_layer_surface);
 }
 
-void handle_layer_surface_commit(struct wl_listener *listener,
-                                 [[maybe_unused]] void *data) {
-  struct gfwl_layer_surface *gfwl_layer_surface =
+void handle_layer_surface_commit(struct wl_listener*    listener,
+                                 [[maybe_unused]] void* data) {
+  struct gfwl_layer_surface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
@@ -80,9 +80,9 @@ void handle_layer_surface_commit(struct wl_listener *listener,
   }
 }
 
-void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
+void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
   // Grab our server (parent of the listener).
-  class GfServer *server =
+  class GfServer* server =
       wl_container_of(listener, server, new_layer_shell_surface);
   if (!server) {
     wlr_log(WLR_ERROR, "No server from listener.");
@@ -90,26 +90,26 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   }
 
   // Grab layer surface.
-  struct wlr_layer_surface_v1 *wlr_layer_surface = (wlr_layer_surface_v1 *)data;
+  struct wlr_layer_surface_v1* wlr_layer_surface = (wlr_layer_surface_v1*)data;
   if (!wlr_layer_surface) {
     wlr_log(WLR_ERROR, "No layer surface.");
     return;
   }
 
   // Dynamically allocate a new layer surface wrapper and save callback args.
-  struct gfwl_layer_surface *gfwl_layer_surface =
-      (struct gfwl_layer_surface *)calloc(1, sizeof(*gfwl_layer_surface));
+  struct gfwl_layer_surface* gfwl_layer_surface =
+      (struct gfwl_layer_surface*)calloc(1, sizeof(*gfwl_layer_surface));
   if (!gfwl_layer_surface) {
     wlr_log(WLR_ERROR, "No gfwl layer surface.");
     return;
   }
   gfwl_layer_surface->wlr_layer_surface = wlr_layer_surface;
-  gfwl_layer_surface->server = server;
+  gfwl_layer_surface->server            = server;
 
   // Check for layer surface output.
   if (!wlr_layer_surface->output) {
     wlr_log(WLR_INFO, "No output on layer surface.");
-    struct wlr_seat *seat = server->seat;
+    struct wlr_seat* seat = server->seat;
     if (!seat) {
       wlr_log(WLR_ERROR, "No seat.");
       return;
@@ -133,7 +133,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
     }
   }
   // Get gfwl_output from wlr_output
-  struct gfwl_output *gfwl_output =
+  struct gfwl_output* gfwl_output =
       wl_container_of(wlr_layer_surface->output, gfwl_output, wlr_output);
   if (!gfwl_output) {
     wlr_log(WLR_ERROR, "No gfwl_output is parent of wlr_output.");
@@ -143,7 +143,7 @@ void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
   gfwl_layer_surface->output = gfwl_output;
 
   // Create the scene.
-  struct wlr_scene_layer_surface_v1 *scene_surface =
+  struct wlr_scene_layer_surface_v1* scene_surface =
       wlr_scene_layer_surface_v1_create(server->scene.layer.top,
                                         wlr_layer_surface);
   // Add to layer_surface object.
