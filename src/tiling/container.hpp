@@ -17,6 +17,7 @@ enum gfwl_container_type {
 class GfContainer : public std::enable_shared_from_this<GfContainer> {
   friend class GfContainerRoot;
   friend class GfContainerToplevel;
+  friend class GfContainerSplit;
 
 public:
   /* This will be used for non root containers in theory. */
@@ -109,9 +110,8 @@ private:
 
 class GfContainerToplevel : public GfContainer {
 public:
-  explicit GfContainerToplevel(gfwl_toplevel* const toplevel,
-                               GfServer&            server,
-                               // TODO: Change to always being split.
+  explicit GfContainerToplevel(gfwl_toplevel* const         toplevel,
+                               GfServer&                    server,
                                std::weak_ptr<GfContainer>   parent,
                                std::weak_ptr<GfTilingState> tiling_state) :
       GfContainer(server, parent, GFWL_CONTAINER_TOPLEVEL, tiling_state),
@@ -121,6 +121,15 @@ public:
   gfwl_toplevel* const toplevel;
 
   void                 set_container_box(struct wlr_box box_in);
+};
+
+class GfContainerSplit : public GfContainer {
+public:
+  explicit GfContainerSplit(GfServer&                    server,
+                            std::weak_ptr<GfContainer>   parent,
+                            const gfwl_container_type    e_type,
+                            std::weak_ptr<GfTilingState> tiling_state) :
+      GfContainer(server, parent, e_type, tiling_state){};
 };
 
 void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);

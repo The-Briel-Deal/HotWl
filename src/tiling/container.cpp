@@ -169,10 +169,10 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
-      .emplace_back(std::make_shared<GfContainer>(*to_insert->server,
-                                                  this->weak_from_this(),
-                                                  split_container_type,
-                                                  this->tiling_state))
+      .emplace_back(std::make_shared<GfContainerSplit>(*to_insert->server,
+                                                       this->weak_from_this(),
+                                                       split_container_type,
+                                                       this->tiling_state))
       ->insert_child(to_insert);
 }
 
@@ -187,10 +187,10 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
       .emplace(std::find(this->child_containers.begin(),
                          this->child_containers.end(),
                          insert_after.lock()),
-               std::make_shared<GfContainer>(*to_insert->server,
-                                             this->weak_from_this(),
-                                             split_container_type,
-                                             this->tiling_state))
+               std::make_shared<GfContainerSplit>(*to_insert->server,
+                                                  this->weak_from_this(),
+                                                  split_container_type,
+                                                  this->tiling_state))
       ->get()
       ->insert_child(to_insert);
 }
