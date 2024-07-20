@@ -15,22 +15,22 @@
 void focus_next_in_stack(std::weak_ptr<GfContainer>             curr,
                          std::deque<std::weak_ptr<GfContainer>> stack) {
   while (!stack.empty()) {
-    if (!stack.front().expired() && stack.front().lock() != curr.lock() &&
-        stack.front().lock()->e_type == GFWL_CONTAINER_TOPLEVEL) {
-      focus_toplevel(
-          stack.front().lock()->toplevel,
-          stack.front().lock()->toplevel->xdg_toplevel->base->surface);
-      return;
+    if (!stack.front().expired() && stack.front().lock() != curr.lock()) {
+      auto toplevel_container =
+          dynamic_cast<GfContainerToplevel*>(stack.front().lock().get());
+      if (toplevel_container != NULL) {
+        focus_toplevel(
+            toplevel_container->toplevel,
+            toplevel_container->toplevel->xdg_toplevel->base->surface);
+        return;
+      }
     }
     stack.pop_front();
   }
 }
-GfContainer::~GfContainer() {
-  auto tl = this->toplevel;
-  if (tl && this->e_type == GFWL_CONTAINER_TOPLEVEL) {
-    wlr_xdg_toplevel_send_close(tl->xdg_toplevel);
-    this->tiling_state.lock()->root->parse_containers();
-  };
+GfContainerToplevel::~GfContainerToplevel() {
+  wlr_xdg_toplevel_send_close(this->toplevel->xdg_toplevel);
+  this->tiling_state.lock()->root->parse_containers();
 }
 
 std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel* to_insert) {
@@ -107,16 +107,15 @@ GfContainer::insert_sibling(gfwl_toplevel* to_insert) {
                        parent->child_containers.end(),
                        this->shared_from_this());
   /* Emplace a new container before the afformentioned pos in the parent. */
-  auto toplevel_container =
-      parent->child_containers
-          .emplace(pos,
-                   std::make_shared<GfContainer>(to_insert,
-                                                 *to_insert->server,
-                                                 parent->weak_from_this(),
-                                                 GFWL_CONTAINER_TOPLEVEL,
-                                                 this->tiling_state))
-          ->get()
-          ->weak_from_this();
+  auto toplevel_container = parent->child_containers
+                                .emplace(pos,
+                                         std::make_shared<GfContainerToplevel>(
+                                             to_insert,
+                                             *to_insert->server,
+                                             parent->weak_from_this(),
+                                             this->tiling_state))
+                                ->get()
+                                ->weak_from_this();
 
   /* Set the new container as the parent in the toplevel. */
   to_insert->parent_container = toplevel_container;
@@ -130,11 +129,11 @@ GfContainer::insert_sibling(gfwl_toplevel* to_insert) {
 std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel* to_insert) {
   auto toplevel_container =
       this->child_containers
-          .emplace_back(std::make_shared<GfContainer>(to_insert,
-                                                      *to_insert->server,
-                                                      this->weak_from_this(),
-                                                      GFWL_CONTAINER_TOPLEVEL,
-                                                      this->tiling_state))
+          .emplace_back(
+              std::make_shared<GfContainerToplevel>(to_insert,
+                                                    *to_insert->server,
+                                                    this->weak_from_this(),
+                                                    this->tiling_state))
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
   // As an optimization down the road, I can try just parsing the changes
@@ -151,11 +150,10 @@ GfContainer::insert_child(gfwl_toplevel*             to_insert,
           .emplace(std::find(this->child_containers.begin(),
                              this->child_containers.end(),
                              insert_before.lock()),
-                   std::make_shared<GfContainer>(to_insert,
-                                                 *to_insert->server,
-                                                 this->weak_from_this(),
-                                                 GFWL_CONTAINER_TOPLEVEL,
-                                                 this->tiling_state))
+                   std::make_shared<GfContainerToplevel>(to_insert,
+                                                         *to_insert->server,
+                                                         this->weak_from_this(),
+                                                         this->tiling_state))
           ->get()
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
@@ -171,8 +169,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
-      .emplace_back(std::make_shared<GfContainer>(to_insert,
-                                                  *to_insert->server,
+      .emplace_back(std::make_shared<GfContainer>(*to_insert->server,
                                                   this->weak_from_this(),
                                                   split_container_type,
                                                   this->tiling_state))
@@ -190,8 +187,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
       .emplace(std::find(this->child_containers.begin(),
                          this->child_containers.end(),
                          insert_after.lock()),
-               std::make_shared<GfContainer>(to_insert,
-                                             *to_insert->server,
+               std::make_shared<GfContainer>(*to_insert->server,
                                              this->weak_from_this(),
                                              split_container_type,
                                              this->tiling_state))
@@ -344,17 +340,20 @@ void GfContainerRoot::parse_containers() {
   this->parse_children();
 }
 
-// Sets the size and position of a container based on a wlr_box.
+// The default behavior for all containers is to just set the containers box.
 void GfContainer::set_container_box(struct wlr_box box_in) {
   this->box = box_in;
-  if (e_type == GFWL_CONTAINER_TOPLEVEL) {
-    auto xdg_toplevel = this->toplevel->xdg_toplevel;
-    // Set the size.
-    wlr_xdg_toplevel_set_size(xdg_toplevel, box_in.width, box_in.height);
-    // Set the position.
-    auto scene_tree = static_cast<wlr_scene_tree*>(xdg_toplevel->base->data);
-    wlr_scene_node_set_position(&scene_tree->node, box_in.x, box_in.y);
-  }
+}
+
+// But for toplevels, we also need to set the toplevel's pos and size.
+void GfContainerToplevel::set_container_box(struct wlr_box box_in) {
+  this->box = box_in;
+
+  auto xdg_toplevel = this->toplevel->xdg_toplevel;
+  wlr_xdg_toplevel_set_size(xdg_toplevel, box_in.width, box_in.height);
+
+  auto scene_tree = static_cast<wlr_scene_tree*>(xdg_toplevel->base->data);
+  wlr_scene_node_set_position(&scene_tree->node, box_in.x, box_in.y);
 }
 
 // Get A List of Toplevels below this Container node.

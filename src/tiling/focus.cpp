@@ -1,3 +1,4 @@
+#include "tiling/container.hpp"
 #include <assert.h>
 #include <climits>
 #include <includes.hpp>
@@ -11,18 +12,19 @@
 #include <xdg_shell.hpp>
 
 // TODO: Make tiling_state object oriented in cpp.
-static std::shared_ptr<GfContainer>
-            get_container_in_dir(enum gfwl_tiling_focus_direction dir,
-                                 std::shared_ptr<GfTilingState>   state);
+static std::shared_ptr<GfContainerToplevel>
+get_container_in_dir(enum gfwl_tiling_focus_direction dir,
+                     std::shared_ptr<GfTilingState>   state);
 
-static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> contaiener,
-                                        std::shared_ptr<GfTilingState> state);
+static bool
+focus_and_warp_to_container(std::shared_ptr<GfContainerToplevel> container,
+                            std::shared_ptr<GfTilingState>       state);
 
 static struct wl_list*
 get_toplevel_container_list(std::shared_ptr<GfContainer> head,
                             struct wl_list*              list);
 
-static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
+static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
     struct gfwl_point                              origin,
     const std::vector<std::weak_ptr<GfContainer>>& toplevel_container_list,
     enum gfwl_tiling_focus_direction               dir) {
@@ -129,13 +131,14 @@ static std::weak_ptr<GfContainer> find_closest_to_origin_in_dir(
     }
   }
 
-  return closest_valid_toplevel;
+  return std::dynamic_pointer_cast<GfContainerToplevel>(
+      closest_valid_toplevel.lock());
 }
 
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
                               std::shared_ptr<GfTilingState>   state) {
   // Get Container In The Specified Direction.
-  std::shared_ptr<GfContainer> container_to_focus =
+  std::shared_ptr<GfContainerToplevel> container_to_focus =
       get_container_in_dir(dir, state);
   if (container_to_focus == NULL) {
     return false;
@@ -149,7 +152,7 @@ bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction dir,
   return true;
 }
 
-static std::shared_ptr<GfContainer>
+static std::shared_ptr<GfContainerToplevel>
 get_container_in_dir(enum gfwl_tiling_focus_direction dir,
                      std::shared_ptr<GfTilingState>   state) {
   assert(state);
@@ -168,7 +171,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
 
   auto toplevel_container_list = state->root->get_top_level_container_list();
 
-  std::shared_ptr<GfContainer> to_focus =
+  std::shared_ptr<GfContainerToplevel> to_focus =
       find_closest_to_origin_in_dir(
           curr_focused_origin, toplevel_container_list, dir)
           .lock();
@@ -181,8 +184,9 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   return NULL;
 }
 
-static bool focus_and_warp_to_container(std::shared_ptr<GfContainer> container,
-                                        std::shared_ptr<GfTilingState> _) {
+static bool
+focus_and_warp_to_container(std::shared_ptr<GfContainerToplevel> container,
+                            std::shared_ptr<GfTilingState>       _) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
   const gfwl_toplevel* toplevel = container->toplevel;
