@@ -24,45 +24,34 @@ public:
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), parent_container(parent_container),
-      tiling_state(tiling_state), toplevel(toplevel), server(server) {};
+      tiling_state(tiling_state), toplevel(toplevel), server(server){};
 
   /* I have this constructor without a parent container for root containers. */
   explicit GfContainer(gfwl_toplevel* const toplevel, GfServer& server,
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), tiling_state(tiling_state), toplevel(toplevel),
-      server(server) {};
+      server(server){};
 
-  virtual std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
-  const wlr_box&                     get_box();
   ~GfContainer();
 
-  void                                    set_focused_toplevel_container();
+  virtual std::weak_ptr<GfContainer>        insert(gfwl_toplevel* toplevel);
+  virtual void                              parse_containers();
+  void                                      close();
+  void                                      set_focused_toplevel_container();
 
-  std::vector<std::weak_ptr<GfContainer>> get_top_level_container_list();
-  gfwl_split_direction                    get_split_dir_from_container_type();
+  const wlr_box&                            get_box();
+  std::vector<std::weak_ptr<GfContainer>>   get_top_level_container_list();
+  gfwl_split_direction                      get_split_dir_from_container_type();
+  gfwl_split_direction                      get_split_dir_longer();
 
-  /* Determines whether to split horizontally or vertically based on container
-   * type. */
-  void         split_containers();
-  virtual void parse_containers();
+  void                                      split_containers();
 
-  /* Gets whether to split hori or vert based on which is longer. */
-  gfwl_split_direction get_split_dir_longer();
+  const gfwl_container_type                 e_type = GFWL_CONTAINER_UNKNOWN;
 
-  /* TODO: Finish
-   * Close, unmap, and free this container. */
-  void close();
-
-  /* Descriptors of this container. */
-  const gfwl_container_type e_type = GFWL_CONTAINER_UNKNOWN;
-
-  /* The Container Above and Below this one in the tiling tree. */
   std::weak_ptr<GfContainer>                parent_container;
   std::vector<std::shared_ptr<GfContainer>> child_containers;
-
-  /* Tiling State of The Current Output. */
-  std::weak_ptr<GfTilingState> tiling_state;
+  std::weak_ptr<GfTilingState>              tiling_state;
 
   /* References to the associated toplevel and server
    * TODO: I would later like to make this a shared pointer, container should
@@ -76,12 +65,9 @@ private:
    * vertically or horizontally. */
   void vert_split_containers();
   void hori_split_containers();
-
   /* Sets the size and position of a container based on a wlr_box. */
   void set_container_box(struct wlr_box box);
-
   /* The Dimensions of a container. */
-  wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
 
   /* Position Manipulation */
   void move_container_to(std::weak_ptr<GfContainer> new_parent);
@@ -89,6 +75,7 @@ private:
   std::weak_ptr<GfContainer> insert_sibling(gfwl_toplevel* toplevel);
 
   std::weak_ptr<GfContainer> insert_child(gfwl_toplevel* toplevel);
+
   std::weak_ptr<GfContainer>
   insert_child(gfwl_toplevel*             toplevel,
                std::weak_ptr<GfContainer> insert_before);
@@ -101,11 +88,12 @@ private:
                         enum gfwl_container_type split_container_type);
 
   std::weak_ptr<GfContainer>
-       insert_child_in_split(gfwl_toplevel*             toplevel,
-                             std::weak_ptr<GfContainer> insert_after,
-                             enum gfwl_container_type   split_container_type);
+          insert_child_in_split(gfwl_toplevel*             toplevel,
+                                std::weak_ptr<GfContainer> insert_after,
+                                enum gfwl_container_type   split_container_type);
+  void    parse_children();
 
-  void parse_children();
+  wlr_box box = {.x = 0, .y = 0, .width = 0, .height = 0};
 };
 
 class GfContainerRoot : public GfContainer {
@@ -113,7 +101,7 @@ public:
   explicit GfContainerRoot(gfwl_toplevel* const toplevel, GfServer& server,
                            const gfwl_container_type    e_type,
                            std::weak_ptr<GfTilingState> tiling_state) :
-      GfContainer(toplevel, server, e_type, tiling_state) {};
+      GfContainer(toplevel, server, e_type, tiling_state){};
 
   std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
   void                       parse_containers();
