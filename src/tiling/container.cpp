@@ -34,10 +34,11 @@ GfContainer::~GfContainer() {
 }
 
 std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel *to_insert) {
-  if (this->is_root)
-    return this->insert_child_in_split(to_insert, GFWL_CONTAINER_HSPLIT);
-
   return this->insert_based_on_longer_dir(to_insert);
+}
+
+std::weak_ptr<GfContainer> GfContainerRoot::insert(gfwl_toplevel *to_insert) {
+  return this->insert_child_in_split(to_insert, GFWL_CONTAINER_HSPLIT);
 }
 
 // Return const reference to containers box.
@@ -107,7 +108,7 @@ GfContainer::insert_sibling(gfwl_toplevel *to_insert) {
           .emplace(pos,
                    std::make_shared<GfContainer>(
                        to_insert, *to_insert->server, parent->weak_from_this(),
-                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state))
           ->get()
           ->weak_from_this();
 
@@ -125,7 +126,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel *to_insert) {
       this->child_containers
           .emplace_back(std::make_shared<GfContainer>(
               to_insert, *to_insert->server, this->weak_from_this(),
-              GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+              GFWL_CONTAINER_TOPLEVEL, this->tiling_state))
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
   // As an optimization down the road, I can try just parsing the changes
@@ -144,7 +145,7 @@ GfContainer::insert_child(gfwl_toplevel *to_insert,
                              insert_before.lock()),
                    std::make_shared<GfContainer>(
                        to_insert, *to_insert->server, this->weak_from_this(),
-                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state, false))
+                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state))
           ->get()
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
@@ -162,7 +163,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
   return this->child_containers
       .emplace_back(std::make_shared<GfContainer>(
           to_insert, *to_insert->server, this->weak_from_this(),
-          split_container_type, this->tiling_state, false))
+          split_container_type, this->tiling_state))
       ->insert_child(to_insert);
 }
 
@@ -177,7 +178,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
                          this->child_containers.end(), insert_after.lock()),
                std::make_shared<GfContainer>(
                    to_insert, *to_insert->server, this->weak_from_this(),
-                   split_container_type, this->tiling_state, false))
+                   split_container_type, this->tiling_state))
       ->get()
       ->insert_child(to_insert);
 }
@@ -207,7 +208,8 @@ void GfContainer::close() {
                 parent->child_containers.end(), this->shared_from_this());
 
   parent->child_containers.erase(position_in_parent);
-  if (parent->child_containers.empty() && parent->is_root == false) {
+  if (parent->child_containers.empty() &&
+      typeid(parent) == typeid(GfContainerRoot)) {
     parent->close();
   }
   if (parent->server.active_toplevel_container.front().lock().get() == this) {
@@ -304,15 +306,23 @@ void GfContainer::split_containers() {
 
 void GfContainer::parse_containers() {
   // Get output if we're at the root.
-  if (this->is_root) {
-    // TODO: This also probably shouldn't just grab the first output.
-    std::shared_ptr<gfwl_output> output = this->tiling_state.lock()->output;
-    assert(output);
-    this->box.x = output->scene_output->x;
-    this->box.y = output->scene_output->y;
-    this->box.width = output->wlr_output->width;
-    this->box.height = output->wlr_output->height;
+  this->split_containers();
+  for (auto child : this->child_containers) {
+    if (child->e_type == GFWL_CONTAINER_HSPLIT ||
+        child->e_type == GFWL_CONTAINER_VSPLIT) {
+      child->parse_containers();
+    }
   }
+}
+
+void GfContainerRoot::parse_containers() {
+  // Get output if we're at the root.
+  std::shared_ptr<gfwl_output> output = this->tiling_state.lock()->output;
+  assert(output);
+  this->box.x = output->scene_output->x;
+  this->box.y = output->scene_output->y;
+  this->box.width = output->wlr_output->width;
+  this->box.height = output->wlr_output->height;
   this->split_containers();
   for (auto child : this->child_containers) {
     if (child->e_type == GFWL_CONTAINER_HSPLIT ||
