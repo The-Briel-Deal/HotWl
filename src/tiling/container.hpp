@@ -25,15 +25,13 @@ public:
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), parent_container(parent_container),
-      tiling_state(tiling_state), toplevel(toplevel), server(server) {};
+      tiling_state(tiling_state), toplevel(toplevel), server(server){};
 
   /* I have this constructor without a parent container for root containers. */
-  explicit GfContainer(gfwl_toplevel* const         toplevel,
-                       GfServer&                    server,
+  explicit GfContainer(GfServer&                    server,
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
-      e_type(e_type), tiling_state(tiling_state), toplevel(toplevel),
-      server(server) {};
+      e_type(e_type), tiling_state(tiling_state), server(server){};
 
   ~GfContainer();
 
@@ -97,11 +95,10 @@ private:
 
 class GfContainerRoot : public GfContainer {
 public:
-  explicit GfContainerRoot(gfwl_toplevel* const         toplevel,
-                           GfServer&                    server,
+  explicit GfContainerRoot(GfServer&                    server,
                            const gfwl_container_type    e_type,
                            std::weak_ptr<GfTilingState> tiling_state) :
-      GfContainer(toplevel, server, e_type, tiling_state) {};
+      GfContainer(server, e_type, tiling_state){};
 
   std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
   void                       parse_containers();
@@ -109,5 +106,20 @@ public:
 private:
   void set_to_output_size();
 };
-
+/*
+ * class GfContainerToplevel : public GfContainer {
+ * public:
+ *   explicit GfContainerToplevel(gfwl_toplevel* const         toplevel,
+ *                                GfServer&                    server,
+ *                                const gfwl_container_type    e_type,
+ *                                std::weak_ptr<GfTilingState> tiling_state) :
+ *       GfContainer(toplevel, server, e_type, tiling_state){};
+ *
+ *   std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
+ *   void                       parse_containers();
+ *
+ * private:
+ *   void set_to_output_size();
+ * };
+ */
 void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);
