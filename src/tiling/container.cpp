@@ -224,8 +224,7 @@ void GfContainer::close() {
                                       this->shared_from_this());
 
   parent->child_containers.erase(position_in_parent);
-  if (parent->child_containers.empty() &&
-      typeid(parent) == typeid(GfContainerRoot)) {
+  if (parent->child_containers.empty()) {
     parent->close();
   }
   if (parent->server.active_toplevel_container.front().lock().get() == this) {
@@ -233,6 +232,11 @@ void GfContainer::close() {
   }
   focus_next_in_stack(this->weak_from_this(),
                       parent->server.active_toplevel_container);
+}
+
+/* Close Should not do anything on the Root container */
+void GfContainerRoot::close() {
+  return;
 }
 
 enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {

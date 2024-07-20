@@ -37,7 +37,7 @@ public:
 
   virtual std::weak_ptr<GfContainer>        insert(gfwl_toplevel* toplevel);
   virtual void                              parse_containers();
-  void                                      close();
+  virtual void                              close();
   void                                      set_focused_toplevel_container();
 
   const wlr_box&                            get_box();
@@ -102,6 +102,7 @@ public:
 
   std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
   void                       parse_containers();
+  void                       close();
 
 private:
   void set_to_output_size();
