@@ -104,7 +104,10 @@ private:
   insert_child_in_split(gfwl_toplevel *toplevel,
                         std::weak_ptr<GfContainer> insert_after,
                         enum gfwl_container_type split_container_type);
+
+  void parse_children();
 };
+
 class GfContainerRoot : public GfContainer {
 public:
   explicit GfContainerRoot(gfwl_toplevel *const toplevel, GfServer &server,
@@ -114,6 +117,9 @@ public:
 
   std::weak_ptr<GfContainer> insert(gfwl_toplevel *toplevel);
   void parse_containers();
+
+private:
+  void set_to_output_size();
 };
 
 void set_focused_toplevel_container(std::weak_ptr<GfContainer> container);
