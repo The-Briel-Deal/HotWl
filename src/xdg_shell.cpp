@@ -50,8 +50,10 @@ void focus_toplevel(struct gfwl_toplevel* toplevel,
    * clients without additional work on your part.
    */
   if (keyboard != NULL) {
-    wlr_seat_keyboard_notify_enter(seat, toplevel->xdg_toplevel->base->surface,
-                                   keyboard->keycodes, keyboard->num_keycodes,
+    wlr_seat_keyboard_notify_enter(seat,
+                                   toplevel->xdg_toplevel->base->surface,
+                                   keyboard->keycodes,
+                                   keyboard->num_keycodes,
                                    &keyboard->modifiers);
   }
 }
@@ -116,7 +118,8 @@ static void xdg_toplevel_destroy(struct wl_listener*    listener,
 }
 
 static void begin_interactive(struct gfwl_toplevel* toplevel,
-                              enum gfwl_cursor_mode mode, uint32_t edges) {
+                              enum gfwl_cursor_mode mode,
+                              uint32_t              edges) {
   /* This function sets up an interactive move or resize operation, where the
    * compositor stops propegating pointer events to clients and instead
    * consumes them itself, to move or resize windows. */

@@ -17,17 +17,21 @@ void focus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
   struct wlr_keyboard* keyboard    = wlr_seat_get_keyboard(seat);
   gfwl_layer_surface->prev_focused = seat->keyboard_state.focused_surface;
 
-  wlr_seat_keyboard_notify_enter(
-      seat, gfwl_layer_surface->wlr_layer_surface->surface, keyboard->keycodes,
-      keyboard->num_keycodes, &keyboard->modifiers);
+  wlr_seat_keyboard_notify_enter(seat,
+                                 gfwl_layer_surface->wlr_layer_surface->surface,
+                                 keyboard->keycodes,
+                                 keyboard->num_keycodes,
+                                 &keyboard->modifiers);
 }
 
 void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
   struct wlr_seat*     seat     = gfwl_layer_surface->server->seat;
   struct wlr_keyboard* keyboard = wlr_seat_get_keyboard(seat);
 
-  wlr_seat_keyboard_notify_enter(seat, gfwl_layer_surface->prev_focused,
-                                 keyboard->keycodes, keyboard->num_keycodes,
+  wlr_seat_keyboard_notify_enter(seat,
+                                 gfwl_layer_surface->prev_focused,
+                                 keyboard->keycodes,
+                                 keyboard->num_keycodes,
                                  &keyboard->modifiers);
 }
 

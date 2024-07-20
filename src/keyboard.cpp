@@ -86,14 +86,14 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
     server->focused_output->tiling_state->flip_split_direction();
   else if (sym == server->config.keybinds.next_monitor) {
     // TODO: Make these a helper function.
-    auto next_output =
-        std::next(std::find(server->outputs.begin(), server->outputs.end(),
-                            server->focused_output));
+    auto next_output = std::next(std::find(server->outputs.begin(),
+                                           server->outputs.end(),
+                                           server->focused_output));
     if (next_output != server->outputs.end() && *next_output != nullptr)
       server->focused_output = *next_output;
   } else if (sym == server->config.keybinds.prev_monitor) {
-    auto curr_output = std::find(server->outputs.begin(), server->outputs.end(),
-                                 server->focused_output);
+    auto curr_output = std::find(
+        server->outputs.begin(), server->outputs.end(), server->focused_output);
     auto prev_output = std::prev(curr_output);
     if (curr_output != server->outputs.begin() && *prev_output != nullptr)
       server->focused_output = *prev_output;
@@ -136,8 +136,8 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   if (!handled) {
     /* Otherwise, we pass it along to the client. */
     wlr_seat_set_keyboard(seat, keyboard->wlr_keyboard);
-    wlr_seat_keyboard_notify_key(seat, event->time_msec, event->keycode,
-                                 event->state);
+    wlr_seat_keyboard_notify_key(
+        seat, event->time_msec, event->keycode, event->state);
   }
 }
 

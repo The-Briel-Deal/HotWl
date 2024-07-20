@@ -26,7 +26,9 @@ bool set_keybind(xkb_keysym_t& bind, json keyname_json) {
 }
 
 wlr_keyboard_modifier get_mod_from_string(std::string mod_str) {
-  std::transform(mod_str.begin(), mod_str.end(), mod_str.begin(),
+  std::transform(mod_str.begin(),
+                 mod_str.end(),
+                 mod_str.begin(),
                  [](unsigned char c) { return std::tolower(c); });
   if (mod_str == "super" || mod_str == "logo" || mod_str == "meta") {
     return WLR_MODIFIER_LOGO;

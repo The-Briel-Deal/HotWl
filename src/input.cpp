@@ -40,8 +40,8 @@ void seat_request_cursor(struct wl_listener* listener, void* data) {
      * provided surface as the cursor image. It will set the hardware cursor
      * on the output that it's currently on and continue to do so as the
      * cursor moves between outputs. */
-    wlr_cursor_set_surface(server->cursor, event->surface, event->hotspot_x,
-                           event->hotspot_y);
+    wlr_cursor_set_surface(
+        server->cursor, event->surface, event->hotspot_x, event->hotspot_y);
   }
 }
 

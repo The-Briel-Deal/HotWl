@@ -25,6 +25,8 @@ AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBraces: Attach
 BreakBeforeTernaryOperators: false
 BreakConstructorInitializers: AfterColon
+BinPackArguments: false
+BinPackParameters: false
 ColumnLimit: 80
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false

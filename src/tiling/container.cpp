@@ -88,7 +88,8 @@ void GfContainer::move_container_to(std::weak_ptr<GfContainer> new_parent) {
 
   prev_parent_child_containers.erase(
       std::find(prev_parent_child_containers.begin(),
-                prev_parent_child_containers.end(), this_locked));
+                prev_parent_child_containers.end(),
+                this_locked));
 
   new_parent.lock()->child_containers.insert(
       new_parent.lock()->child_containers.begin(), this_locked);
@@ -102,16 +103,18 @@ GfContainer::insert_sibling(gfwl_toplevel* to_insert) {
   auto parent = parent_container.lock();
   assert(parent);
   /* Get position of this container in its parent. */
-  auto pos =
-      std::find(parent->child_containers.begin(),
-                parent->child_containers.end(), this->shared_from_this());
+  auto pos = std::find(parent->child_containers.begin(),
+                       parent->child_containers.end(),
+                       this->shared_from_this());
   /* Emplace a new container before the afformentioned pos in the parent. */
   auto toplevel_container =
       parent->child_containers
           .emplace(pos,
-                   std::make_shared<GfContainer>(
-                       to_insert, *to_insert->server, parent->weak_from_this(),
-                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state))
+                   std::make_shared<GfContainer>(to_insert,
+                                                 *to_insert->server,
+                                                 parent->weak_from_this(),
+                                                 GFWL_CONTAINER_TOPLEVEL,
+                                                 this->tiling_state))
           ->get()
           ->weak_from_this();
 
@@ -127,9 +130,11 @@ GfContainer::insert_sibling(gfwl_toplevel* to_insert) {
 std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel* to_insert) {
   auto toplevel_container =
       this->child_containers
-          .emplace_back(std::make_shared<GfContainer>(
-              to_insert, *to_insert->server, this->weak_from_this(),
-              GFWL_CONTAINER_TOPLEVEL, this->tiling_state))
+          .emplace_back(std::make_shared<GfContainer>(to_insert,
+                                                      *to_insert->server,
+                                                      this->weak_from_this(),
+                                                      GFWL_CONTAINER_TOPLEVEL,
+                                                      this->tiling_state))
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
   // As an optimization down the road, I can try just parsing the changes
@@ -146,9 +151,11 @@ GfContainer::insert_child(gfwl_toplevel*             to_insert,
           .emplace(std::find(this->child_containers.begin(),
                              this->child_containers.end(),
                              insert_before.lock()),
-                   std::make_shared<GfContainer>(
-                       to_insert, *to_insert->server, this->weak_from_this(),
-                       GFWL_CONTAINER_TOPLEVEL, this->tiling_state))
+                   std::make_shared<GfContainer>(to_insert,
+                                                 *to_insert->server,
+                                                 this->weak_from_this(),
+                                                 GFWL_CONTAINER_TOPLEVEL,
+                                                 this->tiling_state))
           ->get()
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
@@ -164,24 +171,30 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
-      .emplace_back(std::make_shared<GfContainer>(
-          to_insert, *to_insert->server, this->weak_from_this(),
-          split_container_type, this->tiling_state))
+      .emplace_back(std::make_shared<GfContainer>(to_insert,
+                                                  *to_insert->server,
+                                                  this->weak_from_this(),
+                                                  split_container_type,
+                                                  this->tiling_state))
       ->insert_child(to_insert);
 }
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    gfwl_toplevel* to_insert, std::weak_ptr<GfContainer> insert_after,
-    enum gfwl_container_type split_container_type) {
+    gfwl_toplevel*             to_insert,
+    std::weak_ptr<GfContainer> insert_after,
+    enum gfwl_container_type   split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
       .emplace(std::find(this->child_containers.begin(),
-                         this->child_containers.end(), insert_after.lock()),
-               std::make_shared<GfContainer>(
-                   to_insert, *to_insert->server, this->weak_from_this(),
-                   split_container_type, this->tiling_state))
+                         this->child_containers.end(),
+                         insert_after.lock()),
+               std::make_shared<GfContainer>(to_insert,
+                                             *to_insert->server,
+                                             this->weak_from_this(),
+                                             split_container_type,
+                                             this->tiling_state))
       ->get()
       ->insert_child(to_insert);
 }
@@ -205,10 +218,10 @@ gfwl_split_direction GfContainer::get_split_dir_longer() {
 }
 
 void GfContainer::close() {
-  auto parent = this->parent_container.lock();
-  auto position_in_parent =
-      std::find(parent->child_containers.begin(),
-                parent->child_containers.end(), this->shared_from_this());
+  auto parent             = this->parent_container.lock();
+  auto position_in_parent = std::find(parent->child_containers.begin(),
+                                      parent->child_containers.end(),
+                                      this->shared_from_this());
 
   parent->child_containers.erase(position_in_parent);
   if (parent->child_containers.empty() &&

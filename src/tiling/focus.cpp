@@ -169,8 +169,8 @@ get_container_in_dir(enum gfwl_tiling_focus_direction dir,
   auto toplevel_container_list = state->root->get_top_level_container_list();
 
   std::shared_ptr<GfContainer> to_focus =
-      find_closest_to_origin_in_dir(curr_focused_origin,
-                                    toplevel_container_list, dir)
+      find_closest_to_origin_in_dir(
+          curr_focused_origin, toplevel_container_list, dir)
           .lock();
 
   if (to_focus) {

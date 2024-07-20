@@ -19,19 +19,21 @@ class GfContainer : public std::enable_shared_from_this<GfContainer> {
 
 public:
   /* This will be used for non root containers in theory. */
-  explicit GfContainer(gfwl_toplevel* const toplevel, GfServer& server,
+  explicit GfContainer(gfwl_toplevel* const         toplevel,
+                       GfServer&                    server,
                        std::weak_ptr<GfContainer>   parent_container,
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), parent_container(parent_container),
-      tiling_state(tiling_state), toplevel(toplevel), server(server){};
+      tiling_state(tiling_state), toplevel(toplevel), server(server) {};
 
   /* I have this constructor without a parent container for root containers. */
-  explicit GfContainer(gfwl_toplevel* const toplevel, GfServer& server,
+  explicit GfContainer(gfwl_toplevel* const         toplevel,
+                       GfServer&                    server,
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), tiling_state(tiling_state), toplevel(toplevel),
-      server(server){};
+      server(server) {};
 
   ~GfContainer();
 
@@ -95,10 +97,11 @@ private:
 
 class GfContainerRoot : public GfContainer {
 public:
-  explicit GfContainerRoot(gfwl_toplevel* const toplevel, GfServer& server,
+  explicit GfContainerRoot(gfwl_toplevel* const         toplevel,
+                           GfServer&                    server,
                            const gfwl_container_type    e_type,
                            std::weak_ptr<GfTilingState> tiling_state) :
-      GfContainer(toplevel, server, e_type, tiling_state){};
+      GfContainer(toplevel, server, e_type, tiling_state) {};
 
   std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
   void                       parse_containers();
