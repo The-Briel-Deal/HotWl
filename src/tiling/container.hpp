@@ -53,11 +53,8 @@ public:
   std::vector<std::shared_ptr<GfContainer>> child_containers;
   std::weak_ptr<GfTilingState>              tiling_state;
 
-  /* References to the associated toplevel and server
-   * TODO: I would later like to make this a shared pointer, container should
-   * be the owner. */
-  gfwl_toplevel* const toplevel = NULL;
-  GfServer&            server;
+  gfwl_toplevel* const                      toplevel = NULL;
+  GfServer&                                 server;
 
 private:
   /* These should only be called on split containers. These methods iterate
