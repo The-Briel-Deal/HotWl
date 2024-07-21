@@ -14,11 +14,11 @@ executable(
 		# Tiling
 		'tiling/focus.cpp',
 		'tiling/state.cpp',
-		'tiling/container.cpp',
 
 		# Containers
 		'tiling/container/base.cpp',
 		'tiling/container/root.cpp',
+		'tiling/container/toplevel.cpp',
 
 		# Config
 		'conf/config.cpp',

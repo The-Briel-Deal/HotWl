@@ -1,10 +1,4 @@
-#include "state.hpp"
-#include "wlr/util/box.h"
-#include <cassert>
-#include <includes.hpp>
-#include <memory>
-#include <output.hpp>
-#include <server.hpp>
+#include "toplevel.hpp"
 #include <xdg_shell.hpp>
 
 GfContainerToplevel::~GfContainerToplevel() {
