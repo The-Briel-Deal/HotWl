@@ -123,7 +123,7 @@ static void begin_interactive(struct gfwl_toplevel* toplevel,
   /* This function sets up an interactive move or resize operation, where the
    * compositor stops propegating pointer events to clients and instead
    * consumes them itself, to move or resize windows. */
-  struct GfServer*    server = toplevel->server;
+  class GfServer*    server = toplevel->server;
   struct wlr_surface* focused_surface =
       server->seat->pointer_state.focused_surface;
   if (toplevel->xdg_toplevel->base->surface !=

@@ -18,6 +18,8 @@ GfServer::GfServer() {
   xdg_shell     = wlr_xdg_shell_create(wl_display, 3);
   cursor        = wlr_cursor_create();
   cursor_mgr    = wlr_xcursor_manager_create(NULL, 24);
+  xdg_output_manager_v1 =
+      wlr_xdg_output_manager_v1_create(wl_display, output_layout);
 
   wlr_renderer_init_wl_display(renderer, wl_display);
 
