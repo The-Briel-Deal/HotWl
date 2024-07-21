@@ -96,34 +96,6 @@ void GfContainer::move_container_to(std::weak_ptr<GfContainer> new_parent) {
   this->parent_container = new_parent;
 }
 
-/* Insert directly after this container, returns a weak pointer to the new
- * container. */
-std::weak_ptr<GfContainer>
-GfContainer::insert_sibling(gfwl_toplevel* to_insert) {
-  auto parent = parent_container.lock();
-  assert(parent);
-  /* Get position of this container in its parent. */
-  auto pos = std::find(parent->child_containers.begin(),
-                       parent->child_containers.end(),
-                       this->shared_from_this());
-  /* Emplace a new container before the afformentioned pos in the parent. */
-  auto toplevel_container = parent->child_containers
-                                .emplace(pos,
-                                         std::make_shared<GfContainerToplevel>(
-                                             to_insert,
-                                             *to_insert->server,
-                                             parent->weak_from_this(),
-                                             this->tiling_state))
-                                ->get()
-                                ->weak_from_this();
-
-  /* Set the new container as the parent in the toplevel. */
-  to_insert->parent_container = toplevel_container;
-  this->tiling_state.lock()->root->parse_containers();
-
-  return toplevel_container;
-}
-
 // Inserting the toplevel directly, returns a weak pointer to the new
 // container.
 std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel* to_insert) {
@@ -134,27 +106,6 @@ std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel* to_insert) {
                                                     *to_insert->server,
                                                     this->weak_from_this(),
                                                     this->tiling_state))
-          ->weak_from_this();
-  to_insert->parent_container = toplevel_container;
-  // As an optimization down the road, I can try just parsing the changes
-  // containers.
-  this->tiling_state.lock()->root->parse_containers();
-  return toplevel_container;
-}
-
-std::weak_ptr<GfContainer>
-GfContainer::insert_child(gfwl_toplevel*             to_insert,
-                          std::weak_ptr<GfContainer> insert_before) {
-  auto toplevel_container =
-      this->child_containers
-          .emplace(std::find(this->child_containers.begin(),
-                             this->child_containers.end(),
-                             insert_before.lock()),
-                   std::make_shared<GfContainerToplevel>(to_insert,
-                                                         *to_insert->server,
-                                                         this->weak_from_this(),
-                                                         this->tiling_state))
-          ->get()
           ->weak_from_this();
   to_insert->parent_container = toplevel_container;
   // As an optimization down the road, I can try just parsing the changes

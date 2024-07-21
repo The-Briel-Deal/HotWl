@@ -55,25 +55,12 @@ public:
   GfServer&                                 server;
 
 private:
-  /* These should only be called on split containers. These methods iterate
-   * through all direct child containers and divide their height either
-   * vertically or horizontally. */
-  void vert_split_containers();
-  void hori_split_containers();
-  /* Sets the size and position of a container based on a wlr_box. */
+  void         vert_split_containers();
+  void         hori_split_containers();
   virtual void set_container_box(struct wlr_box box);
-  /* The Dimensions of a container. */
 
-  /* Position Manipulation */
-  void move_container_to(std::weak_ptr<GfContainer> new_parent);
-
-  std::weak_ptr<GfContainer> insert_sibling(gfwl_toplevel* toplevel);
-
+  void         move_container_to(std::weak_ptr<GfContainer> new_parent);
   std::weak_ptr<GfContainer> insert_child(gfwl_toplevel* toplevel);
-
-  std::weak_ptr<GfContainer>
-  insert_child(gfwl_toplevel*             toplevel,
-               std::weak_ptr<GfContainer> insert_before);
 
   std::weak_ptr<GfContainer>
   insert_based_on_longer_dir(gfwl_toplevel* toplevel);
