@@ -1,3 +1,4 @@
+#include "wlr/util/box.h"
 #include <assert.h>
 #include <includes.hpp>
 #include <layer_shell.hpp>
@@ -57,13 +58,38 @@ bool center_scene_layer_surface(
   return true;
 }
 
+wlr_box get_box_from_anchors(wlr_scene_layer_surface_v1* scene_layer_surface) {
+  auto    state  = scene_layer_surface->layer_surface->pending;
+  auto    output = scene_layer_surface->layer_surface->output;
+  wlr_box box    = {
+         .x      = 0,
+         .y      = 0,
+         .width  = static_cast<int>(state.desired_width),
+         .height = static_cast<int>(state.desired_height),
+  };
+  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) {
+    box.x = 0;
+  }
+  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) {
+    box.y = output->height - box.height;
+  }
+  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) {
+    box.width = output->width;
+  }
+  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) {
+    // Handle Top Positioning Here.
+  }
+  return box;
+}
+
 void handle_layer_surface_map(struct wl_listener*    listener,
                               [[maybe_unused]] void* data) {
   struct gfwl_layer_surface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
-  center_scene_layer_surface(gfwl_layer_surface->scene,
-                             gfwl_layer_surface->wlr_layer_surface->output);
+  // TODO: Figure out a better condition to do this on for things like fuzzel
+  // center_scene_layer_surface(gfwl_layer_surface->scene,
+  //                            gfwl_layer_surface->wlr_layer_surface->output);
   focus_layer_surface(gfwl_layer_surface);
 }
 
@@ -80,7 +106,12 @@ void handle_layer_surface_commit(struct wl_listener*    listener,
       wl_container_of(listener, gfwl_layer_surface, commit);
 
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
-    wlr_layer_surface_v1_configure(gfwl_layer_surface->wlr_layer_surface, 0, 0);
+    // TODO: Finish get box from anchors and start waybar with compositor.
+    wlr_box box = get_box_from_anchors(gfwl_layer_surface->scene);
+    wlr_scene_node_set_position(
+        &gfwl_layer_surface->scene->tree->node, box.x, box.y);
+    wlr_layer_surface_v1_configure(
+        gfwl_layer_surface->wlr_layer_surface, box.width, box.height);
   }
 }
 
