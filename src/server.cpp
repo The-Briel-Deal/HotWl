@@ -1,10 +1,10 @@
 #include <input.hpp>
 #include <layer_shell.hpp>
-#include <xdg_shell.hpp>
 #include <output.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>
 #include <server.hpp>
+#include <xdg_shell.hpp>
 
 GfServer::GfServer() {
 
