@@ -15,6 +15,7 @@ executable(
 		'tiling/focus.cpp',
 		'tiling/state.cpp',
 		'tiling/container.cpp',
+		'tiling/container/base.cpp',
 
 		# Config
 		'conf/config.cpp',
