@@ -1,24 +1,15 @@
-#include "container.hpp"
 #include "state.hpp"
 #include "wlr/util/box.h"
-#include "wlr/util/log.h"
-#include <algorithm>
 #include <cassert>
-#include <deque>
 #include <includes.hpp>
 #include <memory>
 #include <output.hpp>
 #include <server.hpp>
-#include <vector>
 #include <xdg_shell.hpp>
 
 GfContainerToplevel::~GfContainerToplevel() {
   wlr_xdg_toplevel_send_close(this->toplevel->xdg_toplevel);
   this->tiling_state.lock()->root->parse_containers();
-}
-
-std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel* to_insert) {
-  return this->insert_based_on_longer_dir(to_insert);
 }
 
 std::weak_ptr<GfContainer> GfContainerRoot::insert(gfwl_toplevel* to_insert) {
@@ -41,11 +32,6 @@ void GfContainerRoot::parse_containers() {
   this->parse_children();
 }
 
-// The default behavior for all containers is to just set the containers box.
-void GfContainer::set_container_box(struct wlr_box box_in) {
-  this->box = box_in;
-}
-
 // But for toplevels, we also need to set the toplevel's pos and size.
 void GfContainerToplevel::set_container_box(struct wlr_box box_in) {
   this->box = box_in;
@@ -55,31 +41,4 @@ void GfContainerToplevel::set_container_box(struct wlr_box box_in) {
 
   auto scene_tree = static_cast<wlr_scene_tree*>(xdg_toplevel->base->data);
   wlr_scene_node_set_position(&scene_tree->node, box_in.x, box_in.y);
-}
-
-// Get A List of Toplevels below this Container node.
-std::vector<std::weak_ptr<GfContainer>>
-GfContainer::get_top_level_container_list() {
-  std::vector<std::weak_ptr<GfContainer>> list;
-  std::deque<std::weak_ptr<GfContainer>>  stack;
-
-  for (auto output : server.outputs) {
-    stack.push_back(output->tiling_state->root);
-  }
-
-  while (!stack.empty()) {
-    auto curr_node = stack.back();
-    stack.pop_back();
-    for (auto child : curr_node.lock()->child_containers) {
-      switch (child->e_type) {
-        case GFWL_CONTAINER_TOPLEVEL: list.push_back(child); break;
-        case GFWL_CONTAINER_HSPLIT: stack.push_back(child); break;
-        case GFWL_CONTAINER_VSPLIT: stack.push_back(child); break;
-        case GFWL_CONTAINER_ROOT: break;
-        case GFWL_CONTAINER_UNKNOWN: break;
-        default: break;
-      }
-    }
-  }
-  return list;
 }

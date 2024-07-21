@@ -6,34 +6,47 @@
 #include <tiling/focus.hpp>
 #include <xdg_shell.hpp>
 
-// TODO: Add this to container or move to helpers.
-void focus_next_in_stack(std::weak_ptr<GfContainer>             curr,
-                         std::deque<std::weak_ptr<GfContainer>> stack) {
-  while (!stack.empty()) {
-    if (!stack.front().expired() && stack.front().lock() != curr.lock()) {
-      auto toplevel_container =
-          dynamic_cast<GfContainerToplevel*>(stack.front().lock().get());
-      if (toplevel_container != NULL) {
-        focus_toplevel(
-            toplevel_container->toplevel,
-            toplevel_container->toplevel->xdg_toplevel->base->surface);
-        return;
-      }
-    }
-    stack.pop_front();
-  }
-}
-
-// Return const reference to containers box.
 const wlr_box& GfContainer::get_box() {
   return this->box;
 }
 
-// This is intended for toplevel containers.
+void GfContainer::set_container_box(struct wlr_box box_in) {
+  this->box = box_in;
+}
+
+// Get A List of Toplevels below this Container node.
+std::vector<std::weak_ptr<GfContainer>>
+GfContainer::get_top_level_container_list() {
+  std::vector<std::weak_ptr<GfContainer>> list;
+  std::deque<std::weak_ptr<GfContainer>>  stack;
+
+  for (auto output : server.outputs) {
+    stack.push_back(output->tiling_state->root);
+  }
+
+  while (!stack.empty()) {
+    auto curr_node = stack.back();
+    stack.pop_back();
+    for (auto child : curr_node.lock()->child_containers) {
+      switch (child->e_type) {
+        case GFWL_CONTAINER_TOPLEVEL: list.push_back(child); break;
+        case GFWL_CONTAINER_HSPLIT: stack.push_back(child); break;
+        case GFWL_CONTAINER_VSPLIT: stack.push_back(child); break;
+        case GFWL_CONTAINER_ROOT: break;
+        case GFWL_CONTAINER_UNKNOWN: break;
+        default: break;
+      }
+    }
+  }
+  return list;
+}
+
+std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel* to_insert) {
+  return this->insert_based_on_longer_dir(to_insert);
+}
+
 std::weak_ptr<GfContainer>
 GfContainer::insert_based_on_longer_dir(gfwl_toplevel* to_insert) {
-  // TODO: I will likely have to make sure the container is inserted at the
-  // right position.
   assert(this->e_type == GFWL_CONTAINER_TOPLEVEL);
   auto                       parent           = this->parent_container.lock();
   auto                       split_dir_longer = this->get_split_dir_longer();
@@ -147,6 +160,22 @@ gfwl_split_direction GfContainer::get_split_dir_longer() {
   return GFWL_SPLIT_DIR_VERT;
 }
 
+void focus_next_in_stack(std::weak_ptr<GfContainer>             curr,
+                         std::deque<std::weak_ptr<GfContainer>> stack) {
+  while (!stack.empty()) {
+    if (!stack.front().expired() && stack.front().lock() != curr.lock()) {
+      auto toplevel_container =
+          dynamic_cast<GfContainerToplevel*>(stack.front().lock().get());
+      if (toplevel_container != NULL) {
+        focus_toplevel(
+            toplevel_container->toplevel,
+            toplevel_container->toplevel->xdg_toplevel->base->surface);
+        return;
+      }
+    }
+    stack.pop_front();
+  }
+}
 void GfContainer::close() {
   auto parent             = this->parent_container.lock();
   auto position_in_parent = std::find(parent->child_containers.begin(),
