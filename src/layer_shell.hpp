@@ -4,7 +4,7 @@
 
 struct gfwl_layer_surface {
   struct wl_list                     link;
-  struct gfwl_output*                output;
+  std::shared_ptr<gfwl_output>       output;
   struct wlr_scene_layer_surface_v1* scene;
   struct wlr_layer_surface_v1*       wlr_layer_surface;
   struct wlr_surface*                prev_focused;

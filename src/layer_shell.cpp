@@ -37,49 +37,64 @@ void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
 }
 
 // Returns false if failed.
-bool center_scene_layer_surface(
-    struct wlr_scene_layer_surface_v1* scene_layer_surface,
-    struct wlr_output*                 wlr_output) {
-  assert(wlr_output);
-  if (!wlr_output || !scene_layer_surface)
-    return false;
+wlr_box center_scene_layer_surface(gfwl_layer_surface* layer_surface) {
+  auto    scene_layer_surface = layer_surface->scene;
+  auto    wlr_output          = layer_surface->output->wlr_output;
+  wlr_box box                 = {.x     = 0,
+                                 .y     = 0,
+                                 .width = static_cast<int>(
+                     layer_surface->wlr_layer_surface->pending.desired_width),
+                                 .height = static_cast<int>(
+                     layer_surface->wlr_layer_surface->pending.desired_height)};
 
   int32_t op_x = wlr_output->width;
   int32_t op_y = wlr_output->height;
 
-  assert(scene_layer_surface);
-  if (scene_layer_surface) {
-    scene_layer_surface->tree->node.x =
-        (op_x - scene_layer_surface->layer_surface->pending.desired_width) / 2;
-    scene_layer_surface->tree->node.y =
-        (op_y - scene_layer_surface->layer_surface->pending.desired_height) / 2;
-  }
+  box.x =
+      (op_x - scene_layer_surface->layer_surface->pending.desired_width) / 2;
+  box.y =
+      (op_y - scene_layer_surface->layer_surface->pending.desired_height) / 2;
 
-  return true;
+  return box;
 }
 
-wlr_box get_box_from_anchors(wlr_scene_layer_surface_v1* scene_layer_surface) {
-  auto    state  = scene_layer_surface->layer_surface->pending;
-  auto    output = scene_layer_surface->layer_surface->output;
-  wlr_box box    = {
-         .x      = 0,
-         .y      = 0,
-         .width  = static_cast<int>(state.desired_width),
-         .height = static_cast<int>(state.desired_height),
+void get_box_from_anchors(gfwl_layer_surface* layer_surface) {
+  auto    state  = layer_surface->scene->layer_surface->pending;
+  auto    anchor = state.anchor;
+  auto    output = layer_surface->scene->layer_surface->output;
+  wlr_box box;
+
+  if (!anchor) {
+    box = center_scene_layer_surface(layer_surface);
+  } else {
+    box = {
+        .x      = 0,
+        .y      = 0,
+        .width  = static_cast<int>(state.desired_width),
+        .height = static_cast<int>(state.desired_height),
+    };
+    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) {
+      box.x = 0;
+    }
+    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) {
+      box.y = output->height - box.height;
+    }
+    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) {
+      box.width = output->width;
+    }
+    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) {
+      // TODO: Handle Top Positioning Here.
+    }
+  }
+
+  wlr_box output_box = {
+      .x      = layer_surface->output->scene_output->x,
+      .y      = layer_surface->output->scene_output->y,
+      .width  = layer_surface->output->wlr_output->width,
+      .height = layer_surface->output->wlr_output->height,
   };
-  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) {
-    box.x = 0;
-  }
-  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) {
-    box.y = output->height - box.height;
-  }
-  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) {
-    box.width = output->width;
-  }
-  if (state.anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) {
-    // Handle Top Positioning Here.
-  }
-  return box;
+
+  wlr_scene_layer_surface_v1_configure(layer_surface->scene, &output_box, &box);
 }
 
 void handle_layer_surface_map(struct wl_listener*    listener,
@@ -88,8 +103,6 @@ void handle_layer_surface_map(struct wl_listener*    listener,
       wl_container_of(listener, gfwl_layer_surface, map);
 
   // TODO: Figure out a better condition to do this on for things like fuzzel
-  // center_scene_layer_surface(gfwl_layer_surface->scene,
-  //                            gfwl_layer_surface->wlr_layer_surface->output);
   focus_layer_surface(gfwl_layer_surface);
 }
 
@@ -106,17 +119,11 @@ void handle_layer_surface_commit(struct wl_listener*    listener,
       wl_container_of(listener, gfwl_layer_surface, commit);
 
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
-    // TODO: Finish get box from anchors and start waybar with compositor.
-    wlr_box box = get_box_from_anchors(gfwl_layer_surface->scene);
-    wlr_scene_node_set_position(
-        &gfwl_layer_surface->scene->tree->node, box.x, box.y);
-    wlr_layer_surface_v1_configure(
-        gfwl_layer_surface->wlr_layer_surface, box.width, box.height);
+    get_box_from_anchors(gfwl_layer_surface);
   }
 }
 
 void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
-  // Grab our server (parent of the listener).
   class GfServer* server =
       wl_container_of(listener, server, new_layer_shell_surface);
   if (!server) {
@@ -124,14 +131,12 @@ void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
     return;
   }
 
-  // Grab layer surface.
   struct wlr_layer_surface_v1* wlr_layer_surface = (wlr_layer_surface_v1*)data;
   if (!wlr_layer_surface) {
     wlr_log(WLR_ERROR, "No layer surface.");
     return;
   }
 
-  // Dynamically allocate a new layer surface wrapper and save callback args.
   struct gfwl_layer_surface* gfwl_layer_surface =
       (struct gfwl_layer_surface*)calloc(1, sizeof(*gfwl_layer_surface));
   if (!gfwl_layer_surface) {
@@ -141,41 +146,18 @@ void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
   gfwl_layer_surface->wlr_layer_surface = wlr_layer_surface;
   gfwl_layer_surface->server            = server;
 
-  // Check for layer surface output.
-  if (!wlr_layer_surface->output) {
-    wlr_log(WLR_INFO, "No output on layer surface.");
-    struct wlr_seat* seat = server->seat;
-    if (!seat) {
-      wlr_log(WLR_ERROR, "No seat.");
-      return;
+  if (wlr_layer_surface->output) {
+    for (auto output : server->outputs) {
+      if (output->wlr_output == wlr_layer_surface->output) {
+        gfwl_layer_surface->output = output;
+        break;
+      }
     }
-
-    // TODO: Make this not always just put the layer shell on the first output
-    // lol.
-    // Get first output.
-    struct std::shared_ptr<gfwl_output> gfwl_output = server->outputs[0];
-    if (!gfwl_output) {
-      wlr_log(WLR_ERROR, "No output.");
-      return;
-    }
-
-    // Set layer_surface output.
-    if (gfwl_output->wlr_output) {
-      wlr_layer_surface->output = gfwl_output->wlr_output;
-    } else {
-      wlr_log(WLR_ERROR, "gfwl_output has no wlr_output.");
-      return;
-    }
+  } else {
+    auto gfwl_output           = server->focused_output;
+    gfwl_layer_surface->output = gfwl_output;
+    wlr_layer_surface->output  = gfwl_output->wlr_output;
   }
-  // Get gfwl_output from wlr_output
-  struct gfwl_output* gfwl_output =
-      wl_container_of(wlr_layer_surface->output, gfwl_output, wlr_output);
-  if (!gfwl_output) {
-    wlr_log(WLR_ERROR, "No gfwl_output is parent of wlr_output.");
-    return;
-  }
-
-  gfwl_layer_surface->output = gfwl_output;
 
   // Create the scene.
   struct wlr_scene_layer_surface_v1* scene_surface =
