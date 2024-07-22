@@ -87,14 +87,31 @@ void get_box_from_anchors(gfwl_layer_surface* layer_surface) {
     }
   }
 
-  wlr_box output_box = {
+  wlr_box usable_box = {
       .x      = layer_surface->output->scene_output->x,
       .y      = layer_surface->output->scene_output->y,
       .width  = layer_surface->output->wlr_output->width,
       .height = layer_surface->output->wlr_output->height,
   };
+  wlr_box usable_area = {0, 0, 0, 0};
+  wlr_output_effective_resolution(
+      output, &usable_area.width, &usable_area.height);
+  const struct wlr_box full_area = usable_area;
 
-  wlr_scene_layer_surface_v1_configure(layer_surface->scene, &output_box, &box);
+  wlr_log(WLR_INFO,
+          "Break Height: %i, Width: %i, x: %i, y: %i",
+          usable_area.height,
+          usable_area.width,
+          usable_area.x,
+          usable_area.y);
+  wlr_scene_layer_surface_v1_configure(
+      layer_surface->scene, &full_area, &usable_area);
+  wlr_log(WLR_INFO,
+          "Break Height: %i, Width: %i, x: %i, y: %i",
+          usable_area.height,
+          usable_area.width,
+          usable_area.x,
+          usable_area.y);
 }
 
 void handle_layer_surface_map(struct wl_listener*    listener,
@@ -102,7 +119,6 @@ void handle_layer_surface_map(struct wl_listener*    listener,
   struct gfwl_layer_surface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
-  // TODO: Figure out a better condition to do this on for things like fuzzel
   focus_layer_surface(gfwl_layer_surface);
 }
 
@@ -115,6 +131,7 @@ void handle_layer_surface_unmap(struct wl_listener*    listener,
 
 void handle_layer_surface_commit(struct wl_listener*    listener,
                                  [[maybe_unused]] void* data) {
+  wlr_log(WLR_INFO, "Commited Layer Surface Change");
   struct gfwl_layer_surface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
