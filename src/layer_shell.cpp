@@ -59,59 +59,15 @@ wlr_box center_scene_layer_surface(gfwl_layer_surface* layer_surface) {
 }
 
 void get_box_from_anchors(gfwl_layer_surface* layer_surface) {
-  auto    state  = layer_surface->scene->layer_surface->pending;
-  auto    anchor = state.anchor;
   auto    output = layer_surface->scene->layer_surface->output;
-  wlr_box box;
 
-  if (!anchor) {
-    box = center_scene_layer_surface(layer_surface);
-  } else {
-    box = {
-        .x      = 0,
-        .y      = 0,
-        .width  = static_cast<int>(state.desired_width),
-        .height = static_cast<int>(state.desired_height),
-    };
-    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) {
-      box.x = 0;
-    }
-    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) {
-      box.y = output->height - box.height;
-    }
-    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) {
-      box.width = output->width;
-    }
-    if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) {
-      // TODO: Handle Top Positioning Here.
-    }
-  }
-
-  wlr_box usable_box = {
-      .x      = layer_surface->output->scene_output->x,
-      .y      = layer_surface->output->scene_output->y,
-      .width  = layer_surface->output->wlr_output->width,
-      .height = layer_surface->output->wlr_output->height,
-  };
   wlr_box usable_area = {0, 0, 0, 0};
   wlr_output_effective_resolution(
       output, &usable_area.width, &usable_area.height);
   const struct wlr_box full_area = usable_area;
 
-  wlr_log(WLR_INFO,
-          "Break Height: %i, Width: %i, x: %i, y: %i",
-          usable_area.height,
-          usable_area.width,
-          usable_area.x,
-          usable_area.y);
   wlr_scene_layer_surface_v1_configure(
       layer_surface->scene, &full_area, &usable_area);
-  wlr_log(WLR_INFO,
-          "Break Height: %i, Width: %i, x: %i, y: %i",
-          usable_area.height,
-          usable_area.width,
-          usable_area.x,
-          usable_area.y);
 }
 
 void handle_layer_surface_map(struct wl_listener*    listener,
