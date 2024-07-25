@@ -13,6 +13,18 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/util/box.h>
 
+void gfwl_output::set_usable_space(wlr_box box) {
+  this->usable_space = box;
+}
+wlr_box gfwl_output::get_usable_space() {
+  if (wlr_box_empty(&this->usable_space)) {
+    wlr_box usable_area{0, 0, 0, 0};
+    wlr_output_effective_resolution(
+        this->wlr_output, &usable_area.width, &usable_area.height);
+    this->set_usable_space(usable_area);
+  }
+  return this->usable_space;
+};
 // Gets the output that a container is in.
 std::shared_ptr<gfwl_output>
 get_output_from_container(std::shared_ptr<GfContainer> container) {

@@ -46,6 +46,7 @@ void get_box_from_anchors(gfwl_layer_surface* layer_surface) {
 
   wlr_scene_layer_surface_v1_configure(
       layer_surface->scene, &full_area, &usable_area);
+  layer_surface->output->set_usable_space(usable_area);
 }
 
 void handle_layer_surface_map(struct wl_listener*    listener,
@@ -54,6 +55,7 @@ void handle_layer_surface_map(struct wl_listener*    listener,
       wl_container_of(listener, gfwl_layer_surface, map);
 
   focus_layer_surface(gfwl_layer_surface);
+  get_box_from_anchors(gfwl_layer_surface);
 }
 
 void handle_layer_surface_unmap(struct wl_listener*    listener,

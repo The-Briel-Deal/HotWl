@@ -1,4 +1,5 @@
 #pragma once
+#include "wlr/util/box.h"
 #include <memory>
 #include <tiling/state.hpp>
 #include <wayland-server-core.h>
@@ -16,6 +17,11 @@ struct gfwl_output {
   struct wl_listener               frame;
   struct wl_listener               request_state;
   struct wl_listener               destroy;
+  void                             set_usable_space(wlr_box box);
+  wlr_box                          get_usable_space();
+
+private:
+  wlr_box usable_space = {0, 0, 0, 0};
 };
 
 void server_new_output(struct wl_listener* listener, void* data);
