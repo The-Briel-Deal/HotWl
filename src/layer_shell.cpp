@@ -36,7 +36,7 @@ void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
                                  &keyboard->modifiers);
 }
 
-void get_box_from_anchors(gfwl_layer_surface* layer_surface) {
+void configure_anchored_layer_surface(gfwl_layer_surface* layer_surface) {
   auto    output = layer_surface->scene->layer_surface->output;
 
   wlr_box usable_area = {0, 0, 0, 0};
@@ -55,7 +55,7 @@ void handle_layer_surface_map(struct wl_listener*    listener,
       wl_container_of(listener, gfwl_layer_surface, map);
 
   focus_layer_surface(gfwl_layer_surface);
-  get_box_from_anchors(gfwl_layer_surface);
+  configure_anchored_layer_surface(gfwl_layer_surface);
 }
 
 void handle_layer_surface_unmap(struct wl_listener*    listener,
@@ -72,7 +72,7 @@ void handle_layer_surface_commit(struct wl_listener*    listener,
       wl_container_of(listener, gfwl_layer_surface, commit);
 
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
-    get_box_from_anchors(gfwl_layer_surface);
+    configure_anchored_layer_surface(gfwl_layer_surface);
   }
 }
 
