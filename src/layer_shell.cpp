@@ -36,28 +36,6 @@ void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
                                  &keyboard->modifiers);
 }
 
-// Returns false if failed.
-wlr_box center_scene_layer_surface(gfwl_layer_surface* layer_surface) {
-  auto    scene_layer_surface = layer_surface->scene;
-  auto    wlr_output          = layer_surface->output->wlr_output;
-  wlr_box box                 = {.x     = 0,
-                                 .y     = 0,
-                                 .width = static_cast<int>(
-                     layer_surface->wlr_layer_surface->pending.desired_width),
-                                 .height = static_cast<int>(
-                     layer_surface->wlr_layer_surface->pending.desired_height)};
-
-  int32_t op_x = wlr_output->width;
-  int32_t op_y = wlr_output->height;
-
-  box.x =
-      (op_x - scene_layer_surface->layer_surface->pending.desired_width) / 2;
-  box.y =
-      (op_y - scene_layer_surface->layer_surface->pending.desired_height) / 2;
-
-  return box;
-}
-
 void get_box_from_anchors(gfwl_layer_surface* layer_surface) {
   auto    output = layer_surface->scene->layer_surface->output;
 
