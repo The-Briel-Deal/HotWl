@@ -10,6 +10,7 @@
 #include <vector>
 #include <wayland-server-core.h>
 
+// TODO: fix prefix.
 enum gfwl_cursor_mode {
   TINYWL_CURSOR_PASSTHROUGH,
   TINYWL_CURSOR_MOVE,
@@ -69,3 +70,5 @@ public:
 
   GfConfig                                  config;
 };
+
+extern GfServer g_Server;
