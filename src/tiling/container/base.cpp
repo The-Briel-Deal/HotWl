@@ -147,8 +147,7 @@ void GfContainer::set_focused_toplevel_container() {
 
   auto sp_tiling_state = this->tiling_state.lock();
   if (sp_tiling_state) {
-    g_Server.active_toplevel_container.push_front(
-        this->weak_from_this());
+    g_Server.active_toplevel_container.push_front(this->weak_from_this());
   }
 }
 

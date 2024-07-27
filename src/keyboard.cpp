@@ -2,9 +2,11 @@
 #include "tiling/state.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <iterator>
 #include <keyboard.hpp>
+#include <optional>
 #include <scene.hpp>
 #include <server.hpp>
 #include <string>
@@ -51,7 +53,7 @@ static void keyboard_handle_modifiers(struct wl_listener*    listener,
 static void launch_app(const std::string& path) {
   pid_t pid = fork();
   if (pid == 0) {
-    execv(path.c_str(), nullptr);
+    execlp(path.c_str(), nullptr);
   }
 }
 
@@ -65,9 +67,9 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
    */
 
   if (sym == server->config.keybinds.new_term) {
-    launch_app("/usr/bin/kitty");
+    launch_app("kitty");
   } else if (sym == server->config.keybinds.launcher) {
-    launch_app("/usr/bin/fuzzel");
+    launch_app("fuzzel");
   } else if (sym == server->config.keybinds.exit) {
     wl_display_terminate(server->wl_display);
   } else if (sym == server->config.keybinds.tiling_focus_left) {
@@ -114,7 +116,7 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   class GfServer*       server   = keyboard->server;
   struct wlr_keyboard_key_event* event =
       static_cast<wlr_keyboard_key_event*>(data);
-  struct wlr_seat*               seat  = server->seat;
+  struct wlr_seat* seat = server->seat;
 
   /* Translate libinput keycode -> xkbcommon */
   uint32_t keycode = event->keycode + 8;
@@ -150,8 +152,8 @@ void server_new_keyboard(class GfServer*          server,
 
   struct gfwl_keyboard* keyboard =
       static_cast<gfwl_keyboard*>(calloc(1, sizeof(*keyboard)));
-  keyboard->server               = server;
-  keyboard->wlr_keyboard         = wlr_keyboard;
+  keyboard->server       = server;
+  keyboard->wlr_keyboard = wlr_keyboard;
 
   /* We need to prepare an XKB keymap and assign it to the keyboard. This
    * assumes the defaults (e.g. layout = "us"). */

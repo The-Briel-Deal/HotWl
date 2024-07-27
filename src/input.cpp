@@ -1,3 +1,4 @@
+#include "server.hpp"
 #include <includes.hpp>
 #include <keyboard.hpp>
 #include <pointer.hpp>
@@ -45,13 +46,12 @@ void seat_request_cursor(struct wl_listener* listener, void* data) {
   }
 }
 
-void seat_request_set_selection(struct wl_listener* listener, void* data) {
+void seat_request_set_selection(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised by the seat when a client wants to set the selection,
    * usually when the user copies something. wlroots allows compositors to
    * ignore such requests if they so choose, but in gfwl we always honor
    */
-  GfServer* server = wl_container_of(listener, server, request_set_selection);
   struct wlr_seat_request_set_selection_event* event =
       static_cast<wlr_seat_request_set_selection_event*>(data);
-  wlr_seat_set_selection(server->seat, event->source, event->serial);
+  wlr_seat_set_selection(g_Server.seat, event->source, event->serial);
 }
