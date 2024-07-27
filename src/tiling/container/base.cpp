@@ -30,10 +30,10 @@ GfContainer::get_top_level_container_list() {
     for (const auto& child : curr_node.lock()->child_containers) {
       switch (child->e_type) {
         case GFWL_CONTAINER_TOPLEVEL: list.push_back(child); break;
-        case GFWL_CONTAINER_HSPLIT: stack.push_back(child); break;
+        case GFWL_CONTAINER_HSPLIT:
         case GFWL_CONTAINER_VSPLIT: stack.push_back(child); break;
-        case GFWL_CONTAINER_ROOT: break;
-        case GFWL_CONTAINER_UNKNOWN: break;
+        case GFWL_CONTAINER_ROOT:
+        case GFWL_CONTAINER_UNKNOWN:
         default: break;
       }
     }
