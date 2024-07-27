@@ -9,7 +9,8 @@
 GfServer::GfServer() {
 
   wl_display = wl_display_create();
-  backend = wlr_backend_autocreate(wl_display_get_event_loop(wl_display), NULL);
+  backend =
+      wlr_backend_autocreate(wl_display_get_event_loop(wl_display), nullptr);
   renderer      = wlr_renderer_autocreate(backend);
   allocator     = wlr_allocator_autocreate(backend, renderer);
   output_layout = wlr_output_layout_create(wl_display);
@@ -17,7 +18,7 @@ GfServer::GfServer() {
   layer_shell   = wlr_layer_shell_v1_create(wl_display, 1);
   xdg_shell     = wlr_xdg_shell_create(wl_display, 3);
   cursor        = wlr_cursor_create();
-  cursor_mgr    = wlr_xcursor_manager_create(NULL, 24);
+  cursor_mgr    = wlr_xcursor_manager_create(nullptr, 24);
   xdg_output_manager_v1 =
       wlr_xdg_output_manager_v1_create(wl_display, output_layout);
 
@@ -29,7 +30,7 @@ GfServer::GfServer() {
   wlr_data_device_manager_create(wl_display);
   wlr_cursor_attach_output_layout(cursor, output_layout);
 
-  // TODO: I don't think I need this anymore, I should be using vectors.
+  // TODO(gabe): I don't think I need this anymore, I should be using vectors.
   wl_list_init(&toplevels);
 
   /* Signals */

@@ -6,22 +6,25 @@
 #include <includes.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <utility>
 #include <xkbcommon/xkbcommon.h>
 
 using json = nlohmann::json;
 
-bool set_keybind(xkb_keysym_t& bind, json keyname_json) {
-  if (!keyname_json.is_string())
+bool set_keybind(xkb_keysym_t& bind, const json& keyname_json) {
+  if (!keyname_json.is_string()) {
     return false;
+  }
 
   std::string  keyname = keyname_json;
   xkb_keysym_t new_bind =
       xkb_keysym_from_name(keyname.c_str(), XKB_KEYSYM_CASE_INSENSITIVE);
 
-  if (bind && new_bind)
+  if (bind && new_bind) {
     bind = new_bind;
-  else
+  } else {
     return false;
+  }
   return true;
 }
 
@@ -32,32 +35,35 @@ wlr_keyboard_modifier get_mod_from_string(std::string mod_str) {
                  [](unsigned char c) { return std::tolower(c); });
   if (mod_str == "super" || mod_str == "logo" || mod_str == "meta") {
     return WLR_MODIFIER_LOGO;
-  } else if (mod_str == "ctrl" || mod_str == "control") {
+  }
+  if (mod_str == "ctrl" || mod_str == "control") {
     return WLR_MODIFIER_CTRL;
   } else if (mod_str == "shift") {
     return WLR_MODIFIER_SHIFT;
   } else if (mod_str == "alt") {
     return WLR_MODIFIER_ALT;
   }
-  return (wlr_keyboard_modifier)NULL;
+  return static_cast<wlr_keyboard_modifier>(NULL);
 }
 
-bool set_mod(xkb_mod_mask_t& modmask, json modname_json) {
-  if (!modname_json.is_string())
+bool set_mod(xkb_mod_mask_t& modmask, const json& modname_json) {
+  if (!modname_json.is_string()) {
     return false;
+  }
 
   std::string    keyname  = modname_json;
   xkb_mod_mask_t new_mask = get_mod_from_string(keyname);
 
-  if (modmask && new_mask)
+  if (modmask && new_mask) {
     modmask = new_mask;
-  else
+  } else {
     return false;
+  }
   return true;
 }
 
 // Return true if it succeeds.
-bool GfConfig::parse_file(std::string config_path) {
+bool GfConfig::parse_file(const std::string& config_path) {
   // Create input filestream for config file.
 
   std::ifstream f(config_path);
@@ -93,5 +99,5 @@ GfConfig::GfConfig() {
 }
 
 GfConfig::GfConfig(std::string config_path) {
-  parse_file(config_path);
+  parse_file(std::move(config_path));
 }

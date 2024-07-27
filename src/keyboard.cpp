@@ -2,11 +2,11 @@
 #include "tiling/state.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <iterator>
 #include <keyboard.hpp>
 #include <scene.hpp>
 #include <server.hpp>
-#include <stdlib.h>
 #include <string>
 #include <tiling/focus.hpp>
 #include <unistd.h>
@@ -48,10 +48,10 @@ static void keyboard_handle_modifiers(struct wl_listener*    listener,
                                      &keyboard->wlr_keyboard->modifiers);
 }
 
-static void launch_app(std::string path) {
+static void launch_app(const std::string& path) {
   pid_t pid = fork();
   if (pid == 0) {
-    execv(path.c_str(), NULL);
+    execv(path.c_str(), nullptr);
   }
 }
 
@@ -64,39 +64,41 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
    * This function assumes your mod is pressed.
    */
 
-  if (sym == server->config.keybinds.new_term)
+  if (sym == server->config.keybinds.new_term) {
     launch_app("/usr/bin/kitty");
-  else if (sym == server->config.keybinds.launcher)
+  } else if (sym == server->config.keybinds.launcher) {
     launch_app("/usr/bin/fuzzel");
-  else if (sym == server->config.keybinds.exit)
+  } else if (sym == server->config.keybinds.exit) {
     wl_display_terminate(server->wl_display);
-  else if (sym == server->config.keybinds.tiling_focus_left)
+  } else if (sym == server->config.keybinds.tiling_focus_left) {
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_LEFT,
                              server->focused_output->tiling_state);
-  else if (sym == server->config.keybinds.tiling_focus_down)
+  } else if (sym == server->config.keybinds.tiling_focus_down) {
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_DOWN,
                              server->focused_output->tiling_state);
-  else if (sym == server->config.keybinds.tiling_focus_up)
+  } else if (sym == server->config.keybinds.tiling_focus_up) {
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_UP,
                              server->focused_output->tiling_state);
-  else if (sym == server->config.keybinds.tiling_focus_right)
+  } else if (sym == server->config.keybinds.tiling_focus_right) {
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT,
                              server->focused_output->tiling_state);
-  else if (sym == server->config.keybinds.flip_split_direction)
+  } else if (sym == server->config.keybinds.flip_split_direction) {
     server->focused_output->tiling_state->flip_split_direction();
-  else if (sym == server->config.keybinds.next_monitor) {
-    // TODO: Make these a helper function.
+  } else if (sym == server->config.keybinds.next_monitor) {
+    // TODO(gabe): Make these a helper function.
     auto next_output = std::next(std::find(server->outputs.begin(),
                                            server->outputs.end(),
                                            server->focused_output));
-    if (next_output != server->outputs.end() && *next_output != nullptr)
+    if (next_output != server->outputs.end() && *next_output != nullptr) {
       server->focused_output = *next_output;
+    }
   } else if (sym == server->config.keybinds.prev_monitor) {
     auto curr_output = std::find(
         server->outputs.begin(), server->outputs.end(), server->focused_output);
     auto prev_output = std::prev(curr_output);
-    if (curr_output != server->outputs.begin() && *prev_output != nullptr)
+    if (curr_output != server->outputs.begin() && *prev_output != nullptr) {
       server->focused_output = *prev_output;
+    }
   } else if (sym == server->config.keybinds.close_surface &&
              !server->active_toplevel_container.empty() &&
              !server->active_toplevel_container.front().expired()) {
@@ -110,7 +112,8 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   /* This event is raised when a key is pressed or released. */
   struct gfwl_keyboard* keyboard = wl_container_of(listener, keyboard, key);
   class GfServer*       server   = keyboard->server;
-  struct wlr_keyboard_key_event* event = (wlr_keyboard_key_event*)data;
+  struct wlr_keyboard_key_event* event =
+      static_cast<wlr_keyboard_key_event*>(data);
   struct wlr_seat*               seat  = server->seat;
 
   /* Translate libinput keycode -> xkbcommon */
@@ -123,7 +126,7 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   bool     handled   = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
 
-  // TODO: Make this modifier configurable.
+  // TODO(gabe): Make this modifier configurable.
   if ((modifiers & server->config.keybinds.modmask) &&
       event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
     /* If alt is held down and this button was _pressed_, we attempt to
@@ -145,7 +148,8 @@ void server_new_keyboard(class GfServer*          server,
                          struct wlr_input_device* device) {
   struct wlr_keyboard*  wlr_keyboard = wlr_keyboard_from_input_device(device);
 
-  struct gfwl_keyboard* keyboard = (gfwl_keyboard*)calloc(1, sizeof(*keyboard));
+  struct gfwl_keyboard* keyboard =
+      static_cast<gfwl_keyboard*>(calloc(1, sizeof(*keyboard)));
   keyboard->server               = server;
   keyboard->wlr_keyboard         = wlr_keyboard;
 
@@ -153,7 +157,7 @@ void server_new_keyboard(class GfServer*          server,
    * assumes the defaults (e.g. layout = "us"). */
   struct xkb_context* context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
   struct xkb_keymap*  keymap =
-      xkb_keymap_new_from_names(context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
+      xkb_keymap_new_from_names(context, nullptr, XKB_KEYMAP_COMPILE_NO_FLAGS);
 
   wlr_keyboard_set_keymap(wlr_keyboard, keymap);
   xkb_keymap_unref(keymap);

@@ -8,7 +8,7 @@ public:
                            std::weak_ptr<GfTilingState> tiling_state) :
       GfContainer(server, e_type, tiling_state){};
 
-  std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
+  std::weak_ptr<GfContainer> insert(gfwl_toplevel* to_insert);
   void                       parse_containers();
   void                       close();
 

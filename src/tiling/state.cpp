@@ -8,10 +8,11 @@
  * DEPRECATED: Moving to this being the containers responsibility.
  * Flips tiling states split_dir */
 void GfTilingState::flip_split_direction() {
-  if (this->split_dir == GFWL_SPLIT_DIR_HORI)
+  if (this->split_dir == GFWL_SPLIT_DIR_HORI) {
     this->split_dir = GFWL_SPLIT_DIR_VERT;
-  else
+  } else {
     this->split_dir = GFWL_SPLIT_DIR_HORI;
+  }
 }
 
 /* Once we make the call to the appropriate container, its up to the container
@@ -27,7 +28,6 @@ std::weak_ptr<GfContainer> GfTilingState::insert(gfwl_toplevel* toplevel) {
               .get() == this) {
     return this->server->active_toplevel_container.front().lock()->insert(
         toplevel);
-  } else {
-    return this->root->insert(toplevel);
   }
+  return this->root->insert(toplevel);
 }

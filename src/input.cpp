@@ -10,7 +10,7 @@ void server_new_input(struct wl_listener* listener, void* data) {
   /* This event is raised by the backend when a new input device becomes
    * available. */
   GfServer* server = wl_container_of(listener, server, new_input);
-  struct wlr_input_device* device = (wlr_input_device*)data;
+  struct wlr_input_device* device = static_cast<wlr_input_device*>(data);
   switch (device->type) {
     case WLR_INPUT_DEVICE_KEYBOARD: server_new_keyboard(server, device); break;
     case WLR_INPUT_DEVICE_POINTER: server_new_pointer(server, device); break;
@@ -30,7 +30,7 @@ void seat_request_cursor(struct wl_listener* listener, void* data) {
   GfServer* server = wl_container_of(listener, server, request_cursor);
   /* This event is raised by the seat when a client provides a cursor image */
   struct wlr_seat_pointer_request_set_cursor_event* event =
-      (wlr_seat_pointer_request_set_cursor_event*)data;
+      static_cast<wlr_seat_pointer_request_set_cursor_event*>(data);
   struct wlr_seat_client* focused_client =
       server->seat->pointer_state.focused_client;
   /* This can be sent by any client, so we check to make sure this one is
@@ -52,6 +52,6 @@ void seat_request_set_selection(struct wl_listener* listener, void* data) {
    */
   GfServer* server = wl_container_of(listener, server, request_set_selection);
   struct wlr_seat_request_set_selection_event* event =
-      (wlr_seat_request_set_selection_event*)data;
+      static_cast<wlr_seat_request_set_selection_event*>(data);
   wlr_seat_set_selection(server->seat, event->source, event->serial);
 }

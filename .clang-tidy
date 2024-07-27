@@ -19,7 +19,7 @@ Checks: >
   -modernize-use-trailing-return-type,
   -modernize-concat-nested-namespaces,
   -modernize-use-nodiscard,
-  -modernize-use-auto
+  -modernize-use-auto,
   -modernize-avoid-c-arrays,
   -performance-move-const-arg,
   -performance-avoid-endl,

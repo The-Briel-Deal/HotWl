@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 #include <conf/config.hpp>
 #include <getopt.h>
 #include <includes.hpp>
@@ -9,10 +9,10 @@
 #include <pointer.hpp>
 #include <scene.hpp>
 #include <server.hpp>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <unistd.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
@@ -35,8 +35,8 @@
 #include <xkbcommon/xkbcommon.h>
 
 int main(int argc, char* argv[]) {
-  wlr_log_init(WLR_DEBUG, NULL);
-  char* startup_cmd = NULL;
+  wlr_log_init(WLR_DEBUG, nullptr);
+  char* startup_cmd = nullptr;
 
   // Iterate through args until it finds a -s then save to startup_cmd.
   int c;
@@ -54,18 +54,18 @@ int main(int argc, char* argv[]) {
   /* Create Server - This is where all important state is stored. */
   GfServer server;
 
-  // TODO: Move these checks to another function.
-  if (server.backend == NULL) {
+  // TODO(gabe): Move these checks to another function.
+  if (server.backend == nullptr) {
     wlr_log(WLR_ERROR, "failed to create wlr_backend");
     return 1;
   }
 
-  if (server.renderer == NULL) {
+  if (server.renderer == nullptr) {
     wlr_log(WLR_ERROR, "failed to create wlr_renderer");
     return 1;
   }
 
-  if (server.allocator == NULL) {
+  if (server.allocator == nullptr) {
     wlr_log(WLR_ERROR, "failed to create wlr_allocator");
     return 1;
   }
@@ -96,10 +96,10 @@ int main(int argc, char* argv[]) {
 
   /* Set the WAYLAND_DISPLAY environment variable to our socket and run the
    * startup command if requested. */
-  setenv("WAYLAND_DISPLAY", socket, true);
+  setenv("WAYLAND_DISPLAY", socket, 1);
   if (startup_cmd) {
     if (fork() == 0) {
-      execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void*)NULL);
+      execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void*)nullptr);
     }
   }
   /* Run the Wayland event loop. This does not return until you exit the

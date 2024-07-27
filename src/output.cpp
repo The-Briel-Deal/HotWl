@@ -1,9 +1,9 @@
+#include <cstdlib>
 #include <includes.hpp>
 #include <memory>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
-#include <stdlib.h>
 #include <tiling/container.hpp>
 #include <tiling/focus.hpp>
 #include <wayland-server-core.h>
@@ -27,7 +27,7 @@ wlr_box gfwl_output::get_usable_space() {
 };
 // Gets the output that a container is in.
 std::shared_ptr<gfwl_output>
-get_output_from_container(std::shared_ptr<GfContainer> container) {
+get_output_from_container(const std::shared_ptr<GfContainer>& container) {
   auto container_point = get_container_origin(container); // container->box;
   auto server          = container->server;
   auto outputs         = server.outputs;
@@ -45,11 +45,12 @@ get_output_from_container(std::shared_ptr<GfContainer> container) {
       return output;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 // Focuses the output that the container is in.
-void focus_output_from_container(std::shared_ptr<GfContainer> container) {
+void focus_output_from_container(
+    const std::shared_ptr<GfContainer>& container) {
   auto  output = get_output_from_container(container);
   auto& server = container->server;
   if (output) {
@@ -70,7 +71,7 @@ static void output_frame(struct wl_listener*    listener,
       wlr_scene_get_scene_output(scene, output->wlr_output);
 
   /* Render the scene if needed and commit the output */
-  wlr_scene_output_commit(scene_output, NULL);
+  wlr_scene_output_commit(scene_output, nullptr);
 
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
@@ -83,7 +84,7 @@ static void output_request_state(struct wl_listener* listener, void* data) {
    * when the output window is resized. */
   struct gfwl_output* output = wl_container_of(listener, output, request_state);
   const struct wlr_output_event_request_state* event =
-      (wlr_output_event_request_state*)data;
+      static_cast<wlr_output_event_request_state*>(data);
   wlr_output_commit_state(output->wlr_output, event->state);
 }
 
@@ -102,7 +103,7 @@ void server_new_output(struct wl_listener* listener, void* data) {
   /* This event is raised by the backend when a new output (aka a display or
    * monitor) becomes available. */
   GfServer*          server     = wl_container_of(listener, server, new_output);
-  struct wlr_output* wlr_output = (struct wlr_output*)data;
+  struct wlr_output* wlr_output = static_cast<struct wlr_output*>(data);
 
   /* Configures the output created by the backend to use our allocator
    * and our renderer. Must be done once, before commiting the output */
@@ -119,7 +120,7 @@ void server_new_output(struct wl_listener* listener, void* data) {
    * just pick the monitor's preferred mode, a more sophisticated compositor
    * would let the user configure it. */
   struct wlr_output_mode* mode = wlr_output_preferred_mode(wlr_output);
-  if (mode != NULL) {
+  if (mode != nullptr) {
     wlr_output_state_set_mode(&state, mode);
   }
 
@@ -147,7 +148,7 @@ void server_new_output(struct wl_listener* listener, void* data) {
   server->focused_output = output;
   server->outputs.push_back(output);
 
-  // TODO: Maybe move this to the constructor of tiling state.
+  // TODO(gabe): Maybe move this to the constructor of tiling state.
   // (I actually think this may be worth doing inheritance for)
   output->tiling_state->root = std::make_shared<GfContainerRoot>(
       *server, GFWL_CONTAINER_ROOT, output->tiling_state->weak_from_this());

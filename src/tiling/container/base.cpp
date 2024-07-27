@@ -20,14 +20,14 @@ GfContainer::get_top_level_container_list() {
   std::vector<std::weak_ptr<GfContainer>> list;
   std::deque<std::weak_ptr<GfContainer>>  stack;
 
-  for (auto output : server.outputs) {
+  for (const auto& output : server.outputs) {
     stack.push_back(output->tiling_state->root);
   }
 
   while (!stack.empty()) {
     auto curr_node = stack.back();
     stack.pop_back();
-    for (auto child : curr_node.lock()->child_containers) {
+    for (const auto& child : curr_node.lock()->child_containers) {
       switch (child->e_type) {
         case GFWL_CONTAINER_TOPLEVEL: list.push_back(child); break;
         case GFWL_CONTAINER_HSPLIT: stack.push_back(child); break;
@@ -77,7 +77,8 @@ GfContainer::insert_based_on_longer_dir(gfwl_toplevel* to_insert) {
   return this->parent_container;
 }
 
-void GfContainer::move_container_to(std::weak_ptr<GfContainer> new_parent) {
+void GfContainer::move_container_to(
+    const std::weak_ptr<GfContainer>& new_parent) {
   auto  this_locked = this->shared_from_this();
   auto& prev_parent_child_containers =
       this->parent_container.lock()->child_containers;
@@ -125,9 +126,9 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    gfwl_toplevel*             to_insert,
-    std::weak_ptr<GfContainer> insert_after,
-    enum gfwl_container_type   split_container_type) {
+    gfwl_toplevel*                    to_insert,
+    const std::weak_ptr<GfContainer>& insert_after,
+    enum gfwl_container_type          split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
@@ -151,22 +152,23 @@ void GfContainer::set_focused_toplevel_container() {
   }
 }
 
-gfwl_split_direction GfContainer::get_split_dir_longer() {
-  // TODO: This will fail once too many windows are open. Maybe do something
-  // about this?
+gfwl_split_direction GfContainer::get_split_dir_longer() const {
+  // TODO(gabe): This will fail once too many windows are open. Maybe do
+  // something about this?
   assert(this->box.height && this->box.height);
-  if (this->box.width >= this->box.height)
+  if (this->box.width >= this->box.height) {
     return GFWL_SPLIT_DIR_HORI;
+  }
   return GFWL_SPLIT_DIR_VERT;
 }
 
-void focus_next_in_stack(std::weak_ptr<GfContainer>             curr,
+void focus_next_in_stack(const std::weak_ptr<GfContainer>&      curr,
                          std::deque<std::weak_ptr<GfContainer>> stack) {
   while (!stack.empty()) {
     if (!stack.front().expired() && stack.front().lock() != curr.lock()) {
-      auto toplevel_container =
+      auto* toplevel_container =
           dynamic_cast<GfContainerToplevel*>(stack.front().lock().get());
-      if (toplevel_container != NULL) {
+      if (toplevel_container != nullptr) {
         focus_toplevel(
             toplevel_container->toplevel,
             toplevel_container->toplevel->xdg_toplevel->base->surface);
@@ -194,11 +196,10 @@ void GfContainer::close() {
 }
 
 /* Close Should not do anything on the Root container */
-void GfContainerRoot::close() {
-  return;
-}
+void GfContainerRoot::close() {}
 
-enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {
+enum gfwl_split_direction
+GfContainer::get_split_dir_from_container_type() const {
   switch (this->e_type) {
     case GFWL_CONTAINER_VSPLIT: return GFWL_SPLIT_DIR_VERT;
     case GFWL_CONTAINER_HSPLIT: return GFWL_SPLIT_DIR_HORI;
@@ -209,11 +210,11 @@ enum gfwl_split_direction GfContainer::get_split_dir_from_container_type() {
   }
 }
 
-// TODO: Replace duplicate parts with generalized helpers.
+// TODO(gabe): Replace duplicate parts with generalized helpers.
 // Change this to get output size from the parent.
 void GfContainer::vert_split_containers() {
   // Get count.
-  auto count = int(this->child_containers.size());
+  auto count = static_cast<int>(this->child_containers.size());
   if (count == 0) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
@@ -226,7 +227,7 @@ void GfContainer::vert_split_containers() {
 
   // Set all sizes. (recycling count for the index)
   count = 0;
-  for (auto curr : this->child_containers) {
+  for (const auto& curr : this->child_containers) {
     wlr_box curr_box = {.x      = this->box.x,
                         .y      = this->box.y + (per_win_height * count),
                         .width  = width,
@@ -238,7 +239,7 @@ void GfContainer::vert_split_containers() {
 
 void GfContainer::hori_split_containers() {
   // Get count.
-  auto count = int(this->child_containers.size());
+  auto count = static_cast<int>(this->child_containers.size());
   if (count == 0) {
     wlr_log(WLR_DEBUG, "You probably don't want to divide by 0");
     return;
@@ -252,7 +253,7 @@ void GfContainer::hori_split_containers() {
 
   // Set all sizes. (recycling count for the index)
   count = 0;
-  for (auto curr : this->child_containers) {
+  for (const auto& curr : this->child_containers) {
     wlr_box curr_box = {.x      = this->box.x + (count * per_win_width),
                         .y      = this->box.y,
                         .width  = per_win_width,
@@ -272,7 +273,7 @@ void GfContainer::split_containers() {
 }
 
 void GfContainer::parse_children() {
-  for (auto child : this->child_containers) {
+  for (const auto& child : this->child_containers) {
     if (child->e_type == GFWL_CONTAINER_HSPLIT ||
         child->e_type == GFWL_CONTAINER_VSPLIT) {
       child->parse_containers();

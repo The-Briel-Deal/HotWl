@@ -1,12 +1,12 @@
 #include "wlr/util/box.h"
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
 #include <includes.hpp>
 #include <layer_shell.hpp>
 #include <memory>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
-#include <stdlib.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_scene.h>
@@ -37,7 +37,7 @@ void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
 }
 
 void configure_anchored_layer_surface(gfwl_layer_surface* layer_surface) {
-  auto    output = layer_surface->scene->layer_surface->output;
+  auto*   output = layer_surface->scene->layer_surface->output;
 
   wlr_box usable_area = {0, 0, 0, 0};
   wlr_output_effective_resolution(
@@ -84,14 +84,16 @@ void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
     return;
   }
 
-  struct wlr_layer_surface_v1* wlr_layer_surface = (wlr_layer_surface_v1*)data;
+  struct wlr_layer_surface_v1* wlr_layer_surface =
+      static_cast<wlr_layer_surface_v1*>(data);
   if (!wlr_layer_surface) {
     wlr_log(WLR_ERROR, "No layer surface.");
     return;
   }
 
   struct gfwl_layer_surface* gfwl_layer_surface =
-      (struct gfwl_layer_surface*)calloc(1, sizeof(*gfwl_layer_surface));
+      static_cast<struct gfwl_layer_surface*>(
+          calloc(1, sizeof(*gfwl_layer_surface)));
   if (!gfwl_layer_surface) {
     wlr_log(WLR_ERROR, "No gfwl layer surface.");
     return;
@@ -100,7 +102,7 @@ void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
   gfwl_layer_surface->server            = server;
 
   if (wlr_layer_surface->output) {
-    for (auto output : server->outputs) {
+    for (const auto& output : server->outputs) {
       if (output->wlr_output == wlr_layer_surface->output) {
         gfwl_layer_surface->output = output;
         break;

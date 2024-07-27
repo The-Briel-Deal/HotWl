@@ -14,7 +14,7 @@ public:
   GfConfig(std::string config_path);
   std::string get_option(std::string);
   std::string set_option(std::string);
-  bool        parse_file(std::string);
+  bool        parse_file(const std::string&);
 
   struct GfKeybinds {
     xkb_mod_mask_t modmask = WLR_MODIFIER_CTRL;

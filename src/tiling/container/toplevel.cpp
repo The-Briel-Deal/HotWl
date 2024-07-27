@@ -10,9 +10,9 @@ GfContainerToplevel::~GfContainerToplevel() {
 void GfContainerToplevel::set_container_box(struct wlr_box box_in) {
   this->box = box_in;
 
-  auto xdg_toplevel = this->toplevel->xdg_toplevel;
+  auto* xdg_toplevel = this->toplevel->xdg_toplevel;
   wlr_xdg_toplevel_set_size(xdg_toplevel, box_in.width, box_in.height);
 
-  auto scene_tree = static_cast<wlr_scene_tree*>(xdg_toplevel->base->data);
+  auto* scene_tree = static_cast<wlr_scene_tree*>(xdg_toplevel->base->data);
   wlr_scene_node_set_position(&scene_tree->node, box_in.x, box_in.y);
 }

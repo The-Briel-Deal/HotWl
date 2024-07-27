@@ -25,10 +25,10 @@ void server_new_pointer(GfServer* server, struct wlr_input_device* device) {
 void reset_cursor_mode(GfServer* server) {
   /* Reset the cursor mode to passthrough. */
   server->cursor_mode      = TINYWL_CURSOR_PASSTHROUGH;
-  server->grabbed_toplevel = NULL;
+  server->grabbed_toplevel = nullptr;
 }
 
-static void process_cursor_move(GfServer* server, uint32_t _) {
+static void process_cursor_move(GfServer* server) {
   /* Move the grabbed toplevel to the new position. */
   struct gfwl_toplevel* toplevel = server->grabbed_toplevel;
   wlr_scene_node_set_position(&toplevel->scene_tree->node,
@@ -91,19 +91,21 @@ static void process_cursor_resize(GfServer* server, uint32_t _) {
 static void process_cursor_motion(GfServer* server, uint32_t time) {
   /* If the mode is non-passthrough, delegate to those functions. */
   if (server->cursor_mode == TINYWL_CURSOR_MOVE) {
-    process_cursor_move(server, time);
+    process_cursor_move(server);
     return;
-  } else if (server->cursor_mode == TINYWL_CURSOR_RESIZE) {
+  }
+  if (server->cursor_mode == TINYWL_CURSOR_RESIZE) {
     process_cursor_resize(server, time);
     return;
   }
 
   /* Otherwise, find the toplevel under the pointer and send the event along. */
-  double              sx, sy;
+  double              sx;
+  double              sy;
   struct wlr_seat*    seat        = server->seat;
-  struct wlr_surface* wlr_surface = NULL;
-  // TODO: This has yet to be tested. First I need to add a check to make sure
-  // desktop_toplevel_at isn't overriding this. Also, fuzzel doesn't do any
+  struct wlr_surface* wlr_surface = nullptr;
+  // TODO(gabe): This has yet to be tested. First I need to add a check to make
+  // sure desktop_toplevel_at isn't overriding this. Also, fuzzel doesn't do any
   // mouse things. And Wofi is crashing.
 
   struct gfwl_toplevel* toplevel = desktop_toplevel_at(
@@ -140,7 +142,8 @@ void server_cursor_motion(struct wl_listener* listener, void* data) {
   /* This event is forwarded by the cursor when a pointer emits a _relative_
    * pointer motion event (i.e. a delta) */
   GfServer* server = wl_container_of(listener, server, cursor_motion);
-  struct wlr_pointer_motion_event* event = (wlr_pointer_motion_event*)data;
+  struct wlr_pointer_motion_event* event =
+      static_cast<wlr_pointer_motion_event*>(data);
   /* The cursor doesn't move unless we tell it to. The cursor automatically
    * handles constraining the motion to the output layout, as well as any
    * special configuration applied for the specific input device which
@@ -162,7 +165,7 @@ void server_cursor_motion_absolute(struct wl_listener* listener, void* data) {
    * emits these events. */
   GfServer* server = wl_container_of(listener, server, cursor_motion_absolute);
   struct wlr_pointer_motion_absolute_event* event =
-      (wlr_pointer_motion_absolute_event*)data;
+      static_cast<wlr_pointer_motion_absolute_event*>(data);
   wlr_cursor_warp_absolute(
       server->cursor, &event->pointer->base, event->x, event->y);
   process_cursor_motion(server, event->time_msec);
@@ -172,12 +175,14 @@ void server_cursor_button(struct wl_listener* listener, void* data) {
   /* This event is forwarded by the cursor when a pointer emits a button
    * event. */
   GfServer* server = wl_container_of(listener, server, cursor_button);
-  struct wlr_pointer_button_event* event = (wlr_pointer_button_event*)data;
+  struct wlr_pointer_button_event* event =
+      static_cast<wlr_pointer_button_event*>(data);
   /* Notify the client with pointer focus that a button press has occurred */
   wlr_seat_pointer_notify_button(
       server->seat, event->time_msec, event->button, event->state);
-  double                sx, sy;
-  struct wlr_surface*   surface  = NULL;
+  double                sx;
+  double                sy;
+  struct wlr_surface*   surface  = nullptr;
   struct gfwl_toplevel* toplevel = desktop_toplevel_at(
       server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
   if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
@@ -193,7 +198,8 @@ void server_cursor_axis(struct wl_listener* listener, void* data) {
   /* This event is forwarded by the cursor when a pointer emits an axis event,
    * for example when you move the scroll wheel. */
   GfServer* server = wl_container_of(listener, server, cursor_axis);
-  struct wlr_pointer_axis_event* event = (wlr_pointer_axis_event*)data;
+  struct wlr_pointer_axis_event* event =
+      static_cast<wlr_pointer_axis_event*>(data);
   /* Notify the client with pointer focus of the axis event. */
   wlr_seat_pointer_notify_axis(server->seat,
                                event->time_msec,
@@ -226,27 +232,28 @@ struct gfwl_toplevel* desktop_toplevel_at(GfServer*            server,
    * surface in the surface tree of a gfwl_toplevel. */
   struct wlr_scene_node* node =
       wlr_scene_node_at(&server->scene.root->tree.node, lx, ly, sx, sy);
-  if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
-    return NULL;
+  if (node == nullptr || node->type != WLR_SCENE_NODE_BUFFER) {
+    return nullptr;
   }
   struct wlr_scene_buffer*  scene_buffer = wlr_scene_buffer_from_node(node);
   struct wlr_scene_surface* scene_surface =
       wlr_scene_surface_try_from_buffer(scene_buffer);
   if (!scene_surface) {
-    return NULL;
+    return nullptr;
   }
 
   *surface = scene_surface->surface;
   /* Find the node corresponding to the gfwl_toplevel at the root of this
    * surface tree, it is the only one for which we set the data field. */
   struct wlr_scene_tree* tree = node->parent;
-  while (tree != NULL && tree->node.data == NULL) {
+  while (tree != nullptr && tree->node.data == nullptr) {
     tree = tree->node.parent;
   }
   // Only return the tree's node IF it has a node.
-  if (tree)
-    return (struct gfwl_toplevel*)tree->node.data;
-  return NULL;
+  if (tree) {
+    return static_cast<struct gfwl_toplevel*>(tree->node.data);
+  }
+  return nullptr;
 }
 
 struct wlr_scene_layer_surface_v1*
@@ -261,16 +268,16 @@ desktop_layersurface_at(GfServer*            server,
    * surface in the surface tree of a gfwl_toplevel. */
   struct wlr_scene_node* node =
       wlr_scene_node_at(&server->scene.layer.top->node, lx, ly, sx, sy);
-  if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
-    return NULL;
+  if (node == nullptr || node->type != WLR_SCENE_NODE_BUFFER) {
+    return nullptr;
   }
   struct wlr_scene_buffer* scene_buffer = wlr_scene_buffer_from_node(node);
-  // TODO: I have a new theory that I might be able to just look at the
+  // TODO(gabe): I have a new theory that I might be able to just look at the
   // scene_trees parent to see if its owned by a wlr_scene_layer_surface_v1
   struct wlr_scene_surface* scene_surface =
       wlr_scene_surface_try_from_buffer(scene_buffer);
   if (!scene_surface) {
-    return NULL;
+    return nullptr;
   }
 
   *surface = scene_surface->surface;
@@ -278,8 +285,8 @@ desktop_layersurface_at(GfServer*            server,
    * surface tree, it is the only one for which we set the data field. */
   struct wlr_scene_tree*             tree = node->parent;
 
-  struct wlr_scene_layer_surface_v1* maybe_scene_layer_surface = NULL;
-  while (tree != NULL && maybe_scene_layer_surface == NULL) {
+  struct wlr_scene_layer_surface_v1* maybe_scene_layer_surface = nullptr;
+  while (tree != nullptr && maybe_scene_layer_surface == nullptr) {
     maybe_scene_layer_surface =
         wl_container_of(tree, maybe_scene_layer_surface, tree);
     tree = tree->node.parent;

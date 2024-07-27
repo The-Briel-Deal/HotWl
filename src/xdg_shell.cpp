@@ -1,11 +1,11 @@
 #include "layer_shell.hpp"
 #include "server.hpp"
 #include "wlr/util/box.h"
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
 #include <includes.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>
-#include <stdlib.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/edges.h>
@@ -14,7 +14,7 @@
 void focus_toplevel(struct gfwl_toplevel* toplevel,
                     struct wlr_surface*   surface) {
   /* Note: this function only deals with keyboard focus. */
-  if (toplevel == NULL) {
+  if (toplevel == nullptr) {
     return;
   }
   GfServer*        server = toplevel->server;
@@ -33,7 +33,7 @@ void focus_toplevel(struct gfwl_toplevel* toplevel,
      */
     struct wlr_xdg_toplevel* prev_toplevel =
         wlr_xdg_toplevel_try_from_wlr_surface(toplevel->prev_focused);
-    if (prev_toplevel != NULL) {
+    if (prev_toplevel != nullptr) {
       wlr_xdg_toplevel_set_activated(prev_toplevel, false);
     }
   }
@@ -49,7 +49,7 @@ void focus_toplevel(struct gfwl_toplevel* toplevel,
    * track of this and automatically send key events to the appropriate
    * clients without additional work on your part.
    */
-  if (keyboard != NULL) {
+  if (keyboard != nullptr) {
     wlr_seat_keyboard_notify_enter(seat,
                                    toplevel->xdg_toplevel->base->surface,
                                    keyboard->keycodes,
@@ -157,7 +157,7 @@ static void begin_interactive(struct gfwl_toplevel* toplevel,
 }
 
 static void xdg_toplevel_request_move(struct wl_listener* listener,
-                                      void*               data) {
+                                      void* /*data*/) {
   /* This event is raised when a client would like to begin an interactive
    * move, typically because the user clicked on their client-side
    * decorations. Note that a more sophisticated compositor should check the
@@ -176,14 +176,14 @@ static void xdg_toplevel_request_resize(struct wl_listener* listener,
    * provided serial against a list of button press serials sent to this
    * client, to prevent the client from requesting this whenever they want. */
   struct wlr_xdg_toplevel_resize_event* event =
-      (wlr_xdg_toplevel_resize_event*)data;
+      static_cast<wlr_xdg_toplevel_resize_event*>(data);
   struct gfwl_toplevel* toplevel =
       wl_container_of(listener, toplevel, request_resize);
   begin_interactive(toplevel, TINYWL_CURSOR_RESIZE, event->edges);
 }
 
 static void xdg_toplevel_request_maximize(struct wl_listener* listener,
-                                          void*               data) {
+                                          void* /*data*/) {
   /* This event is raised when a client would like to maximize itself,
    * typically because the user clicked on the maximize button on client-side
    * decorations. gfwl doesn't support maximization, but to conform to
@@ -217,10 +217,11 @@ void server_new_xdg_toplevel(struct wl_listener* listener, void* data) {
   class GfServer* server = wl_container_of(listener, server, new_xdg_toplevel);
   /* We are typing the generic callback's data pointer to an xdg_toplevel
    * object. */
-  struct wlr_xdg_toplevel* xdg_toplevel = (wlr_xdg_toplevel*)data;
+  struct wlr_xdg_toplevel* xdg_toplevel = static_cast<wlr_xdg_toplevel*>(data);
 
   /* We are dynamically allocating a gfwl_toplevel instance. */
-  struct gfwl_toplevel* toplevel = (gfwl_toplevel*)calloc(1, sizeof(*toplevel));
+  struct gfwl_toplevel* toplevel =
+      static_cast<gfwl_toplevel*>(calloc(1, sizeof(*toplevel)));
   /* We are attaching our servers state to the new gfwl_toplevel instance. */
   toplevel->server = server;
   /* We are storing the wlr_toplevel object that we have been was given to use
@@ -257,7 +258,7 @@ void server_new_xdg_toplevel(struct wl_listener* listener, void* data) {
                 &toplevel->request_fullscreen);
 }
 
-static void xdg_popup_commit(struct wl_listener* listener, void* data) {
+static void xdg_popup_commit(struct wl_listener* listener, void* /*data*/) {
   /* Called when a new surface state is committed. */
   struct gfwl_popup* popup = wl_container_of(listener, popup, commit);
 
@@ -271,7 +272,7 @@ static void xdg_popup_commit(struct wl_listener* listener, void* data) {
   }
 }
 
-static void xdg_popup_destroy(struct wl_listener* listener, void* data) {
+static void xdg_popup_destroy(struct wl_listener* listener, void* /*data*/) {
   /* Called when the xdg_popup is destroyed. */
   struct gfwl_popup* popup = wl_container_of(listener, popup, destroy);
 
@@ -281,11 +282,12 @@ static void xdg_popup_destroy(struct wl_listener* listener, void* data) {
   free(popup);
 }
 
-void server_new_xdg_popup(struct wl_listener* listener, void* data) {
+void server_new_xdg_popup(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised when a client creates a new popup. */
-  struct wlr_xdg_popup* xdg_popup = (wlr_xdg_popup*)data;
+  struct wlr_xdg_popup* xdg_popup = static_cast<wlr_xdg_popup*>(data);
 
-  struct gfwl_popup*    popup = (gfwl_popup*)calloc(1, sizeof(*popup));
+  struct gfwl_popup*    popup =
+      static_cast<gfwl_popup*>(calloc(1, sizeof(*popup)));
   popup->xdg_popup            = xdg_popup;
 
   /* We must add xdg popups to the scene graph so they get rendered. The
@@ -295,8 +297,9 @@ void server_new_xdg_popup(struct wl_listener* listener, void* data) {
    * scene node. */
   struct wlr_xdg_surface* parent =
       wlr_xdg_surface_try_from_wlr_surface(xdg_popup->parent);
-  assert(parent != NULL);
-  struct wlr_scene_tree* parent_tree = (wlr_scene_tree*)parent->data;
+  assert(parent != nullptr);
+  struct wlr_scene_tree* parent_tree =
+      static_cast<wlr_scene_tree*>(parent->data);
   xdg_popup->base->data =
       wlr_scene_xdg_surface_create(parent_tree, xdg_popup->base);
 
