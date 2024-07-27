@@ -7,13 +7,8 @@
 #include <wlr/util/log.h>
 #include <xdg_shell.hpp>
 
-struct wlr_scene_layer_surface_v1*
-     desktop_layersurface_at(GfServer*            server,
-                             double               lx,
-                             double               ly,
-                             struct wlr_surface** surface,
-                             double*              sx,
-                             double*              sy);
+struct wlr_scene_layer_surface_v1* desktop_layersurface_at(
+    double lx, double ly, struct wlr_surface** surface, double* sx, double* sy);
 void server_new_pointer(GfServer* server, struct wlr_input_device* device) {
   /* We don't do anything special with pointers. All of our pointer handling
    * is proxied through wlr_cursor. On another compositor, you might take this
@@ -109,7 +104,7 @@ static void process_cursor_motion(GfServer* server, uint32_t time) {
   // mouse things. And Wofi is crashing.
 
   struct gfwl_toplevel* toplevel = desktop_toplevel_at(
-      server, server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
+      server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
 
   if (!toplevel) {
     /* If there's no toplevel under the cursor, set the cursor image to a
@@ -171,23 +166,23 @@ void server_cursor_motion_absolute(struct wl_listener* listener, void* data) {
   process_cursor_motion(server, event->time_msec);
 }
 
-void server_cursor_button(struct wl_listener* listener, void* data) {
+void server_cursor_button(struct wl_listener* /*listener*/, void* data) {
   /* This event is forwarded by the cursor when a pointer emits a button
    * event. */
-  GfServer* server = wl_container_of(listener, server, cursor_button);
   struct wlr_pointer_button_event* event =
       static_cast<wlr_pointer_button_event*>(data);
   /* Notify the client with pointer focus that a button press has occurred */
   wlr_seat_pointer_notify_button(
-      server->seat, event->time_msec, event->button, event->state);
+      g_Server.seat, event->time_msec, event->button, event->state);
   double                sx;
   double                sy;
   struct wlr_surface*   surface  = nullptr;
   struct gfwl_toplevel* toplevel = desktop_toplevel_at(
-      server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+      g_Server.cursor->x, g_Server.cursor->y, &surface, &sx, &sy);
   if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
     /* If you released any buttons, we exit interactive move/resize mode. */
-    reset_cursor_mode(server);
+    // TODO: Remove passing the g_Server
+    reset_cursor_mode(&g_Server);
   } else {
     /* Focus that client if the button was _pressed_ */
     focus_toplevel(toplevel, surface);
@@ -221,8 +216,7 @@ void server_cursor_frame(struct wl_listener*    listener,
   wlr_seat_pointer_notify_frame(server->seat);
 }
 
-struct gfwl_toplevel* desktop_toplevel_at(GfServer*            server,
-                                          double               lx,
+struct gfwl_toplevel* desktop_toplevel_at(double               lx,
                                           double               ly,
                                           struct wlr_surface** surface,
                                           double*              sx,
@@ -231,7 +225,7 @@ struct gfwl_toplevel* desktop_toplevel_at(GfServer*            server,
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a gfwl_toplevel. */
   struct wlr_scene_node* node =
-      wlr_scene_node_at(&server->scene.root->tree.node, lx, ly, sx, sy);
+      wlr_scene_node_at(&g_Server.scene.root->tree.node, lx, ly, sx, sy);
   if (node == nullptr || node->type != WLR_SCENE_NODE_BUFFER) {
     return nullptr;
   }
@@ -257,8 +251,7 @@ struct gfwl_toplevel* desktop_toplevel_at(GfServer*            server,
 }
 
 struct wlr_scene_layer_surface_v1*
-desktop_layersurface_at(GfServer*            server,
-                        double               lx,
+desktop_layersurface_at(double               lx,
                         double               ly,
                         struct wlr_surface** surface,
                         double*              sx,
@@ -267,7 +260,7 @@ desktop_layersurface_at(GfServer*            server,
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a gfwl_toplevel. */
   struct wlr_scene_node* node =
-      wlr_scene_node_at(&server->scene.layer.top->node, lx, ly, sx, sy);
+      wlr_scene_node_at(&g_Server.scene.layer.top->node, lx, ly, sx, sy);
   if (node == nullptr || node->type != WLR_SCENE_NODE_BUFFER) {
     return nullptr;
   }

@@ -13,6 +13,7 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/util/box.h>
 
+
 void gfwl_output::set_usable_space(wlr_box box) {
   this->usable_space = box;
 }
@@ -29,8 +30,7 @@ wlr_box gfwl_output::get_usable_space() {
 std::shared_ptr<gfwl_output>
 get_output_from_container(const std::shared_ptr<GfContainer>& container) {
   auto container_point = get_container_origin(container); // container->box;
-  auto server          = container->server;
-  auto outputs         = server.outputs;
+  auto outputs         = g_Server.outputs;
   for (auto output : outputs) {
     wlr_box output_box = {
         .x      = output->scene_output->x,
@@ -51,10 +51,9 @@ get_output_from_container(const std::shared_ptr<GfContainer>& container) {
 // Focuses the output that the container is in.
 void focus_output_from_container(
     const std::shared_ptr<GfContainer>& container) {
-  auto  output = get_output_from_container(container);
-  auto& server = container->server;
+  auto output = get_output_from_container(container);
   if (output) {
-    server.focused_output = output;
+    g_Server.focused_output = output;
   } else {
     wlr_log(WLR_ERROR, "Your container doesn't have an output ):<");
   }
@@ -65,7 +64,7 @@ static void output_frame(struct wl_listener*    listener,
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
   struct gfwl_output*      output = wl_container_of(listener, output, frame);
-  struct wlr_scene*        scene  = output->server->scene.root;
+  struct wlr_scene*        scene  = g_Server.scene.root;
 
   struct wlr_scene_output* scene_output =
       wlr_scene_get_scene_output(scene, output->wlr_output);
@@ -99,15 +98,14 @@ static void output_destroy(struct wl_listener*    listener,
   free(output);
 }
 
-void server_new_output(struct wl_listener* listener, void* data) {
+void server_new_output(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised by the backend when a new output (aka a display or
    * monitor) becomes available. */
-  GfServer*          server     = wl_container_of(listener, server, new_output);
   struct wlr_output* wlr_output = static_cast<struct wlr_output*>(data);
 
   /* Configures the output created by the backend to use our allocator
    * and our renderer. Must be done once, before commiting the output */
-  wlr_output_init_render(wlr_output, server->allocator, server->renderer);
+  wlr_output_init_render(wlr_output, g_Server.allocator, g_Server.renderer);
 
   /* The output may be disabled, switch it on. */
   struct wlr_output_state state;
@@ -131,7 +129,6 @@ void server_new_output(struct wl_listener* listener, void* data) {
   /* Allocates and configures our state for this output */
   struct std::shared_ptr<gfwl_output> output = std::make_shared<gfwl_output>();
   output->wlr_output                         = wlr_output;
-  output->server                             = server;
 
   /* Sets up a listener for the frame event. */
   output->frame.notify = output_frame;
@@ -145,16 +142,15 @@ void server_new_output(struct wl_listener* listener, void* data) {
   output->destroy.notify = output_destroy;
   wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 
-  server->focused_output = output;
-  server->outputs.push_back(output);
+  g_Server.focused_output = output;
+  g_Server.outputs.push_back(output);
 
   // TODO(gabe): Maybe move this to the constructor of tiling state.
   // (I actually think this may be worth doing inheritance for)
   output->tiling_state->root = std::make_shared<GfContainerRoot>(
-      *server, GFWL_CONTAINER_ROOT, output->tiling_state->weak_from_this());
+      g_Server, GFWL_CONTAINER_ROOT, output->tiling_state->weak_from_this());
 
   output->tiling_state->split_dir = GFWL_SPLIT_DIR_HORI;
-  output->tiling_state->server    = server;
   output->tiling_state->output    = output;
 
   /* Adds this to the output layout. The add_auto function arranges outputs
@@ -167,9 +163,9 @@ void server_new_output(struct wl_listener* listener, void* data) {
    * output (such as DPI, scale factor, manufacturer, etc).
    */
   output->output_layout_output =
-      wlr_output_layout_add_auto(server->output_layout, wlr_output);
+      wlr_output_layout_add_auto(g_Server.output_layout, wlr_output);
   output->scene_output =
-      wlr_scene_output_create(server->scene.root, wlr_output);
+      wlr_scene_output_create(g_Server.scene.root, wlr_output);
   wlr_scene_output_layout_add_output(
-      server->scene_layout, output->output_layout_output, output->scene_output);
+      g_Server.scene_layout, output->output_layout_output, output->scene_output);
 }

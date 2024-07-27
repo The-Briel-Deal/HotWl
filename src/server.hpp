@@ -71,4 +71,4 @@ public:
   GfConfig                                  config;
 };
 
-extern GfServer g_Server;
+inline GfServer g_Server;

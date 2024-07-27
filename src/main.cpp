@@ -52,20 +52,19 @@ int main(int argc, char* argv[]) {
   }
 
   /* Create Server - This is where all important state is stored. */
-  GfServer server;
 
   // TODO(gabe): Move these checks to another function.
-  if (server.backend == nullptr) {
+  if (g_Server.backend == nullptr) {
     wlr_log(WLR_ERROR, "failed to create wlr_backend");
     return 1;
   }
 
-  if (server.renderer == nullptr) {
+  if (g_Server.renderer == nullptr) {
     wlr_log(WLR_ERROR, "failed to create wlr_renderer");
     return 1;
   }
 
-  if (server.allocator == nullptr) {
+  if (g_Server.allocator == nullptr) {
     wlr_log(WLR_ERROR, "failed to create wlr_allocator");
     return 1;
   }
@@ -80,17 +79,17 @@ int main(int argc, char* argv[]) {
    * And more comments are sprinkled throughout the notify functions above.
    */
   /* Add a Unix socket to the Wayland display. */
-  const char* socket = wl_display_add_socket_auto(server.wl_display);
+  const char* socket = wl_display_add_socket_auto(g_Server.wl_display);
   if (!socket) {
-    wlr_backend_destroy(server.backend);
+    wlr_backend_destroy(g_Server.backend);
     return 1;
   }
 
   /* Start the backend. This will enumerate outputs and inputs, become the DRM
    * master, etc */
-  if (!wlr_backend_start(server.backend)) {
-    wlr_backend_destroy(server.backend);
-    wl_display_destroy(server.wl_display);
+  if (!wlr_backend_start(g_Server.backend)) {
+    wlr_backend_destroy(g_Server.backend);
+    wl_display_destroy(g_Server.wl_display);
     return 1;
   }
 
@@ -99,7 +98,7 @@ int main(int argc, char* argv[]) {
   setenv("WAYLAND_DISPLAY", socket, 1);
   if (startup_cmd) {
     if (fork() == 0) {
-      execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void*)nullptr);
+      execl("/bin/sh", "/bin/sh", "-c", startup_cmd, nullptr);
     }
   }
   /* Run the Wayland event loop. This does not return until you exit the
@@ -107,17 +106,17 @@ int main(int argc, char* argv[]) {
    * loop configuration to listen to libinput events, DRM events, generate
    * frame events at the refresh rate, and so on. */
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s", socket);
-  wl_display_run(server.wl_display);
+  wl_display_run(g_Server.wl_display);
 
   /* Once wl_display_run returns, we destroy all clients then shut down the
    * server. */
-  wl_display_destroy_clients(server.wl_display);
-  wlr_scene_node_destroy(&server.scene.root->tree.node);
-  wlr_xcursor_manager_destroy(server.cursor_mgr);
-  wlr_cursor_destroy(server.cursor);
-  wlr_allocator_destroy(server.allocator);
-  wlr_renderer_destroy(server.renderer);
-  wlr_backend_destroy(server.backend);
-  wl_display_destroy(server.wl_display);
+  wl_display_destroy_clients(g_Server.wl_display);
+  wlr_scene_node_destroy(&g_Server.scene.root->tree.node);
+  wlr_xcursor_manager_destroy(g_Server.cursor_mgr);
+  wlr_cursor_destroy(g_Server.cursor);
+  wlr_allocator_destroy(g_Server.allocator);
+  wlr_renderer_destroy(g_Server.renderer);
+  wlr_backend_destroy(g_Server.backend);
+  wl_display_destroy(g_Server.wl_display);
   return 0;
 }

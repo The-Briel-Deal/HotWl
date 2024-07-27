@@ -17,8 +17,7 @@ void focus_toplevel(struct gfwl_toplevel* toplevel,
   if (toplevel == nullptr) {
     return;
   }
-  GfServer*        server = toplevel->server;
-  struct wlr_seat* seat   = server->seat;
+  struct wlr_seat* seat = g_Server.seat;
   toplevel->parent_container.lock()->set_focused_toplevel_container();
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
@@ -41,7 +40,7 @@ void focus_toplevel(struct gfwl_toplevel* toplevel,
   /* Move the toplevel to the front */
   wlr_scene_node_raise_to_top(&toplevel->scene_tree->node);
   wl_list_remove(&toplevel->link);
-  wl_list_insert(&server->toplevels, &toplevel->link);
+  wl_list_insert(&g_Server.toplevels, &toplevel->link);
   /* Activate the new surface */
   wlr_xdg_toplevel_set_activated(toplevel->xdg_toplevel, true);
   /*
@@ -62,13 +61,10 @@ static void xdg_toplevel_map(struct wl_listener*    listener,
                              [[maybe_unused]] void* data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
   struct gfwl_toplevel* toplevel = wl_container_of(listener, toplevel, map);
-  GfServer*             server   = toplevel->server;
 
-  assert(server);
+  wl_list_insert(&g_Server.toplevels, &toplevel->link);
 
-  wl_list_insert(&server->toplevels, &toplevel->link);
-
-  server->focused_output->tiling_state->insert(toplevel);
+  g_Server.focused_output->tiling_state->insert(toplevel);
 
   focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
 }
@@ -123,7 +119,7 @@ static void begin_interactive(struct gfwl_toplevel* toplevel,
   /* This function sets up an interactive move or resize operation, where the
    * compositor stops propegating pointer events to clients and instead
    * consumes them itself, to move or resize windows. */
-  class GfServer*    server = toplevel->server;
+  class GfServer*     server = toplevel->server;
   struct wlr_surface* focused_surface =
       server->seat->pointer_state.focused_surface;
   if (toplevel->xdg_toplevel->base->surface !=
@@ -208,27 +204,19 @@ static void xdg_toplevel_request_fullscreen(struct wl_listener*    listener,
   }
 }
 
-void server_new_xdg_toplevel(struct wl_listener* listener, void* data) {
+void server_new_xdg_toplevel(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised when a client creates a new toplevel (application
    * window). */
-
-  /* We are first getting our compositors state (the server object) from the
-   * callback. */
-  class GfServer* server = wl_container_of(listener, server, new_xdg_toplevel);
-  /* We are typing the generic callback's data pointer to an xdg_toplevel
-   * object. */
   struct wlr_xdg_toplevel* xdg_toplevel = static_cast<wlr_xdg_toplevel*>(data);
 
   /* We are dynamically allocating a gfwl_toplevel instance. */
   struct gfwl_toplevel* toplevel =
       static_cast<gfwl_toplevel*>(calloc(1, sizeof(*toplevel)));
-  /* We are attaching our servers state to the new gfwl_toplevel instance. */
-  toplevel->server = server;
   /* We are storing the wlr_toplevel object that we have been was given to use
    * from the data field. */
   toplevel->xdg_toplevel = xdg_toplevel;
-  toplevel->scene_tree   = wlr_scene_xdg_surface_create(
-      toplevel->server->scene.layer.base, xdg_toplevel->base);
+  toplevel->scene_tree = wlr_scene_xdg_surface_create(g_Server.scene.layer.base,
+                                                      xdg_toplevel->base);
   // Setting the root node of scene_tree to have toplevel as data?
   toplevel->scene_tree->node.data = toplevel;
   xdg_toplevel->base->data        = toplevel->scene_tree;
@@ -288,7 +276,7 @@ void server_new_xdg_popup(struct wl_listener* /*listener*/, void* data) {
 
   struct gfwl_popup*    popup =
       static_cast<gfwl_popup*>(calloc(1, sizeof(*popup)));
-  popup->xdg_popup            = xdg_popup;
+  popup->xdg_popup = xdg_popup;
 
   /* We must add xdg popups to the scene graph so they get rendered. The
    * wlroots scene graph provides a helper for this, but to use it we must

@@ -20,13 +20,13 @@ void GfTilingState::flip_split_direction() {
 std::weak_ptr<GfContainer> GfTilingState::insert(gfwl_toplevel* toplevel) {
   /* Ideally insert into the active container in this tiling state. */
   // If focus stack not empty or expired insert in that container.
-  if (!this->server->active_toplevel_container.empty() &&
-      !this->server->active_toplevel_container.front().expired() &&
-      this->server->active_toplevel_container.front()
+  if (!g_Server.active_toplevel_container.empty() &&
+      !g_Server.active_toplevel_container.front().expired() &&
+      g_Server.active_toplevel_container.front()
               .lock()
               ->tiling_state.lock()
               .get() == this) {
-    return this->server->active_toplevel_container.front().lock()->insert(
+    return g_Server.active_toplevel_container.front().lock()->insert(
         toplevel);
   }
   return this->root->insert(toplevel);
