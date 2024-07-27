@@ -17,8 +17,7 @@ static std::shared_ptr<GfContainerToplevel>
                                  const std::shared_ptr<GfTilingState>& state);
 
 static bool focus_and_warp_to_container(
-    const std::shared_ptr<GfContainerToplevel>& container,
-    std::shared_ptr<GfTilingState>              state);
+    const std::shared_ptr<GfContainerToplevel>& container);
 
 static struct wl_list*
 get_toplevel_container_list(std::shared_ptr<GfContainer> head,
@@ -150,7 +149,7 @@ bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction      dir,
 
   // Focus container.
   // TODO(gabe): I think I can just return focus_and_warp_to_container
-  if (!focus_and_warp_to_container(container_to_focus, state)) {
+  if (!focus_and_warp_to_container(container_to_focus)) {
     return false;
   };
   return true;
@@ -190,8 +189,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction      dir,
 }
 
 static bool focus_and_warp_to_container(
-    const std::shared_ptr<GfContainerToplevel>& container,
-    std::shared_ptr<GfTilingState>              _) {
+    const std::shared_ptr<GfContainerToplevel>& container) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
   const gfwl_toplevel* toplevel = container->toplevel;

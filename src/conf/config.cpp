@@ -38,9 +38,11 @@ wlr_keyboard_modifier get_mod_from_string(std::string mod_str) {
   }
   if (mod_str == "ctrl" || mod_str == "control") {
     return WLR_MODIFIER_CTRL;
-  } else if (mod_str == "shift") {
+  }
+  if (mod_str == "shift") {
     return WLR_MODIFIER_SHIFT;
-  } else if (mod_str == "alt") {
+  }
+  if (mod_str == "alt") {
     return WLR_MODIFIER_ALT;
   }
   return static_cast<wlr_keyboard_modifier>(NULL);
@@ -98,6 +100,6 @@ GfConfig::GfConfig() {
   parse_file(std::string(std::getenv("HOME")) + "/.config/gfwl.json");
 }
 
-GfConfig::GfConfig(std::string config_path) {
+GfConfig::GfConfig(const std::string& config_path) {
   parse_file(std::move(config_path));
 }

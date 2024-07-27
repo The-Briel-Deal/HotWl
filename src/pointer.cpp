@@ -36,7 +36,7 @@ static void process_cursor_move(GfServer* server) {
                               server->cursor->y - server->grab_y);
 }
 
-static void process_cursor_resize(GfServer* server, uint32_t _) {
+static void process_cursor_resize(GfServer* server) {
   /*
    * Resizing the grabbed toplevel can be a little bit complicated, because we
    * could be resizing from any corner or edge. This not only resizes the
@@ -95,7 +95,7 @@ static void process_cursor_motion(GfServer* server, uint32_t time) {
     return;
   }
   if (server->cursor_mode == TINYWL_CURSOR_RESIZE) {
-    process_cursor_resize(server, time);
+    process_cursor_resize(server);
     return;
   }
 

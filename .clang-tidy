@@ -14,6 +14,7 @@ Checks: >
   -google-runtime-references,
   -misc-non-private-member-variables-in-classes,
   -misc-const-correctness,
+  -misc-use-anonymous-namespace,
   -misc-include-cleaner,
   -modernize-return-braced-init-list,
   -modernize-use-trailing-return-type,
