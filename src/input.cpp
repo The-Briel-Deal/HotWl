@@ -27,13 +27,12 @@ void server_new_input(struct wl_listener* listener, void* data) {
   wlr_seat_set_capabilities(server->seat, caps);
 }
 
-void seat_request_cursor(struct wl_listener* listener, void* data) {
-  GfServer* server = wl_container_of(listener, server, request_cursor);
+void seat_request_cursor(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised by the seat when a client provides a cursor image */
   struct wlr_seat_pointer_request_set_cursor_event* event =
       static_cast<wlr_seat_pointer_request_set_cursor_event*>(data);
   struct wlr_seat_client* focused_client =
-      server->seat->pointer_state.focused_client;
+      g_Server.seat->pointer_state.focused_client;
   /* This can be sent by any client, so we check to make sure this one is
    * actually has pointer focus first. */
   if (focused_client == event->seat_client) {
@@ -42,7 +41,7 @@ void seat_request_cursor(struct wl_listener* listener, void* data) {
      * on the output that it's currently on and continue to do so as the
      * cursor moves between outputs. */
     wlr_cursor_set_surface(
-        server->cursor, event->surface, event->hotspot_x, event->hotspot_y);
+        g_Server.cursor, event->surface, event->hotspot_x, event->hotspot_y);
   }
 }
 

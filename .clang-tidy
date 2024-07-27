@@ -41,7 +41,10 @@ Checks: >
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-unchecked-optional-access,
   -bugprone-unused-local-non-trivial-variable,
-  -bugprone-unused-return-value
+  -bugprone-unused-return-value, 
+  -clang-diagnostic-invalid-offsetof,
+
+# TODO: Remove This ^ Currently Can't due to output being non standard.
 
 # Turn all the warnings from the checks above into errors.
 WarningsAsErrors: '*'
