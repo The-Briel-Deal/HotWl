@@ -11,7 +11,7 @@
 class GfConfig {
 public:
   GfConfig();
-  GfConfig(const std::string& config_path);
+  explicit GfConfig(const std::string& config_path);
   std::string get_option(std::string);
   std::string set_option(std::string);
   bool        parse_file(const std::string&);
