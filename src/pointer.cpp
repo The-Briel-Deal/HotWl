@@ -1,10 +1,12 @@
+#include <cstdint>
 #include <includes.hpp>
 #include <input.hpp>
 #include <scene.hpp>
 #include <server.hpp>
+#include <wayland-server-core.h>
+#include <wayland-server-protocol.h>
 #include <wayland-util.h>
 #include <wlr/util/edges.h>
-#include <wlr/util/log.h>
 #include <xdg_shell.hpp>
 
 struct wlr_scene_layer_surface_v1* desktop_layersurface_at(

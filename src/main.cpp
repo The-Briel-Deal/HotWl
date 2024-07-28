@@ -1,11 +1,6 @@
-#include <cassert>
-#include <conf/config.hpp>
-#include <getopt.h>
 #include <includes.hpp>
 #include <input.hpp>
 #include <keyboard.hpp>
-#include <layer_shell.hpp>
-#include <output.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>
 #include <server.hpp>
@@ -15,7 +10,6 @@
 #include <ctime>
 #include <unistd.h>
 #include <wayland-server-core.h>
-#include <wayland-util.h>
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
@@ -31,8 +25,6 @@
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
-#include <xdg_shell.hpp>
-#include <xkbcommon/xkbcommon.h>
 
 int main(int argc, char* argv[]) {
   wlr_log_init(WLR_DEBUG, nullptr);

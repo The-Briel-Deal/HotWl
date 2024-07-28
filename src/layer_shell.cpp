@@ -4,7 +4,6 @@
 #include <includes.hpp>
 #include <layer_shell.hpp>
 #include <memory>
-#include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
 #include <wayland-server-core.h>

@@ -1,4 +1,6 @@
 #include "toplevel.hpp"
+#include "includes.hpp"
+#include "wlr/util/box.h"
 #include <xdg_shell.hpp>
 
 GfContainerToplevel::~GfContainerToplevel() {

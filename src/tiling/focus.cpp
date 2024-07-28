@@ -1,3 +1,7 @@
+#include "tiling/container/base.hpp"
+#include "tiling/container/toplevel.hpp"
+#include "tiling/state.hpp"
+#include "wlr/util/log.h"
 #include <cassert>
 #include <climits>
 #include <cstdlib>

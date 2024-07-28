@@ -1,5 +1,4 @@
 #include "state.hpp"
-#include "tiling/container.hpp"
 #include <cassert>
 #include <memory>
 #include <server.hpp>

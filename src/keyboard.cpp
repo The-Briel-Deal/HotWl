@@ -1,22 +1,21 @@
 #include "includes.hpp"
-#include "tiling/state.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <iterator>
 #include <keyboard.hpp>
-#include <optional>
 #include <scene.hpp>
 #include <server.hpp>
 #include <string>
+#include <sys/types.h>
 #include <tiling/focus.hpp>
 #include <unistd.h>
 #include <wayland-server-core.h>
+#include <wayland-server-protocol.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
-#include <wlr/util/box.h>
-#include <xdg_shell.hpp>
+#include <xkbcommon/xkbcommon.h>
 
 static void keyboard_handle_destroy(struct wl_listener*    listener,
                                     [[maybe_unused]] void* data) {

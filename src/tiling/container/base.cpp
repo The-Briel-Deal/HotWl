@@ -1,9 +1,15 @@
 #include "base.hpp"
 #include "root.hpp"
+#include "tiling/state.hpp"
 #include "toplevel.hpp"
+#include "wlr/util/box.h"
+#include "wlr/util/log.h"
 #include <algorithm>
+#include <cassert>
+#include <deque>
+#include <memory>
 #include <server.hpp>
-#include <tiling/focus.hpp>
+#include <vector>
 #include <xdg_shell.hpp>
 
 const wlr_box& GfContainer::get_box() {

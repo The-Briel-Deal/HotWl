@@ -1,4 +1,7 @@
 #include "root.hpp"
+#include "tiling/container/base.hpp"
+#include "tiling/state.hpp"
+#include <memory>
 #include <output.hpp>
 
 std::weak_ptr<GfContainer> GfContainerRoot::insert(GfToplevel* to_insert) {

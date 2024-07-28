@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <includes.hpp>
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <string>
 #include <utility>
 #include <xkbcommon/xkbcommon.h>

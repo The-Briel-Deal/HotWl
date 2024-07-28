@@ -1,8 +1,10 @@
 #include "server.hpp"
+#include <cstdint>
 #include <includes.hpp>
 #include <keyboard.hpp>
 #include <pointer.hpp>
 #include <wayland-server-core.h>
+#include <wayland-server-protocol.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_input_device.h>
