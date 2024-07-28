@@ -31,7 +31,7 @@ public:
   struct wlr_renderer* renderer;
   // The allocator allocates memory for pixel buffers.
   struct wlr_allocator*                     allocator;
-  struct gfwl_scene                         scene;
+  struct GfScene                         scene;
   struct wlr_scene_output_layout*           scene_layout;
 
   struct wlr_xdg_shell*                     xdg_shell;

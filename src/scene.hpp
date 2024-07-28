@@ -3,8 +3,8 @@
 #include <wlr/util/box.h>
 class GfServer;
 
-struct gfwl_scene {
-  gfwl_scene() {
+struct GfScene {
+  GfScene() {
     root = wlr_scene_create();
 
     // Create tiling first so its the lowest.
