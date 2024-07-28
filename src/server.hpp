@@ -64,8 +64,8 @@ public:
 
   struct wlr_output_layout*                 output_layout;
   wlr_xdg_output_manager_v1*                xdg_output_manager_v1;
-  std::shared_ptr<gfwl_output>              focused_output;
-  std::vector<std::shared_ptr<gfwl_output>> outputs;
+  std::shared_ptr<GfOutput>              focused_output;
+  std::vector<std::shared_ptr<GfOutput>> outputs;
   struct wl_listener                        new_output;
 
   GfConfig                                  config;

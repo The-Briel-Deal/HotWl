@@ -14,10 +14,10 @@
 #include <wlr/util/box.h>
 
 
-void gfwl_output::set_usable_space(wlr_box box) {
+void GfOutput::set_usable_space(wlr_box box) {
   this->usable_space = box;
 }
-wlr_box gfwl_output::get_usable_space() {
+wlr_box GfOutput::get_usable_space() {
   if (wlr_box_empty(&this->usable_space)) {
     wlr_box usable_area{0, 0, 0, 0};
     wlr_output_effective_resolution(
@@ -27,7 +27,7 @@ wlr_box gfwl_output::get_usable_space() {
   return this->usable_space;
 };
 // Gets the output that a container is in.
-std::shared_ptr<gfwl_output>
+std::shared_ptr<GfOutput>
 get_output_from_container(const std::shared_ptr<GfContainer>& container) {
   auto container_point = get_container_origin(container); // container->box;
   auto outputs         = g_Server.outputs;
@@ -63,7 +63,7 @@ static void output_frame(struct wl_listener*    listener,
                          [[maybe_unused]] void* data) {
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
-  struct gfwl_output*      output = wl_container_of(listener, output, frame);
+  struct GfOutput*      output = wl_container_of(listener, output, frame);
   struct wlr_scene*        scene  = g_Server.scene.root;
 
   struct wlr_scene_output* scene_output =
@@ -81,7 +81,7 @@ static void output_request_state(struct wl_listener* listener, void* data) {
   /* This function is called when the backend requests a new state for
    * the output. For example, Wayland and X11 backends request a new mode
    * when the output window is resized. */
-  struct gfwl_output* output = wl_container_of(listener, output, request_state);
+  struct GfOutput* output = wl_container_of(listener, output, request_state);
   const struct wlr_output_event_request_state* event =
       static_cast<wlr_output_event_request_state*>(data);
   wlr_output_commit_state(output->wlr_output, event->state);
@@ -89,7 +89,7 @@ static void output_request_state(struct wl_listener* listener, void* data) {
 
 static void output_destroy(struct wl_listener*    listener,
                            [[maybe_unused]] void* data) {
-  struct gfwl_output* output = wl_container_of(listener, output, destroy);
+  struct GfOutput* output = wl_container_of(listener, output, destroy);
 
   wl_list_remove(&output->frame.link);
   wl_list_remove(&output->request_state.link);
@@ -127,7 +127,7 @@ void server_new_output(struct wl_listener* /*listener*/, void* data) {
   wlr_output_state_finish(&state);
 
   /* Allocates and configures our state for this output */
-  struct std::shared_ptr<gfwl_output> output = std::make_shared<gfwl_output>();
+  struct std::shared_ptr<GfOutput> output = std::make_shared<GfOutput>();
   output->wlr_output                         = wlr_output;
 
   /* Sets up a listener for the frame event. */

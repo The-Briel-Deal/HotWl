@@ -5,7 +5,7 @@
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 
-struct gfwl_output {
+struct GfOutput {
   // For wlr_layer_surface
   struct wl_list                 link;
   struct wlr_output*             wlr_output;
@@ -26,5 +26,5 @@ void server_new_output(struct wl_listener* listener, void* data);
 
 void focus_output_from_container(const std::shared_ptr<GfContainer>& container);
 
-std::shared_ptr<gfwl_output>
+std::shared_ptr<GfOutput>
 get_output_from_container(const std::shared_ptr<GfContainer>& container);

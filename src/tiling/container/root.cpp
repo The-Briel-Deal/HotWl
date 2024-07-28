@@ -6,7 +6,7 @@ std::weak_ptr<GfContainer> GfContainerRoot::insert(GfToplevel* to_insert) {
 }
 
 void GfContainerRoot::set_to_output_size() {
-  std::shared_ptr<gfwl_output> output = this->tiling_state.lock()->output;
+  std::shared_ptr<GfOutput> output = this->tiling_state.lock()->output;
   this->box                           = output->get_usable_space();
 }
 
