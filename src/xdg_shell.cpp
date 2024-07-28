@@ -4,14 +4,14 @@
 #include <cstdlib>
 #include <pointer.hpp>
 #include <scene.hpp>
+#include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
+#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.hpp>
-#include <wayland-server-core.h>
 
-void focus_toplevel(struct GfToplevel* toplevel,
-                    struct wlr_surface*   surface) {
+void focus_toplevel(struct GfToplevel* toplevel, struct wlr_surface* surface) {
   /* Note: this function only deals with keyboard focus. */
   if (toplevel == nullptr) {
     return;
@@ -112,7 +112,7 @@ static void xdg_toplevel_destroy(struct wl_listener*    listener,
   free(toplevel);
 }
 
-static void begin_interactive(struct GfToplevel* toplevel,
+static void begin_interactive(struct GfToplevel*    toplevel,
                               enum gfwl_cursor_mode mode,
                               uint32_t              edges) {
   /* This function sets up an interactive move or resize operation, where the
@@ -273,9 +273,8 @@ void server_new_xdg_popup(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised when a client creates a new popup. */
   struct wlr_xdg_popup* xdg_popup = static_cast<wlr_xdg_popup*>(data);
 
-  struct GfPopup*    popup =
-      static_cast<GfPopup*>(calloc(1, sizeof(*popup)));
-  popup->xdg_popup = xdg_popup;
+  struct GfPopup* popup = static_cast<GfPopup*>(calloc(1, sizeof(*popup)));
+  popup->xdg_popup      = xdg_popup;
 
   /* We must add xdg popups to the scene graph so they get rendered. The
    * wlroots scene graph provides a helper for this, but to use it we must
