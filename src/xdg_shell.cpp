@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "wlr/util/box.h"
 #include <cassert>
+#include <cstdint>
 #include <cstdlib>
 #include <pointer.hpp>
 #include <scene.hpp>
@@ -10,6 +11,10 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.hpp>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_seat.h>
+#include <wlr/types/wlr_keyboard.h>
+#include <wlr/types/wlr_compositor.h>
 
 void focus_toplevel(struct GfToplevel* toplevel, struct wlr_surface* surface) {
   /* Note: this function only deals with keyboard focus. */
