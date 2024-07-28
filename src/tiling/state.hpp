@@ -11,12 +11,12 @@ enum gfwl_split_direction {
 struct gfwl_output;
 class GfContainer;
 class GfContainerRoot;
-struct gfwl_toplevel;
+struct GfToplevel;
 
 struct GfTilingState : public std::enable_shared_from_this<GfTilingState> {
 public:
   /* Inserts a toplevel into the tiling state. */
-  std::weak_ptr<GfContainer> insert(gfwl_toplevel* toplevel);
+  std::weak_ptr<GfContainer> insert(GfToplevel* toplevel);
 
   /* TODO: Remove */
   void                             flip_split_direction();

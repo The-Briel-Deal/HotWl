@@ -56,7 +56,7 @@ public:
   struct wl_listener                        request_cursor;
   struct wl_listener                        request_set_selection;
   struct wl_list                            keyboards;
-  struct gfwl_toplevel*                     grabbed_toplevel;
+  struct GfToplevel*                     grabbed_toplevel;
   double                                    grab_x, grab_y;
   struct wlr_box                            grab_geobox;
   uint32_t                                  resize_edges;

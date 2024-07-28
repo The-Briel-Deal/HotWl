@@ -41,12 +41,12 @@ GfContainer::get_top_level_container_list() {
   return list;
 }
 
-std::weak_ptr<GfContainer> GfContainer::insert(gfwl_toplevel* to_insert) {
+std::weak_ptr<GfContainer> GfContainer::insert(GfToplevel* to_insert) {
   return this->insert_based_on_longer_dir(to_insert);
 }
 
 std::weak_ptr<GfContainer>
-GfContainer::insert_based_on_longer_dir(gfwl_toplevel* to_insert) {
+GfContainer::insert_based_on_longer_dir(GfToplevel* to_insert) {
   assert(this->e_type == GFWL_CONTAINER_TOPLEVEL);
   auto                       parent           = this->parent_container.lock();
   auto                       split_dir_longer = this->get_split_dir_longer();
@@ -95,7 +95,7 @@ void GfContainer::move_container_to(
 
 // Inserting the toplevel directly, returns a weak pointer to the new
 // container.
-std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel* to_insert) {
+std::weak_ptr<GfContainer> GfContainer::insert_child(GfToplevel* to_insert) {
   auto toplevel_container =
       this->child_containers
           .emplace_back(
@@ -113,7 +113,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child(gfwl_toplevel* to_insert) {
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    gfwl_toplevel* to_insert, enum gfwl_container_type split_container_type) {
+    GfToplevel* to_insert, enum gfwl_container_type split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);
 
   return this->child_containers
@@ -126,7 +126,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    gfwl_toplevel*                    to_insert,
+    GfToplevel*                    to_insert,
     const std::weak_ptr<GfContainer>& insert_after,
     enum gfwl_container_type          split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);

@@ -3,7 +3,7 @@
 
 class GfContainerToplevel : public GfContainer {
 public:
-  explicit GfContainerToplevel(gfwl_toplevel* const         toplevel,
+  explicit GfContainerToplevel(GfToplevel* const         toplevel,
                                GfServer&                    server,
                                std::weak_ptr<GfContainer>   parent,
                                std::weak_ptr<GfTilingState> tiling_state) :
@@ -14,5 +14,5 @@ public:
 
   void                 set_container_box(struct wlr_box box_in);
 
-  gfwl_toplevel* const toplevel;
+  GfToplevel* const toplevel;
 };

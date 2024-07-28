@@ -17,7 +17,7 @@
 #define EXTERNC
 #endif
 
-struct gfwl_toplevel {
+struct GfToplevel {
   struct wl_list             link;
   std::weak_ptr<GfContainer> parent_container;
   GfServer*                  server;
@@ -42,6 +42,6 @@ struct gfwl_popup {
 
 void         server_new_xdg_popup(struct wl_listener* listener, void* data);
 
-EXTERNC void focus_toplevel(struct gfwl_toplevel* toplevel,
+EXTERNC void focus_toplevel(struct GfToplevel* toplevel,
                             struct wlr_surface*   surface);
 void         server_new_xdg_toplevel(struct wl_listener* listener, void* data);

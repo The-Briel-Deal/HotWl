@@ -25,7 +25,7 @@ void reset_cursor_mode(GfServer* server) {
 
 static void process_cursor_move(GfServer* server) {
   /* Move the grabbed toplevel to the new position. */
-  struct gfwl_toplevel* toplevel = server->grabbed_toplevel;
+  struct GfToplevel* toplevel = server->grabbed_toplevel;
   wlr_scene_node_set_position(&toplevel->scene_tree->node,
                               server->cursor->x - server->grab_x,
                               server->cursor->y - server->grab_y);
@@ -42,7 +42,7 @@ static void process_cursor_resize(GfServer* server) {
    * compositor, you'd wait for the client to prepare a buffer at the new
    * size, then commit any movement that was prepared.
    */
-  struct gfwl_toplevel* toplevel = server->grabbed_toplevel;
+  struct GfToplevel* toplevel = server->grabbed_toplevel;
   double                border_x = server->cursor->x - server->grab_x;
   double                border_y = server->cursor->y - server->grab_y;
   int                   new_left = server->grab_geobox.x;
@@ -103,7 +103,7 @@ static void process_cursor_motion(GfServer* server, uint32_t time) {
   // sure desktop_toplevel_at isn't overriding this. Also, fuzzel doesn't do any
   // mouse things. And Wofi is crashing.
 
-  struct gfwl_toplevel* toplevel = desktop_toplevel_at(
+  struct GfToplevel* toplevel = desktop_toplevel_at(
       server->cursor->x, server->cursor->y, &wlr_surface, &sx, &sy);
 
   if (!toplevel) {
@@ -176,7 +176,7 @@ void server_cursor_button(struct wl_listener* /*listener*/, void* data) {
   double                sx;
   double                sy;
   struct wlr_surface*   surface  = nullptr;
-  struct gfwl_toplevel* toplevel = desktop_toplevel_at(
+  struct GfToplevel* toplevel = desktop_toplevel_at(
       g_Server.cursor->x, g_Server.cursor->y, &surface, &sx, &sy);
   if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
     /* If you released any buttons, we exit interactive move/resize mode. */
@@ -213,7 +213,7 @@ void server_cursor_frame(struct wl_listener* /*listener*/,
   wlr_seat_pointer_notify_frame(g_Server.seat);
 }
 
-struct gfwl_toplevel* desktop_toplevel_at(double               lx,
+struct GfToplevel* desktop_toplevel_at(double               lx,
                                           double               ly,
                                           struct wlr_surface** surface,
                                           double*              sx,
@@ -242,7 +242,7 @@ struct gfwl_toplevel* desktop_toplevel_at(double               lx,
   }
   // Only return the tree's node IF it has a node.
   if (tree) {
-    return static_cast<struct gfwl_toplevel*>(tree->node.data);
+    return static_cast<struct GfToplevel*>(tree->node.data);
   }
   return nullptr;
 }

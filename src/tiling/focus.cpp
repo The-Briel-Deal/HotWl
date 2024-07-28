@@ -188,7 +188,7 @@ static bool focus_and_warp_to_container(
     const std::shared_ptr<GfContainerToplevel>& container) {
   assert(container && container->e_type == GFWL_CONTAINER_TOPLEVEL);
 
-  const gfwl_toplevel* toplevel = container->toplevel;
+  const GfToplevel* toplevel = container->toplevel;
   assert(toplevel);
 
   struct wlr_surface* surface = toplevel->xdg_toplevel->base->surface;

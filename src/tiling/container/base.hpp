@@ -32,7 +32,7 @@ public:
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), tiling_state(tiling_state), server(server){};
 
-  virtual std::weak_ptr<GfContainer>        insert(gfwl_toplevel* to_insert);
+  virtual std::weak_ptr<GfContainer>        insert(GfToplevel* to_insert);
   virtual void                              parse_containers();
   virtual void                              close();
   void                                      set_focused_toplevel_container();
@@ -58,17 +58,17 @@ private:
   virtual void set_container_box(struct wlr_box box);
 
   void         move_container_to(const std::weak_ptr<GfContainer>& new_parent);
-  std::weak_ptr<GfContainer> insert_child(gfwl_toplevel* to_insert);
+  std::weak_ptr<GfContainer> insert_child(GfToplevel* to_insert);
 
   std::weak_ptr<GfContainer>
-  insert_based_on_longer_dir(gfwl_toplevel* to_insert);
+  insert_based_on_longer_dir(GfToplevel* to_insert);
 
   std::weak_ptr<GfContainer>
-  insert_child_in_split(gfwl_toplevel*           to_insert,
+  insert_child_in_split(GfToplevel*           to_insert,
                         enum gfwl_container_type split_container_type);
 
   std::weak_ptr<GfContainer>
-          insert_child_in_split(gfwl_toplevel*                    to_insert,
+          insert_child_in_split(GfToplevel*                    to_insert,
                                 const std::weak_ptr<GfContainer>& insert_after,
                                 enum gfwl_container_type          split_container_type);
   void    parse_children();

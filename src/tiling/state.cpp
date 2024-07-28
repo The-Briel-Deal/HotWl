@@ -17,7 +17,7 @@ void GfTilingState::flip_split_direction() {
 
 /* Once we make the call to the appropriate container, its up to the container
  * to put it in the right place. */
-std::weak_ptr<GfContainer> GfTilingState::insert(gfwl_toplevel* toplevel) {
+std::weak_ptr<GfContainer> GfTilingState::insert(GfToplevel* toplevel) {
   /* Ideally insert into the active container in this tiling state. */
   // If focus stack not empty or expired insert in that container.
   if (!g_Server.active_toplevel_container.empty() &&

@@ -11,7 +11,7 @@
 #include <wlr/util/edges.h>
 #include <xdg_shell.hpp>
 
-void focus_toplevel(struct gfwl_toplevel* toplevel,
+void focus_toplevel(struct GfToplevel* toplevel,
                     struct wlr_surface*   surface) {
   /* Note: this function only deals with keyboard focus. */
   if (toplevel == nullptr) {
@@ -60,7 +60,7 @@ void focus_toplevel(struct gfwl_toplevel* toplevel,
 static void xdg_toplevel_map(struct wl_listener*    listener,
                              [[maybe_unused]] void* data) {
   /* Called when the surface is mapped, or ready to display on-screen. */
-  struct gfwl_toplevel* toplevel = wl_container_of(listener, toplevel, map);
+  struct GfToplevel* toplevel = wl_container_of(listener, toplevel, map);
 
   wl_list_insert(&g_Server.toplevels, &toplevel->link);
 
@@ -72,7 +72,7 @@ static void xdg_toplevel_map(struct wl_listener*    listener,
 static void xdg_toplevel_unmap(struct wl_listener*    listener,
                                [[maybe_unused]] void* data) {
   /* Called when the surface is unmapped, and should no longer be shown. */
-  struct gfwl_toplevel* toplevel = wl_container_of(listener, toplevel, unmap);
+  struct GfToplevel* toplevel = wl_container_of(listener, toplevel, unmap);
 
   /* Reset the cursor mode if the grabbed toplevel was unmapped. */
   if (toplevel == toplevel->server->grabbed_toplevel) {
@@ -85,7 +85,7 @@ static void xdg_toplevel_unmap(struct wl_listener*    listener,
 static void xdg_toplevel_commit(struct wl_listener*    listener,
                                 [[maybe_unused]] void* data) {
   /* Called when a new surface state is committed. */
-  struct gfwl_toplevel* toplevel = wl_container_of(listener, toplevel, commit);
+  struct GfToplevel* toplevel = wl_container_of(listener, toplevel, commit);
 
   if (toplevel->xdg_toplevel->base->initial_commit) {
     /* When an xdg_surface performs an initial commit, the compositor must
@@ -99,7 +99,7 @@ static void xdg_toplevel_commit(struct wl_listener*    listener,
 static void xdg_toplevel_destroy(struct wl_listener*    listener,
                                  [[maybe_unused]] void* data) {
   /* Called when the xdg_toplevel is destroyed. */
-  struct gfwl_toplevel* toplevel = wl_container_of(listener, toplevel, destroy);
+  struct GfToplevel* toplevel = wl_container_of(listener, toplevel, destroy);
 
   wl_list_remove(&toplevel->map.link);
   wl_list_remove(&toplevel->unmap.link);
@@ -113,7 +113,7 @@ static void xdg_toplevel_destroy(struct wl_listener*    listener,
   free(toplevel);
 }
 
-static void begin_interactive(struct gfwl_toplevel* toplevel,
+static void begin_interactive(struct GfToplevel* toplevel,
                               enum gfwl_cursor_mode mode,
                               uint32_t              edges) {
   /* This function sets up an interactive move or resize operation, where the
@@ -159,7 +159,7 @@ static void xdg_toplevel_request_move(struct wl_listener* listener,
    * decorations. Note that a more sophisticated compositor should check the
    * provided serial against a list of button press serials sent to this
    * client, to prevent the client from requesting this whenever they want. */
-  struct gfwl_toplevel* toplevel =
+  struct GfToplevel* toplevel =
       wl_container_of(listener, toplevel, request_move);
   begin_interactive(toplevel, TINYWL_CURSOR_MOVE, 0);
 }
@@ -173,7 +173,7 @@ static void xdg_toplevel_request_resize(struct wl_listener* listener,
    * client, to prevent the client from requesting this whenever they want. */
   struct wlr_xdg_toplevel_resize_event* event =
       static_cast<wlr_xdg_toplevel_resize_event*>(data);
-  struct gfwl_toplevel* toplevel =
+  struct GfToplevel* toplevel =
       wl_container_of(listener, toplevel, request_resize);
   begin_interactive(toplevel, TINYWL_CURSOR_RESIZE, event->edges);
 }
@@ -187,7 +187,7 @@ static void xdg_toplevel_request_maximize(struct wl_listener* listener,
    * wlr_xdg_surface_schedule_configure() is used to send an empty reply.
    * However, if the request was sent before an initial commit, we don't do
    * anything and let the client finish the initial surface setup. */
-  struct gfwl_toplevel* toplevel =
+  struct GfToplevel* toplevel =
       wl_container_of(listener, toplevel, request_maximize);
   if (toplevel->xdg_toplevel->base->initialized) {
     wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
@@ -197,7 +197,7 @@ static void xdg_toplevel_request_maximize(struct wl_listener* listener,
 static void xdg_toplevel_request_fullscreen(struct wl_listener*    listener,
                                             [[maybe_unused]] void* data) {
   /* Just as with request_maximize, we must send a configure here. */
-  struct gfwl_toplevel* toplevel =
+  struct GfToplevel* toplevel =
       wl_container_of(listener, toplevel, request_fullscreen);
   if (toplevel->xdg_toplevel->base->initialized) {
     wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
@@ -210,8 +210,8 @@ void server_new_xdg_toplevel(struct wl_listener* /*listener*/, void* data) {
   struct wlr_xdg_toplevel* xdg_toplevel = static_cast<wlr_xdg_toplevel*>(data);
 
   /* We are dynamically allocating a gfwl_toplevel instance. */
-  struct gfwl_toplevel* toplevel =
-      static_cast<gfwl_toplevel*>(calloc(1, sizeof(*toplevel)));
+  struct GfToplevel* toplevel =
+      static_cast<GfToplevel*>(calloc(1, sizeof(*toplevel)));
   /* We are storing the wlr_toplevel object that we have been was given to use
    * from the data field. */
   toplevel->xdg_toplevel = xdg_toplevel;
