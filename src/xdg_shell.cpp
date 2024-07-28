@@ -248,7 +248,7 @@ void server_new_xdg_toplevel(struct wl_listener* /*listener*/, void* data) {
 
 static void xdg_popup_commit(struct wl_listener* listener, void* /*data*/) {
   /* Called when a new surface state is committed. */
-  struct gfwl_popup* popup = wl_container_of(listener, popup, commit);
+  struct GfPopup* popup = wl_container_of(listener, popup, commit);
 
   if (popup->xdg_popup->base->initial_commit) {
     /* When an xdg_surface performs an initial commit, the compositor must
@@ -262,7 +262,7 @@ static void xdg_popup_commit(struct wl_listener* listener, void* /*data*/) {
 
 static void xdg_popup_destroy(struct wl_listener* listener, void* /*data*/) {
   /* Called when the xdg_popup is destroyed. */
-  struct gfwl_popup* popup = wl_container_of(listener, popup, destroy);
+  struct GfPopup* popup = wl_container_of(listener, popup, destroy);
 
   wl_list_remove(&popup->commit.link);
   wl_list_remove(&popup->destroy.link);
@@ -274,8 +274,8 @@ void server_new_xdg_popup(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised when a client creates a new popup. */
   struct wlr_xdg_popup* xdg_popup = static_cast<wlr_xdg_popup*>(data);
 
-  struct gfwl_popup*    popup =
-      static_cast<gfwl_popup*>(calloc(1, sizeof(*popup)));
+  struct GfPopup*    popup =
+      static_cast<GfPopup*>(calloc(1, sizeof(*popup)));
   popup->xdg_popup = xdg_popup;
 
   /* We must add xdg popups to the scene graph so they get rendered. The

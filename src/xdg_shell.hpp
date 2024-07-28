@@ -27,7 +27,7 @@ struct GfToplevel {
   struct wl_listener         request_fullscreen;
 };
 
-struct gfwl_popup {
+struct GfPopup {
   struct wlr_xdg_popup* xdg_popup;
   struct wl_listener    commit;
   struct wl_listener    destroy;
