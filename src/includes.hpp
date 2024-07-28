@@ -16,8 +16,6 @@
 #include <signal.h>
 #include <stdio.h>
 #include <sys/wait.h>
-#include <thread>
-#include <time.h>
 #include <unistd.h>
 #include <wayland-server-core.h>
 
