@@ -2,7 +2,7 @@
 #include <includes.hpp>
 #include <server.hpp>
 
-struct gfwl_layer_surface {
+struct GfLayerSurface {
   struct wl_list                     link;
   std::shared_ptr<gfwl_output>       output;
   struct wlr_scene_layer_surface_v1* scene;

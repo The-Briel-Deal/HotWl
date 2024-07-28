@@ -13,7 +13,7 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 
-void focus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
+void focus_layer_surface(struct GfLayerSurface* gfwl_layer_surface) {
   struct wlr_seat*     seat        = gfwl_layer_surface->server->seat;
   struct wlr_keyboard* keyboard    = wlr_seat_get_keyboard(seat);
   gfwl_layer_surface->prev_focused = seat->keyboard_state.focused_surface;
@@ -25,7 +25,7 @@ void focus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
                                  &keyboard->modifiers);
 }
 
-void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
+void unfocus_layer_surface(struct GfLayerSurface* gfwl_layer_surface) {
   struct wlr_seat*     seat     = gfwl_layer_surface->server->seat;
   struct wlr_keyboard* keyboard = wlr_seat_get_keyboard(seat);
 
@@ -36,7 +36,7 @@ void unfocus_layer_surface(struct gfwl_layer_surface* gfwl_layer_surface) {
                                  &keyboard->modifiers);
 }
 
-void configure_anchored_layer_surface(gfwl_layer_surface* layer_surface) {
+void configure_anchored_layer_surface(GfLayerSurface* layer_surface) {
   auto*   output = layer_surface->scene->layer_surface->output;
 
   wlr_box usable_area = {0, 0, 0, 0};
@@ -51,7 +51,7 @@ void configure_anchored_layer_surface(gfwl_layer_surface* layer_surface) {
 
 void handle_layer_surface_map(struct wl_listener*    listener,
                               [[maybe_unused]] void* data) {
-  struct gfwl_layer_surface* gfwl_layer_surface =
+  struct GfLayerSurface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, map);
 
   focus_layer_surface(gfwl_layer_surface);
@@ -60,7 +60,7 @@ void handle_layer_surface_map(struct wl_listener*    listener,
 
 void handle_layer_surface_unmap(struct wl_listener*    listener,
                                 [[maybe_unused]] void* data) {
-  struct gfwl_layer_surface* gfwl_layer_surface =
+  struct GfLayerSurface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, unmap);
   unfocus_layer_surface(gfwl_layer_surface);
 }
@@ -68,7 +68,7 @@ void handle_layer_surface_unmap(struct wl_listener*    listener,
 void handle_layer_surface_commit(struct wl_listener*    listener,
                                  [[maybe_unused]] void* data) {
   wlr_log(WLR_INFO, "Commited Layer Surface Change");
-  struct gfwl_layer_surface* gfwl_layer_surface =
+  struct GfLayerSurface* gfwl_layer_surface =
       wl_container_of(listener, gfwl_layer_surface, commit);
 
   if (gfwl_layer_surface->wlr_layer_surface->initial_commit) {
@@ -86,8 +86,8 @@ void handle_new_layer_shell_surface(struct wl_listener* /*listener*/,
     return;
   }
 
-  struct gfwl_layer_surface* gfwl_layer_surface =
-      static_cast<struct gfwl_layer_surface*>(
+  struct GfLayerSurface* gfwl_layer_surface =
+      static_cast<struct GfLayerSurface*>(
           calloc(1, sizeof(*gfwl_layer_surface)));
   if (!gfwl_layer_surface) {
     wlr_log(WLR_ERROR, "No gfwl layer surface.");
