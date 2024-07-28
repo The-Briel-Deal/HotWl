@@ -25,7 +25,7 @@
 #define delete delete_
 
 extern "C" {
-#include "wlr/util/log.h"
+#include <wlr/util/log.h>
 #include <wlr/backend.h>
 #include <wlr/backend/drm.h>
 #include <wlr/backend/headless.h>
