@@ -6,7 +6,6 @@
 #include <includes.hpp>
 #include <memory>
 #include <scene.hpp>
-#include <stdbool.h>
 #include <wlr/util/box.h>
 
 enum gfwl_tiling_focus_direction {
@@ -16,7 +15,7 @@ enum gfwl_tiling_focus_direction {
   GFWL_TILING_FOCUS_RIGHT,
 };
 
-struct gfwl_point {
+struct GfPoint {
   int x;
   int y;
 };
@@ -27,4 +26,4 @@ struct gfwl_point {
 bool       tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction      dir,
                                     const std::shared_ptr<GfTilingState>& state);
 
-gfwl_point get_container_origin(const std::shared_ptr<GfContainer>& container);
+GfPoint get_container_origin(const std::shared_ptr<GfContainer>& container);

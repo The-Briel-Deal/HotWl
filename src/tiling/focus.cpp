@@ -23,7 +23,7 @@ get_toplevel_container_list(std::shared_ptr<GfContainer> head,
                             struct wl_list*              list);
 
 static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
-    struct gfwl_point                              origin,
+    struct GfPoint                              origin,
     const std::vector<std::weak_ptr<GfContainer>>& toplevel_container_list,
     enum gfwl_tiling_focus_direction               dir) {
 
@@ -146,7 +146,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction      dir,
       g_Server.active_toplevel_container.front().lock();
   assert(curr_focused);
 
-  struct gfwl_point curr_focused_origin = get_container_origin(curr_focused);
+  struct GfPoint curr_focused_origin = get_container_origin(curr_focused);
 
   auto toplevel_container_list = state->root->get_top_level_container_list();
 
@@ -186,9 +186,9 @@ static bool focus_and_warp_to_container(
   return true;
 }
 
-gfwl_point get_container_origin(const std::shared_ptr<GfContainer>& container) {
+GfPoint get_container_origin(const std::shared_ptr<GfContainer>& container) {
   auto              box    = container->get_box();
-  struct gfwl_point center = {.x = (box.width / 2) + box.x,
+  struct GfPoint center = {.x = (box.width / 2) + box.x,
                               .y = (box.height / 2) + box.y};
   return center;
 }
