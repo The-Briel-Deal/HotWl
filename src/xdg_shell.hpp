@@ -1,7 +1,8 @@
 #pragma once
 #include "scene.hpp"
 
-#include "tiling/container.hpp"
+#include <tiling/container/base.hpp>
+#include <tiling/container/root.hpp>
 #include <includes.hpp>
 #include <memory>
 #include <wayland-server-core.h>
