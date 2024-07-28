@@ -26,16 +26,6 @@ static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
     struct gfwl_point                              origin,
     const std::vector<std::weak_ptr<GfContainer>>& toplevel_container_list,
     enum gfwl_tiling_focus_direction               dir) {
-  /*
-   * Iterate through all Toplevel Containers, if we are going left, we
-   * should look for a container where the curr focused container's y value
-   * is within (new_focused_y < curr_focused_center_y &&
-   *         new_focused_y + new_focusedheight > curr_focused_center_y &&
-   *         new_focused_x < curr_focused_center_x)
-   * With this container save it along with the distance
-   *        (new_focused_x - curr_focused_center_x)
-   * And return the one with the closest distance.
-   */
 
   std::weak_ptr<GfContainer> closest_valid_toplevel;
   switch (dir) {
