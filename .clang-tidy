@@ -17,7 +17,6 @@ Checks: >
   -misc-no-recursion,
   -misc-const-correctness,
   -misc-use-anonymous-namespace,
-  -misc-include-cleaner,
   -modernize-return-braced-init-list,
   -modernize-use-trailing-return-type,
   -modernize-concat-nested-namespaces,

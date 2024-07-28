@@ -1,4 +1,3 @@
-#include "layer_shell.hpp"
 #include "server.hpp"
 #include "wlr/util/box.h"
 #include <cassert>
