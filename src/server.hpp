@@ -1,6 +1,4 @@
 #pragma once
-#include "includes.hpp"
-#include "wlr/util/box.h"
 #include <conf/config.hpp>
 #include <deque>
 #include <memory>
