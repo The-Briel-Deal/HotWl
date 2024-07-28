@@ -2,7 +2,7 @@
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
 
-struct gfwl_keyboard {
+struct GfKeyboard {
   struct wl_list       link;
   class GfServer*      server;
   struct wlr_keyboard* wlr_keyboard;

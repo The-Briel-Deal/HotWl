@@ -24,7 +24,7 @@ static void keyboard_handle_destroy(struct wl_listener*    listener,
    * the destruction of the wlr_keyboard. It will no longer receive events
    * and should be destroyed.
    */
-  struct gfwl_keyboard* keyboard = wl_container_of(listener, keyboard, destroy);
+  struct GfKeyboard* keyboard = wl_container_of(listener, keyboard, destroy);
   wl_list_remove(&keyboard->modifiers.link);
   wl_list_remove(&keyboard->key.link);
   wl_list_remove(&keyboard->destroy.link);
@@ -36,7 +36,7 @@ static void keyboard_handle_modifiers(struct wl_listener*    listener,
                                       [[maybe_unused]] void* data) {
   /* This event is raised when a modifier key, such as shift or alt, is
    * pressed. We simply communicate this to the client. */
-  struct gfwl_keyboard* keyboard =
+  struct GfKeyboard* keyboard =
       wl_container_of(listener, keyboard, modifiers);
   /*
    * A seat can only have one keyboard, but this is a limitation of the
@@ -112,7 +112,7 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
 
 static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   /* This event is raised when a key is pressed or released. */
-  struct gfwl_keyboard* keyboard = wl_container_of(listener, keyboard, key);
+  struct GfKeyboard* keyboard = wl_container_of(listener, keyboard, key);
   class GfServer*       server   = keyboard->server;
   struct wlr_keyboard_key_event* event =
       static_cast<wlr_keyboard_key_event*>(data);
@@ -150,8 +150,8 @@ void server_new_keyboard(class GfServer*          server,
                          struct wlr_input_device* device) {
   struct wlr_keyboard*  wlr_keyboard = wlr_keyboard_from_input_device(device);
 
-  struct gfwl_keyboard* keyboard =
-      static_cast<gfwl_keyboard*>(calloc(1, sizeof(*keyboard)));
+  struct GfKeyboard* keyboard =
+      static_cast<GfKeyboard*>(calloc(1, sizeof(*keyboard)));
   keyboard->server       = server;
   keyboard->wlr_keyboard = wlr_keyboard;
 
