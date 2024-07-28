@@ -19,13 +19,6 @@
 #include <unistd.h>
 #include <wayland-server-core.h>
 
-#if true
-// wlroots uses dumb-ass shit that makes it not compile on C++, let's fix that.
-// https://github.com/swaywm/wlroots/issues/682
-// pthread first because it uses class in a C++ way and XWayland includes
-// that...
-#include <pthread.h>
-
 #define class     _class
 #define namespace _namespace
 #define static
@@ -78,7 +71,6 @@ extern "C" {
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <wlr/util/edges.h>
-#include <wlr/util/log.h>
 #include <wlr/util/region.h>
 #include <wlr/util/transform.h>
 #include <xkbcommon/xkbcommon.h>
@@ -94,7 +86,6 @@ extern "C" {
 #undef class
 #undef namespace
 #undef static
-#endif
 
 #ifdef LEGACY_RENDERER
 #include <GLES2/gl2.h>
