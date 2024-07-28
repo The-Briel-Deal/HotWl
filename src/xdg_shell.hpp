@@ -10,13 +10,6 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
-#ifdef __cplusplus
-#include <includes.hpp>
-#define EXTERNC extern "C"
-#else
-#define EXTERNC
-#endif
-
 struct GfToplevel {
   struct wl_list             link;
   std::weak_ptr<GfContainer> parent_container;
@@ -40,8 +33,7 @@ struct gfwl_popup {
   struct wl_listener    destroy;
 };
 
-void         server_new_xdg_popup(struct wl_listener* listener, void* data);
+void server_new_xdg_popup(struct wl_listener* listener, void* data);
 
-EXTERNC void focus_toplevel(struct GfToplevel* toplevel,
-                            struct wlr_surface*   surface);
-void         server_new_xdg_toplevel(struct wl_listener* listener, void* data);
+void focus_toplevel(struct GfToplevel* toplevel, struct wlr_surface* surface);
+void server_new_xdg_toplevel(struct wl_listener* listener, void* data);
