@@ -43,8 +43,6 @@ static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
             tl_box.y + tl_box.height >= origin.y &&
             distance_left_of_origin < shortest_distance &&
             toplevel != g_Server.active_toplevel_container.front().lock()) {
-          // TODO(gabe): Actually pass in the currently focused toplevel.
-          // If distance is negative something went wrong.
           assert(distance_left_of_origin > 0);
           closest_valid_toplevel = toplevel;
           shortest_distance      = distance_left_of_origin;
@@ -66,8 +64,6 @@ static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
             tl_box.y + tl_box.height >= origin.y &&
             distance_right_of_origin < shortest_distance &&
             toplevel != g_Server.active_toplevel_container.front().lock()) {
-          // TODO(gabe): Actually pass in the currently focused toplevel.
-          // If distance is negative something went wrong.
           assert(distance_right_of_origin > 0);
           closest_valid_toplevel = toplevel;
           shortest_distance      = distance_right_of_origin;
@@ -89,7 +85,6 @@ static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
             tl_box.x + tl_box.width >= origin.x &&
             distance_above_origin < shortest_distance &&
             toplevel != g_Server.active_toplevel_container.front().lock()) {
-          // If distance is negative something went wrong.
           assert(distance_above_origin > 0);
           closest_valid_toplevel = toplevel;
           shortest_distance      = distance_above_origin;
@@ -111,7 +106,6 @@ static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
             tl_box.x + tl_box.width >= origin.x &&
             distance_below_origin < shortest_distance &&
             toplevel != g_Server.active_toplevel_container.front().lock()) {
-          // If distance is negative something went wrong.
           assert(distance_below_origin > 0);
           closest_valid_toplevel = toplevel;
           shortest_distance      = distance_below_origin;
@@ -127,15 +121,12 @@ static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
 
 bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction      dir,
                               const std::shared_ptr<GfTilingState>& state) {
-  // Get Container In The Specified Direction.
   std::shared_ptr<GfContainerToplevel> container_to_focus =
       get_container_in_dir(dir, state);
   if (container_to_focus == nullptr) {
     return false;
   }
 
-  // Focus container.
-  // TODO(gabe): I think I can just return focus_and_warp_to_container
   if (!focus_and_warp_to_container(container_to_focus)) {
     return false;
   };
@@ -155,10 +146,7 @@ get_container_in_dir(enum gfwl_tiling_focus_direction      dir,
       g_Server.active_toplevel_container.front().lock();
   assert(curr_focused);
 
-  // Get Currently Focused Container Origin, X and Y position.
   struct gfwl_point curr_focused_origin = get_container_origin(curr_focused);
-
-  // Get List of all Toplevel Containers.
 
   auto toplevel_container_list = state->root->get_top_level_container_list();
 
@@ -190,7 +178,6 @@ static bool focus_and_warp_to_container(
     return false;
   }
 
-  // TODO(gabe): Pickup here, I can't use a const pointer for toplevel here.
   focus_toplevel(container->toplevel,
                  container->toplevel->xdg_toplevel->base->surface);
 
