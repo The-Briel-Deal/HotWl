@@ -9,7 +9,6 @@ Checks: >
   performance-*,
   portability-*,
   readability-*,
-  -clang-diagnostic-nonnull,
   -google-readability-todo,
   -google-readability-braces-around-statements,
   -google-readability-namespace-comments,
@@ -41,10 +40,7 @@ Checks: >
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-unchecked-optional-access,
   -bugprone-unused-local-non-trivial-variable,
-  -bugprone-unused-return-value, 
-  -clang-diagnostic-invalid-offsetof,
-
-# TODO: Remove This ^ Currently Can't due to output being non standard.
+  -bugprone-unused-return-value 
 
 # Turn all the warnings from the checks above into errors.
 WarningsAsErrors: '*'

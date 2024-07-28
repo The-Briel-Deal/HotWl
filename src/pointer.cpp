@@ -133,10 +133,9 @@ static void process_cursor_motion(GfServer* server, uint32_t time) {
   }
 }
 
-void server_cursor_motion(struct wl_listener* listener, void* data) {
+void server_cursor_motion(struct wl_listener* /*listener*/, void* data) {
   /* This event is forwarded by the cursor when a pointer emits a _relative_
    * pointer motion event (i.e. a delta) */
-  GfServer* server = wl_container_of(listener, server, cursor_motion);
   struct wlr_pointer_motion_event* event =
       static_cast<wlr_pointer_motion_event*>(data);
   /* The cursor doesn't move unless we tell it to. The cursor automatically
@@ -147,23 +146,23 @@ void server_cursor_motion(struct wl_listener* listener, void* data) {
   // wlr_log(WLR_INFO, "Cursor moved: x=%f, y=%f", event->delta_x,
   // event->delta_y);
   wlr_cursor_move(
-      server->cursor, &event->pointer->base, event->delta_x, event->delta_y);
-  process_cursor_motion(server, event->time_msec);
+      g_Server.cursor, &event->pointer->base, event->delta_x, event->delta_y);
+  process_cursor_motion(&g_Server, event->time_msec);
 }
 
-void server_cursor_motion_absolute(struct wl_listener* listener, void* data) {
+void server_cursor_motion_absolute(struct wl_listener* /*listener*/,
+                                   void* data) {
   /* This event is forwarded by the cursor when a pointer emits an _absolute_
    * motion event, from 0..1 on each axis. This happens, for example, when
    * wlroots is running under a Wayland window rather than KMS+DRM, and you
    * move the mouse over the window. You could enter the window from any edge,
    * so we have to warp the mouse there. There is also some hardware which
    * emits these events. */
-  GfServer* server = wl_container_of(listener, server, cursor_motion_absolute);
   struct wlr_pointer_motion_absolute_event* event =
       static_cast<wlr_pointer_motion_absolute_event*>(data);
   wlr_cursor_warp_absolute(
-      server->cursor, &event->pointer->base, event->x, event->y);
-  process_cursor_motion(server, event->time_msec);
+      g_Server.cursor, &event->pointer->base, event->x, event->y);
+  process_cursor_motion(&g_Server, event->time_msec);
 }
 
 void server_cursor_button(struct wl_listener* /*listener*/, void* data) {
@@ -189,14 +188,13 @@ void server_cursor_button(struct wl_listener* /*listener*/, void* data) {
   }
 }
 
-void server_cursor_axis(struct wl_listener* listener, void* data) {
+void server_cursor_axis(struct wl_listener* /*listener*/, void* data) {
   /* This event is forwarded by the cursor when a pointer emits an axis event,
    * for example when you move the scroll wheel. */
-  GfServer* server = wl_container_of(listener, server, cursor_axis);
   struct wlr_pointer_axis_event* event =
       static_cast<wlr_pointer_axis_event*>(data);
   /* Notify the client with pointer focus of the axis event. */
-  wlr_seat_pointer_notify_axis(server->seat,
+  wlr_seat_pointer_notify_axis(g_Server.seat,
                                event->time_msec,
                                event->orientation,
                                event->delta,
@@ -205,15 +203,14 @@ void server_cursor_axis(struct wl_listener* listener, void* data) {
                                event->relative_direction);
 }
 
-void server_cursor_frame(struct wl_listener*    listener,
+void server_cursor_frame(struct wl_listener* /*listener*/,
                          [[maybe_unused]] void* data) {
   /* This event is forwarded by the cursor when a pointer emits an frame
    * event. Frame events are sent after regular pointer events to group
    * multiple events together. For instance, two axis events may happen at the
    * same time, in which case a frame event won't be sent in between. */
-  GfServer* server = wl_container_of(listener, server, cursor_frame);
   /* Notify the client with pointer focus of the frame event. */
-  wlr_seat_pointer_notify_frame(server->seat);
+  wlr_seat_pointer_notify_frame(g_Server.seat);
 }
 
 struct gfwl_toplevel* desktop_toplevel_at(double               lx,

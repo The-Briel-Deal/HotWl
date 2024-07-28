@@ -19,8 +19,7 @@ struct gfwl_output {
   void                             set_usable_space(wlr_box box);
   wlr_box                          get_usable_space();
 
-private:
-  wlr_box usable_space = {0, 0, 0, 0};
+  wlr_box                          usable_space = {0, 0, 0, 0};
 };
 
 void server_new_output(struct wl_listener* listener, void* data);

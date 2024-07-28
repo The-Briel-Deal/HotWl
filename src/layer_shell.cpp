@@ -76,13 +76,8 @@ void handle_layer_surface_commit(struct wl_listener*    listener,
   }
 }
 
-void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
-  class GfServer* server =
-      wl_container_of(listener, server, new_layer_shell_surface);
-  if (!server) {
-    wlr_log(WLR_ERROR, "No server from listener.");
-    return;
-  }
+void handle_new_layer_shell_surface(struct wl_listener* /*listener*/,
+                                    void* data) {
 
   struct wlr_layer_surface_v1* wlr_layer_surface =
       static_cast<wlr_layer_surface_v1*>(data);
@@ -99,24 +94,24 @@ void handle_new_layer_shell_surface(struct wl_listener* listener, void* data) {
     return;
   }
   gfwl_layer_surface->wlr_layer_surface = wlr_layer_surface;
-  gfwl_layer_surface->server            = server;
+  gfwl_layer_surface->server            = &g_Server;
 
   if (wlr_layer_surface->output) {
-    for (const auto& output : server->outputs) {
+    for (const auto& output : g_Server.outputs) {
       if (output->wlr_output == wlr_layer_surface->output) {
         gfwl_layer_surface->output = output;
         break;
       }
     }
   } else {
-    auto gfwl_output           = server->focused_output;
+    auto gfwl_output           = g_Server.focused_output;
     gfwl_layer_surface->output = gfwl_output;
     wlr_layer_surface->output  = gfwl_output->wlr_output;
   }
 
   // Create the scene.
   struct wlr_scene_layer_surface_v1* scene_surface =
-      wlr_scene_layer_surface_v1_create(server->scene.layer.top,
+      wlr_scene_layer_surface_v1_create(g_Server.scene.layer.top,
                                         wlr_layer_surface);
   // Add to layer_surface object.
   gfwl_layer_surface->scene = scene_surface;

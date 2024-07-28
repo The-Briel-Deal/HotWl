@@ -201,10 +201,10 @@ enum gfwl_split_direction
 GfContainer::get_split_dir_from_container_type() const {
   switch (this->e_type) {
     case GFWL_CONTAINER_VSPLIT: return GFWL_SPLIT_DIR_VERT;
-    case GFWL_CONTAINER_HSPLIT: return GFWL_SPLIT_DIR_HORI;
+    case GFWL_CONTAINER_HSPLIT:
     case GFWL_CONTAINER_ROOT: return GFWL_SPLIT_DIR_HORI;
-    case GFWL_CONTAINER_TOPLEVEL: return GFWL_SPLIT_DIR_UNKNOWN;
-    case GFWL_CONTAINER_UNKNOWN: return GFWL_SPLIT_DIR_UNKNOWN;
+    case GFWL_CONTAINER_TOPLEVEL:
+    case GFWL_CONTAINER_UNKNOWN:
     default: return GFWL_SPLIT_DIR_UNKNOWN;
   }
 }
@@ -266,7 +266,7 @@ void GfContainer::split_containers() {
   switch (this->get_split_dir_from_container_type()) {
     case GFWL_SPLIT_DIR_HORI: this->hori_split_containers(); break;
     case GFWL_SPLIT_DIR_VERT: this->vert_split_containers(); break;
-    case GFWL_SPLIT_DIR_UNKNOWN: break;
+    case GFWL_SPLIT_DIR_UNKNOWN:
     default: break;
   }
 }

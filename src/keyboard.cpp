@@ -53,7 +53,7 @@ static void keyboard_handle_modifiers(struct wl_listener*    listener,
 static void launch_app(const std::string& path) {
   pid_t pid = fork();
   if (pid == 0) {
-    execlp(path.c_str(), nullptr);
+    execlp(path.c_str(), "\0");
   }
 }
 
