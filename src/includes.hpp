@@ -12,9 +12,6 @@
 #include <getopt.h>
 #include <libinput.h>
 #include <linux/input-event-codes.h>
-#include <mutex>
-#include <signal.h>
-#include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <wayland-server-core.h>
