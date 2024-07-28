@@ -2,13 +2,13 @@
 #include "wlr/util/box.h"
 #include <cassert>
 #include <cstdlib>
-#include <includes.hpp>
 #include <pointer.hpp>
 #include <scene.hpp>
 #include <wayland-util.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.hpp>
+#include <wayland-server-core.h>
 
 void focus_toplevel(struct GfToplevel* toplevel,
                     struct wlr_surface*   surface) {
