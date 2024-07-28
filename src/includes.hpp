@@ -9,7 +9,6 @@
 #include <cassert>
 #include <climits>
 #include <cstdlib>
-#include <filesystem>
 #include <getopt.h>
 #include <libinput.h>
 #include <linux/input-event-codes.h>
