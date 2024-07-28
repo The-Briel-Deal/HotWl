@@ -1,4 +1,3 @@
-#include <includes.hpp>
 #include <input.hpp>
 #include <keyboard.hpp>
 #include <pointer.hpp>
@@ -6,8 +5,8 @@
 #include <server.hpp>
 
 #include <cstdio>
-#include <cstdlib>
 #include <ctime>
+#include <cstdlib>
 #include <unistd.h>
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
@@ -21,6 +20,7 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_pointer.h>
+#include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_xdg_shell.h>

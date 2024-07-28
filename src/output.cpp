@@ -68,7 +68,7 @@ static void output_frame(struct wl_listener*    listener,
                          [[maybe_unused]] void* data) {
   /* This function is called every time an output is ready to display a frame,
    * generally at the output's refresh rate (e.g. 60Hz). */
-  struct GfOutput*      output = wl_container_of(listener, output, frame);
+  struct GfOutput*         output = wl_container_of(listener, output, frame);
   struct wlr_scene*        scene  = g_Server.scene.root;
 
   struct wlr_scene_output* scene_output =
@@ -133,7 +133,7 @@ void server_new_output(struct wl_listener* /*listener*/, void* data) {
 
   /* Allocates and configures our state for this output */
   struct std::shared_ptr<GfOutput> output = std::make_shared<GfOutput>();
-  output->wlr_output                         = wlr_output;
+  output->wlr_output                      = wlr_output;
 
   /* Sets up a listener for the frame event. */
   output->frame.notify = output_frame;
@@ -171,6 +171,7 @@ void server_new_output(struct wl_listener* /*listener*/, void* data) {
       wlr_output_layout_add_auto(g_Server.output_layout, wlr_output);
   output->scene_output =
       wlr_scene_output_create(g_Server.scene.root, wlr_output);
-  wlr_scene_output_layout_add_output(
-      g_Server.scene_layout, output->output_layout_output, output->scene_output);
+  wlr_scene_output_layout_add_output(g_Server.scene_layout,
+                                     output->output_layout_output,
+                                     output->scene_output);
 }

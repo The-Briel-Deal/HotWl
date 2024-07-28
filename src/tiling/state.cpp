@@ -25,8 +25,7 @@ std::weak_ptr<GfContainer> GfTilingState::insert(GfToplevel* toplevel) {
               .lock()
               ->tiling_state.lock()
               .get() == this) {
-    return g_Server.active_toplevel_container.front().lock()->insert(
-        toplevel);
+    return g_Server.active_toplevel_container.front().lock()->insert(toplevel);
   }
   return this->root->insert(toplevel);
 }
