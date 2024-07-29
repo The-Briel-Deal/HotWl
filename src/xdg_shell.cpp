@@ -1,8 +1,10 @@
 #include "tiling/container/base.hpp"
+#include "tiling/container/toplevel.hpp"
 #include "tiling/state.hpp"
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 #include <pointer.hpp>
 #include <scene.hpp>
 #include <server.hpp>
@@ -26,7 +28,6 @@ void focus_toplevel(struct GfToplevel* toplevel, struct wlr_surface* surface) {
     return;
   }
   struct wlr_seat* seat = g_Server.seat;
-  toplevel->parent_container.lock()->set_focused_toplevel_container();
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */
@@ -74,7 +75,7 @@ static void xdg_toplevel_map(struct wl_listener*    listener,
 
   g_Server.focused_output->tiling_state->insert(toplevel);
 
-  focus_toplevel(toplevel, toplevel->xdg_toplevel->base->surface);
+  std::reinterpret_pointer_cast<GfContainerToplevel>(toplevel->parent_container.lock())->set_focused_toplevel_container();
 }
 
 static void xdg_toplevel_unmap(struct wl_listener*    listener,

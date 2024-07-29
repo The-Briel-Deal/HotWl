@@ -160,6 +160,10 @@ void GfContainer::set_focused_toplevel_container() {
   if (sp_tiling_state) {
     g_Server.active_toplevel_container.push_front(this->weak_from_this());
   }
+  // Make this function be on the toplevel class for real.
+  auto* casted_this_toplevel = reinterpret_cast<GfContainerToplevel*>(this);
+  focus_toplevel(casted_this_toplevel->toplevel,
+                 casted_this_toplevel->toplevel->xdg_toplevel->base->surface);
 }
 
 gfwl_split_direction GfContainer::get_split_dir_longer() const {
@@ -179,9 +183,7 @@ void focus_next_in_stack(const std::weak_ptr<GfContainer>&      curr,
       auto* toplevel_container =
           dynamic_cast<GfContainerToplevel*>(stack.front().lock().get());
       if (toplevel_container != nullptr) {
-        focus_toplevel(
-            toplevel_container->toplevel,
-            toplevel_container->toplevel->xdg_toplevel->base->surface);
+        toplevel_container->set_focused_toplevel_container();
         return;
       }
     }

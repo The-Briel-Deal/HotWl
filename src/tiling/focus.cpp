@@ -189,8 +189,7 @@ static bool focus_and_warp_to_container(
     return false;
   }
 
-  focus_toplevel(container->toplevel,
-                 container->toplevel->xdg_toplevel->base->surface);
+  container->set_focused_toplevel_container();
 
   focus_output_from_container(container);
 
