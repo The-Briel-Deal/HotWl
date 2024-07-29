@@ -1,12 +1,4 @@
-#include "tiling/container/base.hpp"
-#include "tiling/container/root.hpp"
-#include "tiling/state.hpp"
-#include "wlr/util/log.h"
-#include <bits/time.h>
-#include <cstdlib>
-#include <ctime>
 #include <includes.hpp>
-#include <memory>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
@@ -16,8 +8,15 @@
 #include <wayland-util.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/util/box.h>
+#include <cstdlib>
+#include <memory>
+#include <vector>
+
+#include "tiling/container/base.hpp"
+#include "tiling/container/root.hpp"
+#include "tiling/state.hpp"
+#include "wlr/util/log.h"
 
 void GfOutput::set_usable_space(wlr_box box) {
   this->usable_space = box;

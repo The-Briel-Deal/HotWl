@@ -1,16 +1,20 @@
-#include "wlr/util/box.h"
-#include <cassert>
-#include <cstdlib>
 #include <includes.hpp>
 #include <layer_shell.hpp>
-#include <memory>
 #include <scene.hpp>
 #include <server.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
+#include <cstdlib>
+#include <memory>
+#include <vector>
+
+#include "wlr/util/box.h"
+#include "output.hpp"
+#include "wlr/types/wlr_compositor.h"
+#include "wlr/types/wlr_keyboard.h"
+#include "wlr/types/wlr_output.h"
 
 void focus_layer_surface(struct GfLayerSurface* gfwl_layer_surface) {
   struct wlr_seat*     seat        = gfwl_layer_surface->server->seat;

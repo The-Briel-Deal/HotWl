@@ -1,11 +1,14 @@
 #pragma once
 
-#include "state.hpp"
-
 #include <includes.hpp>
-#include <memory>
 #include <scene.hpp>
 #include <wlr/util/box.h>
+#include <memory>
+
+#include "state.hpp"
+
+class GfContainer;
+struct GfTilingState;
 
 enum gfwl_tiling_focus_direction {
   GFWL_TILING_FOCUS_LEFT = 1,

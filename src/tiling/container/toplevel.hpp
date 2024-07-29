@@ -1,7 +1,12 @@
 #pragma once
 #include <utility>
+#include <memory>
 
 #include "base.hpp"
+
+class GfServer;
+struct GfTilingState;
+struct GfToplevel;
 
 class GfContainerToplevel : public GfContainer {
 public:

@@ -1,12 +1,14 @@
 #pragma once
 
 #include <includes.hpp>
-#include <map>
 #include <nlohmann/json.hpp>
-#include <string>
 #include <xkbcommon/xkbcommon-keysyms.h>
 #include <xkbcommon/xkbcommon-names.h>
 #include <xkbcommon/xkbcommon.h>
+#include <map>
+#include <string>
+
+#include "wlr/types/wlr_keyboard.h"
 
 class GfConfig {
 public:

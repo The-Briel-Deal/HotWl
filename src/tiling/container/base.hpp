@@ -3,6 +3,12 @@
 #include <tiling/state.hpp>
 #include <utility>
 #include <vector>
+#include <memory>
+
+#include "wlr/util/box.h"
+
+class GfServer;
+struct GfToplevel;
 
 // TODO: Remove
 enum gfwl_container_type {

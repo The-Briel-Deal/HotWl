@@ -1,16 +1,21 @@
 #include "base.hpp"
+
+#include <server.hpp>
+#include <xdg_shell.hpp>
+#include <algorithm>
+#include <cassert>
+#include <deque>
+#include <memory>
+#include <vector>
+
 #include "root.hpp"
 #include "tiling/state.hpp"
 #include "toplevel.hpp"
 #include "wlr/util/box.h"
 #include "wlr/util/log.h"
-#include <algorithm>
-#include <cassert>
-#include <deque>
-#include <memory>
-#include <server.hpp>
-#include <vector>
-#include <xdg_shell.hpp>
+#include "output.hpp"
+#include "tiling/container/split.hpp"
+#include "wlr/types/wlr_xdg_shell.h"
 
 const wlr_box& GfContainer::get_box() {
   return this->box;

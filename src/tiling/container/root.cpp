@@ -1,8 +1,13 @@
 #include "root.hpp"
+
+#include <output.hpp>
+#include <memory>
+
 #include "tiling/container/base.hpp"
 #include "tiling/state.hpp"
-#include <memory>
-#include <output.hpp>
+#include "wlr/util/box.h"
+
+struct GfToplevel;
 
 std::weak_ptr<GfContainer> GfContainerRoot::insert(GfToplevel* to_insert) {
   return this->insert_child_in_split(to_insert, GFWL_CONTAINER_HSPLIT);

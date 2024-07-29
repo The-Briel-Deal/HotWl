@@ -1,7 +1,11 @@
 #include "state.hpp"
-#include <cassert>
-#include <memory>
+
 #include <server.hpp>
+#include <memory>
+#include <deque>
+
+#include "tiling/container/base.hpp"
+#include "tiling/container/root.hpp"
 
 /* TODO: Remove.
  * DEPRECATED: Moving to this being the containers responsibility.

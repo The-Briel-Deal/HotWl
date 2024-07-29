@@ -1,6 +1,8 @@
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+extern "C" {
 #include <wlr/types/wlr_seat.h>
+}
 
 struct GfKeyboard {
   struct wl_list       link;

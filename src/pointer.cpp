@@ -1,13 +1,19 @@
-#include <cstdint>
 #include <includes.hpp>
 #include <input.hpp>
 #include <scene.hpp>
 #include <server.hpp>
-#include <wayland-server-core.h>
 #include <wayland-server-protocol.h>
 #include <wayland-util.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.hpp>
+#include <cstdint>
+
+#include "pointer.hpp"
+#include "wlr/types/wlr_cursor.h"
+#include "wlr/types/wlr_pointer.h"
+#include "wlr/types/wlr_seat.h"
+#include "wlr/types/wlr_xdg_shell.h"
+#include "wlr/util/box.h"
 
 struct wlr_scene_layer_surface_v1* desktop_layersurface_at(
     double lx, double ly, struct wlr_surface** surface, double* sx, double* sy);

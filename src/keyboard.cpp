@@ -1,13 +1,5 @@
-#include "includes.hpp"
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <iterator>
 #include <keyboard.hpp>
-#include <scene.hpp>
 #include <server.hpp>
-#include <string>
 #include <sys/types.h>
 #include <tiling/focus.hpp>
 #include <unistd.h>
@@ -16,6 +8,21 @@
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
 #include <xkbcommon/xkbcommon.h>
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <iterator>
+#include <string>
+#include <deque>
+#include <memory>
+#include <vector>
+
+#include "conf/config.hpp"
+#include "output.hpp"
+#include "tiling/container/base.hpp"
+#include "tiling/state.hpp"
+#include "wlr/types/wlr_input_device.h"
+#include "wlr/types/wlr_keyboard.h"
 
 static void keyboard_handle_destroy(struct wl_listener*    listener,
                                     [[maybe_unused]] void* data) {

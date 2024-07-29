@@ -1,4 +1,3 @@
-#include "includes.hpp"
 #include <input.hpp>
 #include <layer_shell.hpp>
 #include <output.hpp>
@@ -8,6 +7,20 @@
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <xdg_shell.hpp>
+
+#include "includes.hpp"
+#include "wlr/backend.h"
+#include "wlr/render/allocator.h"
+#include "wlr/render/wlr_renderer.h"
+#include "wlr/types/wlr_compositor.h"
+#include "wlr/types/wlr_cursor.h"
+#include "wlr/types/wlr_data_device.h"
+#include "wlr/types/wlr_output_layout.h"
+#include "wlr/types/wlr_seat.h"
+#include "wlr/types/wlr_subcompositor.h"
+#include "wlr/types/wlr_xcursor_manager.h"
+#include "wlr/types/wlr_xdg_output_v1.h"
+#include "wlr/types/wlr_xdg_shell.h"
 
 GfServer::GfServer() {
 

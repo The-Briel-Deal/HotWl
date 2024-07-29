@@ -2,6 +2,8 @@
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_input_device.h>
 
+class GfServer;
+
 void server_new_pointer(GfServer* server, struct wlr_input_device* device);
 
 void reset_cursor_mode(GfServer* server);

@@ -1,13 +1,17 @@
-#include "server.hpp"
-#include <cstdint>
-#include <includes.hpp>
 #include <keyboard.hpp>
 #include <pointer.hpp>
-#include <wayland-server-core.h>
 #include <wayland-server-protocol.h>
 #include <wayland-util.h>
+#include <cstdint>
+
+#include "server.hpp"
+
+extern "C" {
+#include "wlr/types/wlr_cursor.h"
+#include "wlr/types/wlr_seat.h"
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_input_device.h>
+}
 
 void server_new_input(struct wl_listener* /*listener*/, void* data) {
   /* This event is raised by the backend when a new input device becomes

@@ -1,7 +1,12 @@
 #include "toplevel.hpp"
+
+#include <xdg_shell.hpp>
+
 #include "includes.hpp"
 #include "wlr/util/box.h"
-#include <xdg_shell.hpp>
+#include "tiling/container/root.hpp"
+#include "tiling/state.hpp"
+#include "wlr/types/wlr_xdg_shell.h"
 
 GfContainerToplevel::~GfContainerToplevel() {
   wlr_xdg_toplevel_send_close(this->toplevel->xdg_toplevel);

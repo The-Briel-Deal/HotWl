@@ -1,6 +1,12 @@
 #pragma once
 #include <includes.hpp>
 #include <server.hpp>
+#include <wayland-server-core.h>
+#include <wayland-util.h>
+#include <memory>
+
+class GfServer;
+struct GfOutput;
 
 struct GfLayerSurface {
   struct wl_list                     link;

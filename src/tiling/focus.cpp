@@ -1,18 +1,20 @@
+#include <output.hpp>
+#include <server.hpp>
+#include <tiling/focus.hpp>
+#include <xdg_shell.hpp>
+#include <cassert>
+#include <climits>
+#include <memory>
+#include <vector>
+#include <deque>
+
 #include "tiling/container/base.hpp"
 #include "tiling/container/toplevel.hpp"
 #include "tiling/state.hpp"
 #include "wlr/util/log.h"
-#include <cassert>
-#include <climits>
-#include <cstdlib>
-#include <includes.hpp>
-#include <memory>
-#include <output.hpp>
-#include <server.hpp>
-#include <tiling/focus.hpp>
-#include <vector>
-#include <wayland-util.h>
-#include <xdg_shell.hpp>
+#include "tiling/container/root.hpp"
+#include "wlr/types/wlr_xdg_shell.h"
+#include "wlr/util/box.h"
 
 // TODO(gabe): Make tiling_state object oriented in cpp.
 static std::shared_ptr<GfContainerToplevel>

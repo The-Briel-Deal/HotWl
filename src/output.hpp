@@ -1,9 +1,12 @@
 #pragma once
-#include "wlr/util/box.h"
-#include <memory>
 #include <tiling/state.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+#include <memory>
+
+#include "wlr/util/box.h"
+
+class GfContainer;
 
 struct GfOutput {
   // For wlr_layer_surface

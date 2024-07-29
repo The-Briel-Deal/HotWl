@@ -1,3 +1,5 @@
+#include "tiling/container/base.hpp"
+#include "tiling/state.hpp"
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -6,15 +8,16 @@
 #include <server.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+#include <xdg_shell.hpp>
+extern "C" {
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_keyboard.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <wlr/util/edges.h>
-#include <xdg_shell.hpp>
+}
 
 void focus_toplevel(struct GfToplevel* toplevel, struct wlr_surface* surface) {
   /* Note: this function only deals with keyboard focus. */

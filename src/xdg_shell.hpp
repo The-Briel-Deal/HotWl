@@ -1,15 +1,20 @@
 #pragma once
-#include "scene.hpp"
-
 #include <tiling/container/base.hpp>
 #include <tiling/container/root.hpp>
 #include <includes.hpp>
-#include <memory>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+extern "C" {
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_shell.h>
+}
+#include <memory>
+
+#include "scene.hpp"
+
+class GfContainer;
+class GfServer;
 
 struct GfToplevel {
   struct wl_list             link;
