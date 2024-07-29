@@ -149,6 +149,7 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
       g_Marks.new_mark(syms[i],
                        std::dynamic_pointer_cast<GfContainerToplevel>(
                            server->active_toplevel_container.front().lock()));
+      handled = true;
     }
   }
   if ((modifiers == server->config.keybinds.goto_mark_modmask) &&
@@ -162,6 +163,7 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
         locked->set_focused_toplevel_container();
         focus_toplevel(locked->toplevel,
                        locked->toplevel->xdg_toplevel->base->surface);
+        handled = true;
       }
     }
   }
