@@ -3,7 +3,7 @@
 #include <scene.hpp>
 #include <server.hpp>
 #include <tiling/focus.hpp>
-#include <time.h>
+#include <ctime>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_output.h>
