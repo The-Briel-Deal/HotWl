@@ -4,7 +4,10 @@
 #include <wayland-util.h>
 #include <memory>
 
+
 #include "wlr/util/box.h"
+#include "wlr/types/wlr_output_layout.h"
+#include "wlr/types/wlr_scene.h"
 
 class GfContainer;
 

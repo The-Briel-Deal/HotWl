@@ -1,20 +1,25 @@
+#include <cassert>
+#include <climits>
+#include <deque>
+#include <memory>
 #include <output.hpp>
 #include <server.hpp>
 #include <tiling/focus.hpp>
-#include <xdg_shell.hpp>
-#include <cassert>
-#include <climits>
-#include <memory>
 #include <vector>
-#include <deque>
+#include <xdg_shell.hpp>
 
 #include "tiling/container/base.hpp"
+#include "tiling/container/root.hpp"
 #include "tiling/container/toplevel.hpp"
 #include "tiling/state.hpp"
-#include "wlr/util/log.h"
-#include "tiling/container/root.hpp"
+
+extern "C" {
+#include "wayland-util.h"
+#include "wlr/types/wlr_compositor.h"
 #include "wlr/types/wlr_xdg_shell.h"
 #include "wlr/util/box.h"
+#include "wlr/util/log.h"
+}
 
 // TODO(gabe): Make tiling_state object oriented in cpp.
 static std::shared_ptr<GfContainerToplevel>
@@ -29,7 +34,7 @@ get_toplevel_container_list(std::shared_ptr<GfContainer> head,
                             struct wl_list*              list);
 
 static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
-    struct GfPoint                              origin,
+    struct GfPoint                                 origin,
     const std::vector<std::weak_ptr<GfContainer>>& toplevel_container_list,
     enum gfwl_tiling_focus_direction               dir) {
 
@@ -193,8 +198,8 @@ static bool focus_and_warp_to_container(
 }
 
 GfPoint get_container_origin(const std::shared_ptr<GfContainer>& container) {
-  auto              box    = container->get_box();
+  auto           box    = container->get_box();
   struct GfPoint center = {.x = (box.width / 2) + box.x,
-                              .y = (box.height / 2) + box.y};
+                           .y = (box.height / 2) + box.y};
   return center;
 }
