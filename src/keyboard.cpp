@@ -1,28 +1,31 @@
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <deque>
+#include <iterator>
 #include <keyboard.hpp>
+#include <memory>
 #include <server.hpp>
+#include <string>
 #include <sys/types.h>
 #include <tiling/focus.hpp>
 #include <unistd.h>
+#include <vector>
 #include <wayland-server-core.h>
 #include <wayland-server-protocol.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_seat.h>
 #include <xkbcommon/xkbcommon.h>
-#include <algorithm>
-#include <cstdint>
-#include <cstdlib>
-#include <iterator>
-#include <string>
-#include <deque>
-#include <memory>
-#include <vector>
 
 #include "conf/config.hpp"
 #include "output.hpp"
 #include "tiling/container/base.hpp"
+#include "tiling/container/toplevel.hpp"
+#include "tiling/marks.hpp"
 #include "tiling/state.hpp"
 #include "wlr/types/wlr_input_device.h"
 #include "wlr/types/wlr_keyboard.h"
+#include "xdg_shell.hpp"
 
 static void keyboard_handle_destroy(struct wl_listener*    listener,
                                     [[maybe_unused]] void* data) {
@@ -42,8 +45,7 @@ static void keyboard_handle_modifiers(struct wl_listener*    listener,
                                       [[maybe_unused]] void* data) {
   /* This event is raised when a modifier key, such as shift or alt, is
    * pressed. We simply communicate this to the client. */
-  struct GfKeyboard* keyboard =
-      wl_container_of(listener, keyboard, modifiers);
+  struct GfKeyboard* keyboard = wl_container_of(listener, keyboard, modifiers);
   /*
    * A seat can only have one keyboard, but this is a limitation of the
    * Wayland protocol - not wlroots. We assign all connected keyboards to the
@@ -119,7 +121,7 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
 static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   /* This event is raised when a key is pressed or released. */
   struct GfKeyboard* keyboard = wl_container_of(listener, keyboard, key);
-  class GfServer*       server   = keyboard->server;
+  class GfServer*    server   = keyboard->server;
   struct wlr_keyboard_key_event* event =
       static_cast<wlr_keyboard_key_event*>(data);
   struct wlr_seat* seat = server->seat;
@@ -134,13 +136,30 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   bool     handled   = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
 
-  // TODO(gabe): Make this modifier configurable.
   if ((modifiers & server->config.keybinds.modmask) &&
       event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-    /* If alt is held down and this button was _pressed_, we attempt to
-     * process it as a compositor keybinding. */
     for (int i = 0; i < nsyms; i++) {
       handled = handle_keybinding(server, syms[i]);
+    }
+  }
+  if ((modifiers == server->config.keybinds.new_mark_modmask) &&
+      event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+    for (int i = 0; i < nsyms; i++) {
+      // TODO: Make active toplevel container only have toplevels
+      g_Marks.new_mark(syms[i],
+                       std::dynamic_pointer_cast<GfContainerToplevel>(
+                           server->active_toplevel_container.front().lock()));
+    }
+  }
+  if ((modifiers == server->config.keybinds.goto_mark_modmask) &&
+      event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+    for (int i = 0; i < nsyms; i++) {
+      // TODO: Make active toplevel container only have toplevels
+      auto container = g_Marks.get_container_from_keysym(syms[i]);
+      if (container.has_value() && !container->expired()) {
+        auto locked = container->lock();
+        locked->set_focused_toplevel_container();
+      }
     }
   }
 
@@ -154,9 +173,9 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
 
 void server_new_keyboard(class GfServer*          server,
                          struct wlr_input_device* device) {
-  struct wlr_keyboard*  wlr_keyboard = wlr_keyboard_from_input_device(device);
+  struct wlr_keyboard* wlr_keyboard = wlr_keyboard_from_input_device(device);
 
-  struct GfKeyboard* keyboard =
+  struct GfKeyboard*   keyboard =
       static_cast<GfKeyboard*>(calloc(1, sizeof(*keyboard)));
   keyboard->server       = server;
   keyboard->wlr_keyboard = wlr_keyboard;

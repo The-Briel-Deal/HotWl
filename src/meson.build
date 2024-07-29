@@ -14,6 +14,7 @@ executable(
 		# Tiling
 		'tiling/focus.cpp',
 		'tiling/state.cpp',
+		'tiling/marks.cpp',
 
 		# Containers
 		'tiling/container/base.cpp',

@@ -1,21 +1,21 @@
 #include "base.hpp"
 
-#include <server.hpp>
-#include <xdg_shell.hpp>
 #include <algorithm>
 #include <cassert>
 #include <deque>
 #include <memory>
+#include <server.hpp>
 #include <vector>
+#include <xdg_shell.hpp>
 
+#include "output.hpp"
 #include "root.hpp"
+#include "tiling/container/split.hpp"
 #include "tiling/state.hpp"
 #include "toplevel.hpp"
+#include "wlr/types/wlr_xdg_shell.h"
 #include "wlr/util/box.h"
 #include "wlr/util/log.h"
-#include "output.hpp"
-#include "tiling/container/split.hpp"
-#include "wlr/types/wlr_xdg_shell.h"
 
 const wlr_box& GfContainer::get_box() {
   return this->box;
@@ -137,7 +137,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
 
 // Inserts a toplevel nested in a new split_container.
 std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
-    GfToplevel*                    to_insert,
+    GfToplevel*                       to_insert,
     const std::weak_ptr<GfContainer>& insert_after,
     enum gfwl_container_type          split_container_type) {
   assert(split_container_type != GFWL_CONTAINER_TOPLEVEL);

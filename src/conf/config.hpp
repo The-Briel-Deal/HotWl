@@ -1,12 +1,12 @@
 #pragma once
 
 #include <includes.hpp>
+#include <map>
 #include <nlohmann/json.hpp>
+#include <string>
 #include <xkbcommon/xkbcommon-keysyms.h>
 #include <xkbcommon/xkbcommon-names.h>
 #include <xkbcommon/xkbcommon.h>
-#include <map>
-#include <string>
 
 #include "wlr/types/wlr_keyboard.h"
 
@@ -19,7 +19,9 @@ public:
   bool        parse_file(const std::string&);
 
   struct GfKeybinds {
-    xkb_mod_mask_t modmask = WLR_MODIFIER_CTRL;
+    xkb_mod_mask_t modmask           = WLR_MODIFIER_CTRL;
+    xkb_mod_mask_t new_mark_modmask  = WLR_MODIFIER_CTRL | WLR_MODIFIER_LOGO;
+    xkb_mod_mask_t goto_mark_modmask = WLR_MODIFIER_LOGO;
     /* Open Kitty */
     xkb_keysym_t new_term = XKB_KEY_q;
     /* Open Launcher */
