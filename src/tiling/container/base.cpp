@@ -61,9 +61,9 @@ std::weak_ptr<GfContainerToplevel> GfContainer::insert(GfToplevel* to_insert) {
 std::weak_ptr<GfContainerToplevel>
 GfContainer::insert_based_on_longer_dir(GfToplevel* to_insert) {
   assert(this->e_type == GFWL_CONTAINER_TOPLEVEL);
-  auto                       parent           = this->parent_container.lock();
-  auto                       split_dir_longer = this->get_split_dir_longer();
-  std::weak_ptr<GfContainer> new_toplevel_container;
+  auto parent           = this->parent_container.lock();
+  auto split_dir_longer = this->get_split_dir_longer();
+  std::weak_ptr<GfContainerToplevel> new_toplevel_container;
 
   switch (split_dir_longer) {
     case GFWL_SPLIT_DIR_HORI:
@@ -88,8 +88,7 @@ GfContainer::insert_based_on_longer_dir(GfToplevel* to_insert) {
   this->move_container_to(new_toplevel_container.lock()->parent_container);
   this->tiling_state.lock()->root->parse_containers();
   // TODO: Fix the rest of the cascading type issues and remove static cast
-  return std::static_pointer_cast<GfContainerToplevel>(
-      new_toplevel_container.lock());
+  return new_toplevel_container;
 }
 
 void GfContainer::move_container_to(
