@@ -18,11 +18,12 @@ public:
                   std::move(parent),
                   GFWL_CONTAINER_TOPLEVEL,
                   std::move(tiling_state)),
-      toplevel(toplevel) {};
+      toplevel(toplevel){};
 
   ~GfContainerToplevel();
 
   void              set_container_box(struct wlr_box box_in) final;
+  void              set_focused_toplevel_container();
 
   GfToplevel* const toplevel;
 };

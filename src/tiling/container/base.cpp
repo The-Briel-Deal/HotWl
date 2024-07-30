@@ -154,8 +154,7 @@ std::weak_ptr<GfContainer> GfContainer::insert_child_in_split(
       ->insert_child(to_insert);
 }
 
-void GfContainer::set_focused_toplevel_container() {
-
+void GfContainerToplevel::set_focused_toplevel_container() {
   auto sp_tiling_state = this->tiling_state.lock();
   if (sp_tiling_state) {
 

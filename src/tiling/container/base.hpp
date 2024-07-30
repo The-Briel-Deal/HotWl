@@ -42,7 +42,6 @@ public:
   virtual std::weak_ptr<GfContainer>      insert(GfToplevel* to_insert);
   virtual void                            parse_containers();
   virtual void                            close();
-  void                                    set_focused_toplevel_container();
 
   const wlr_box&                          get_box();
   std::vector<std::weak_ptr<GfContainer>> get_top_level_container_list();
