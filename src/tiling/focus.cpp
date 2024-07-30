@@ -34,9 +34,10 @@ get_toplevel_container_list(std::shared_ptr<GfContainer> head,
                             struct wl_list*              list);
 
 static std::weak_ptr<GfContainerToplevel> find_closest_to_origin_in_dir(
-    struct GfPoint                                 origin,
-    const std::vector<std::weak_ptr<GfContainer>>& toplevel_container_list,
-    enum gfwl_tiling_focus_direction               dir) {
+    struct GfPoint origin,
+    const std::vector<std::weak_ptr<GfContainerToplevel>>&
+                                     toplevel_container_list,
+    enum gfwl_tiling_focus_direction dir) {
 
   std::weak_ptr<GfContainer> closest_valid_toplevel;
   switch (dir) {

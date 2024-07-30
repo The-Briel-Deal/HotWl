@@ -8,6 +8,7 @@
 #include "wlr/util/box.h"
 
 class GfServer;
+class GfContainerToplevel;
 struct GfToplevel;
 
 // TODO: Remove
@@ -39,12 +40,13 @@ public:
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), tiling_state(std::move(tiling_state)), server(server) {};
 
-  virtual std::weak_ptr<GfContainer>      insert(GfToplevel* to_insert);
-  virtual void                            parse_containers();
-  virtual void                            close();
+  virtual std::weak_ptr<GfContainerToplevel> insert(GfToplevel* to_insert);
+  virtual void                               parse_containers();
+  virtual void                               close();
 
-  const wlr_box&                          get_box();
-  std::vector<std::weak_ptr<GfContainer>> get_top_level_container_list();
+  const wlr_box&                             get_box();
+  std::vector<std::weak_ptr<GfContainerToplevel>>
+                             get_top_level_container_list();
   gfwl_split_direction       get_split_dir_from_container_type() const;
   gfwl_split_direction       get_split_dir_longer() const;
 
@@ -64,15 +66,16 @@ private:
   virtual void set_container_box(struct wlr_box box);
 
   void         move_container_to(const std::weak_ptr<GfContainer>& new_parent);
-  std::weak_ptr<GfContainer> insert_child(GfToplevel* to_insert);
+  std::weak_ptr<GfContainerToplevel> insert_child(GfToplevel* to_insert);
 
-  std::weak_ptr<GfContainer> insert_based_on_longer_dir(GfToplevel* to_insert);
+  std::weak_ptr<GfContainerToplevel>
+  insert_based_on_longer_dir(GfToplevel* to_insert);
 
-  std::weak_ptr<GfContainer>
+  std::weak_ptr<GfContainerToplevel>
   insert_child_in_split(GfToplevel*              to_insert,
                         enum gfwl_container_type split_container_type);
 
-  std::weak_ptr<GfContainer>
+  std::weak_ptr<GfContainerToplevel>
           insert_child_in_split(GfToplevel*                       to_insert,
                                 const std::weak_ptr<GfContainer>& insert_after,
                                 enum gfwl_container_type          split_container_type);

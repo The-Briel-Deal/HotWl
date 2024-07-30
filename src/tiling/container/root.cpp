@@ -9,7 +9,8 @@
 
 struct GfToplevel;
 
-std::weak_ptr<GfContainer> GfContainerRoot::insert(GfToplevel* to_insert) {
+std::weak_ptr<GfContainerToplevel>
+GfContainerRoot::insert(GfToplevel* to_insert) {
   return this->insert_child_in_split(to_insert, GFWL_CONTAINER_HSPLIT);
 }
 

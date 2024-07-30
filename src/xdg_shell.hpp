@@ -17,20 +17,20 @@ class GfContainer;
 class GfServer;
 
 struct GfToplevel {
-  struct wl_list             link;
-  std::weak_ptr<GfContainer> parent_container;
-  GfServer*                  server;
-  struct wlr_xdg_toplevel*   xdg_toplevel;
-  struct wlr_scene_tree*     scene_tree;
-  struct wlr_surface*        prev_focused;
-  struct wl_listener         map;
-  struct wl_listener         unmap;
-  struct wl_listener         commit;
-  struct wl_listener         destroy;
-  struct wl_listener         request_move;
-  struct wl_listener         request_resize;
-  struct wl_listener         request_maximize;
-  struct wl_listener         request_fullscreen;
+  struct wl_list                     link;
+  std::weak_ptr<GfContainerToplevel> parent_container;
+  GfServer*                          server;
+  struct wlr_xdg_toplevel*           xdg_toplevel;
+  struct wlr_scene_tree*             scene_tree;
+  struct wlr_surface*                prev_focused;
+  struct wl_listener                 map;
+  struct wl_listener                 unmap;
+  struct wl_listener                 commit;
+  struct wl_listener                 destroy;
+  struct wl_listener                 request_move;
+  struct wl_listener                 request_resize;
+  struct wl_listener                 request_maximize;
+  struct wl_listener                 request_fullscreen;
 };
 
 struct GfPopup {
