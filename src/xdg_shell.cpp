@@ -15,8 +15,8 @@ extern "C" {
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_keyboard.h>
-#include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <wlr/util/edges.h>
@@ -27,7 +27,7 @@ void focus_toplevel(struct GfToplevel* toplevel, struct wlr_surface* surface) {
   if (toplevel == nullptr) {
     return;
   }
-  struct wlr_seat* seat = g_Server.seat;
+  struct wlr_seat* seat  = g_Server.seat;
   toplevel->prev_focused = seat->keyboard_state.focused_surface;
   if (toplevel->prev_focused == surface) {
     /* Don't re-focus an already focused surface. */
@@ -75,7 +75,9 @@ static void xdg_toplevel_map(struct wl_listener*    listener,
 
   g_Server.focused_output->tiling_state->insert(toplevel);
 
-  std::reinterpret_pointer_cast<GfContainerToplevel>(toplevel->parent_container.lock())->set_focused_toplevel_container();
+  std::reinterpret_pointer_cast<GfContainerToplevel>(
+      toplevel->parent_container.lock())
+      ->set_focused_toplevel_container();
 }
 
 static void xdg_toplevel_unmap(struct wl_listener*    listener,

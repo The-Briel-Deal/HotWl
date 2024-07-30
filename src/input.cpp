@@ -1,8 +1,8 @@
+#include <cstdint>
 #include <keyboard.hpp>
 #include <pointer.hpp>
 #include <wayland-server-protocol.h>
 #include <wayland-util.h>
-#include <cstdint>
 
 #include "server.hpp"
 

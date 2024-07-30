@@ -16,7 +16,6 @@
 #define delete delete_
 
 extern "C" {
-#include <wlr/util/log.h>
 #include <wlr/backend.h>
 #include <wlr/backend/drm.h>
 #include <wlr/backend/headless.h>
@@ -62,6 +61,7 @@ extern "C" {
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include <wlr/util/edges.h>
+#include <wlr/util/log.h>
 #include <wlr/util/region.h>
 #include <wlr/util/transform.h>
 #include <xkbcommon/xkbcommon.h>

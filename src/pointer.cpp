@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <includes.hpp>
 #include <input.hpp>
 #include <scene.hpp>
@@ -6,7 +7,6 @@
 #include <wayland-util.h>
 #include <wlr/util/edges.h>
 #include <xdg_shell.hpp>
-#include <cstdint>
 
 #include "pointer.hpp"
 #include "wlr/types/wlr_cursor.h"
@@ -51,9 +51,9 @@ static void process_cursor_resize(GfServer* server) {
    * size, then commit any movement that was prepared.
    */
   struct GfToplevel* toplevel = server->grabbed_toplevel;
-  double                border_x = server->cursor->x - server->grab_x;
-  double                border_y = server->cursor->y - server->grab_y;
-  int                   new_left = server->grab_geobox.x;
+  double             border_x = server->cursor->x - server->grab_x;
+  double             border_y = server->cursor->y - server->grab_y;
+  int                new_left = server->grab_geobox.x;
   int new_right  = server->grab_geobox.x + server->grab_geobox.width;
   int new_top    = server->grab_geobox.y;
   int new_bottom = server->grab_geobox.y + server->grab_geobox.height;
@@ -181,10 +181,10 @@ void server_cursor_button(struct wl_listener* /*listener*/, void* data) {
   /* Notify the client with pointer focus that a button press has occurred */
   wlr_seat_pointer_notify_button(
       g_Server.seat, event->time_msec, event->button, event->state);
-  double                sx;
-  double                sy;
-  struct wlr_surface*   surface  = nullptr;
-  struct GfToplevel* toplevel = desktop_toplevel_at(
+  double              sx;
+  double              sy;
+  struct wlr_surface* surface  = nullptr;
+  struct GfToplevel*  toplevel = desktop_toplevel_at(
       g_Server.cursor->x, g_Server.cursor->y, &surface, &sx, &sy);
   if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
     /* If you released any buttons, we exit interactive move/resize mode. */
@@ -222,10 +222,10 @@ void server_cursor_frame(struct wl_listener* /*listener*/,
 }
 
 struct GfToplevel* desktop_toplevel_at(double               lx,
-                                          double               ly,
-                                          struct wlr_surface** surface,
-                                          double*              sx,
-                                          double*              sy) {
+                                       double               ly,
+                                       struct wlr_surface** surface,
+                                       double*              sx,
+                                       double*              sy) {
   /* This returns the topmost node in the scene at the given layout coords.
    * We only care about surface nodes as we are specifically looking for a
    * surface in the surface tree of a gfwl_toplevel. */

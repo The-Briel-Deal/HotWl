@@ -1,16 +1,16 @@
 #pragma once
 #include <includes.hpp>
+#include <memory>
 #include <server.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
-#include <memory>
 
 class GfServer;
 struct GfOutput;
 
 struct GfLayerSurface {
   struct wl_list                     link;
-  std::shared_ptr<GfOutput>       output;
+  std::shared_ptr<GfOutput>          output;
   struct wlr_scene_layer_surface_v1* scene;
   struct wlr_layer_surface_v1*       wlr_layer_surface;
   struct wlr_surface*                prev_focused;

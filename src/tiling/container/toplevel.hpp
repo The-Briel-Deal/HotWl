@@ -1,6 +1,6 @@
 #pragma once
-#include <utility>
 #include <memory>
+#include <utility>
 
 #include "base.hpp"
 
@@ -14,8 +14,11 @@ public:
                                GfServer&                    server,
                                std::weak_ptr<GfContainer>   parent,
                                std::weak_ptr<GfTilingState> tiling_state) :
-      GfContainer(server, std::move(parent), GFWL_CONTAINER_TOPLEVEL, std::move(tiling_state)),
-      toplevel(toplevel){};
+      GfContainer(server,
+                  std::move(parent),
+                  GFWL_CONTAINER_TOPLEVEL,
+                  std::move(tiling_state)),
+      toplevel(toplevel) {};
 
   ~GfContainerToplevel();
 

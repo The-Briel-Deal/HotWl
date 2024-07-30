@@ -23,5 +23,5 @@ public:
 
   std::shared_ptr<GfContainerRoot> root;
   gfwl_split_direction             split_dir;
-  std::shared_ptr<GfOutput>     output = nullptr;
+  std::shared_ptr<GfOutput>        output = nullptr;
 };

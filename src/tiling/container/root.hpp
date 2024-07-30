@@ -1,6 +1,6 @@
 #pragma once
-#include <utility>
 #include <memory>
+#include <utility>
 
 #include "base.hpp"
 
@@ -13,7 +13,7 @@ public:
   explicit GfContainerRoot(GfServer&                    server,
                            const gfwl_container_type    e_type,
                            std::weak_ptr<GfTilingState> tiling_state) :
-      GfContainer(server, e_type, std::move(tiling_state)){};
+      GfContainer(server, e_type, std::move(tiling_state)) {};
 
   std::weak_ptr<GfContainer> insert(GfToplevel* to_insert) final;
   void                       parse_containers() final;

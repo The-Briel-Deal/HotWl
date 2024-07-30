@@ -1,7 +1,7 @@
 #pragma once
+#include <includes.hpp>
 #include <tiling/container/base.hpp>
 #include <tiling/container/root.hpp>
-#include <includes.hpp>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 extern "C" {

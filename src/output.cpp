@@ -1,17 +1,17 @@
+#include <cstdlib>
+#include <ctime>
 #include <includes.hpp>
+#include <memory>
 #include <output.hpp>
 #include <scene.hpp>
 #include <server.hpp>
 #include <tiling/focus.hpp>
-#include <ctime>
+#include <vector>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/util/box.h>
-#include <cstdlib>
-#include <memory>
-#include <vector>
 
 #include "tiling/container/base.hpp"
 #include "tiling/container/root.hpp"

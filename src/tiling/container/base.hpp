@@ -1,9 +1,9 @@
 #pragma once
+#include <memory>
 #include <tiling/focus.hpp>
 #include <tiling/state.hpp>
 #include <utility>
 #include <vector>
-#include <memory>
 
 #include "wlr/util/box.h"
 
@@ -31,13 +31,13 @@ public:
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
       e_type(e_type), parent_container(std::move(parent_container)),
-      tiling_state(std::move(tiling_state)), server(server){};
+      tiling_state(std::move(tiling_state)), server(server) {};
 
   /* I have this constructor without a parent container for root containers. */
   explicit GfContainer(GfServer&                    server,
                        const gfwl_container_type    e_type,
                        std::weak_ptr<GfTilingState> tiling_state) :
-      e_type(e_type), tiling_state(std::move(tiling_state)), server(server){};
+      e_type(e_type), tiling_state(std::move(tiling_state)), server(server) {};
 
   virtual std::weak_ptr<GfContainer>      insert(GfToplevel* to_insert);
   virtual void                            parse_containers();

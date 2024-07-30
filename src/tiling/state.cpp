@@ -1,8 +1,8 @@
 #include "state.hpp"
 
-#include <server.hpp>
-#include <memory>
 #include <deque>
+#include <memory>
+#include <server.hpp>
 
 #include "tiling/container/base.hpp"
 #include "tiling/container/root.hpp"

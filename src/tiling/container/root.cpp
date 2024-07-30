@@ -1,7 +1,7 @@
 #include "root.hpp"
 
-#include <output.hpp>
 #include <memory>
+#include <output.hpp>
 
 #include "tiling/container/base.hpp"
 #include "tiling/state.hpp"
@@ -15,7 +15,7 @@ std::weak_ptr<GfContainer> GfContainerRoot::insert(GfToplevel* to_insert) {
 
 void GfContainerRoot::set_to_output_size() {
   std::shared_ptr<GfOutput> output = this->tiling_state.lock()->output;
-  this->box                           = output->get_usable_space();
+  this->box                        = output->get_usable_space();
 }
 
 /* If we are in the root we need to set the root container to the size of the

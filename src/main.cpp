@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <cstdlib>
+#include <includes.hpp>
 #include <scene.hpp>
 #include <server.hpp>
 #include <unistd.h>
@@ -7,9 +10,6 @@
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/util/log.h>
-#include <includes.hpp>
-#include <cstdio>
-#include <cstdlib>
 
 #include "wlr/types/wlr_xcursor_manager.h"
 

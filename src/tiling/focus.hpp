@@ -1,9 +1,9 @@
 #pragma once
 
 #include <includes.hpp>
+#include <memory>
 #include <scene.hpp>
 #include <wlr/util/box.h>
-#include <memory>
 
 #include "state.hpp"
 

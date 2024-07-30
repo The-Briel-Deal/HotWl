@@ -1,13 +1,13 @@
-#include <conf/config.hpp>
-#include <nlohmann/json_fwd.hpp>
-#include <xkbcommon/xkbcommon.h>
-#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <cctype>
+#include <conf/config.hpp>
 #include <cstdlib>
 #include <fstream>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <string>
 #include <utility>
+#include <xkbcommon/xkbcommon.h>
 
 using json = nlohmann::json;
 

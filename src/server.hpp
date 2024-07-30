@@ -1,10 +1,10 @@
 #pragma once
 #include <conf/config.hpp>
+#include <cstdint>
 #include <deque>
 #include <memory>
 #include <output.hpp>
 #include <scene.hpp>
-#include <cstdint>
 #include <tiling/container.hpp>
 #include <vector>
 #include <wayland-server-core.h>
