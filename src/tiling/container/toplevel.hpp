@@ -18,7 +18,7 @@ public:
                   std::move(parent),
                   GFWL_CONTAINER_TOPLEVEL,
                   std::move(tiling_state)),
-      toplevel(toplevel){};
+      toplevel(toplevel) {};
 
   ~GfContainerToplevel();
 
