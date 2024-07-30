@@ -145,7 +145,6 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   if ((modifiers == server->config.keybinds.new_mark_modmask) &&
       event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
     for (int i = 0; i < nsyms; i++) {
-      // TODO: Make active toplevel container only have toplevels
       g_Marks.new_mark(syms[i],
                        std::dynamic_pointer_cast<GfContainerToplevel>(
                            server->active_toplevel_container.front().lock()));
@@ -155,11 +154,9 @@ static void keyboard_handle_key(struct wl_listener* listener, void* data) {
   if ((modifiers == server->config.keybinds.goto_mark_modmask) &&
       event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
     for (int i = 0; i < nsyms; i++) {
-      // TODO: Make active toplevel container only have toplevels
       auto container = g_Marks.get_container_from_keysym(syms[i]);
       if (container.has_value() && !container->expired()) {
         auto locked = container->lock();
-        // TODO: Make focusing only happen from one place.
         locked->set_focused_toplevel_container();
         handled = true;
       }

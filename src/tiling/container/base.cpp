@@ -158,7 +158,11 @@ void GfContainer::set_focused_toplevel_container() {
 
   auto sp_tiling_state = this->tiling_state.lock();
   if (sp_tiling_state) {
-    g_Server.active_toplevel_container.push_front(this->weak_from_this());
+
+    // TODO: Make this method only on toplevels
+    g_Server.active_toplevel_container.push_front(
+        std::static_pointer_cast<GfContainerToplevel>(
+            this->shared_from_this()));
   }
   // Make this function be on the toplevel class for real.
   auto* casted_this_toplevel = reinterpret_cast<GfContainerToplevel*>(this);
@@ -176,8 +180,8 @@ gfwl_split_direction GfContainer::get_split_dir_longer() const {
   return GFWL_SPLIT_DIR_VERT;
 }
 
-void focus_next_in_stack(const std::weak_ptr<GfContainer>&      curr,
-                         std::deque<std::weak_ptr<GfContainer>> stack) {
+void focus_next_in_stack(const std::weak_ptr<GfContainer>&              curr,
+                         std::deque<std::weak_ptr<GfContainerToplevel>> stack) {
   while (!stack.empty()) {
     if (!stack.front().expired() && stack.front().lock() != curr.lock()) {
       auto* toplevel_container =
