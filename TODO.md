@@ -1,4 +1,7 @@
 # This file is just here to keep track of some things I need to do.
+- [ ] Fix Multi-Display.
+- [ ] Improve comfort of marks
+- [ ] One app marks.
 - [x] Marking system.
 - [n] Basic Lua Config for Keymaps.
 - [x] Make tiling work per display.
