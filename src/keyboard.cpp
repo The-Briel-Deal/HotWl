@@ -95,7 +95,7 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
   } else if (sym == server->config.keybinds.flip_split_direction) {
     server->focused_output->tiling_state->flip_split_direction();
   } else if (sym == server->config.keybinds.next_monitor) {
-    // TODO(gabe): Make these a helper function.
+    // TODO(gabe): Make these a helper function, and change to focus_in_dir
     auto next_output = std::next(std::find(server->outputs.begin(),
                                            server->outputs.end(),
                                            server->focused_output));

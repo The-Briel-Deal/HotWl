@@ -139,6 +139,7 @@ bool tiling_focus_move_in_dir(enum gfwl_tiling_focus_direction      dir,
     return false;
   }
 
+  // TODO: Just return focus and warp to container
   if (!focus_and_warp_to_container(container_to_focus)) {
     return false;
   };
