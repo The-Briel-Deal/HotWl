@@ -1,5 +1,5 @@
 # This file is just here to keep track of some things I need to do.
-- [a] Marking system.
+- [x] Marking system.
 - [n] Basic Lua Config for Keymaps.
 - [x] Make tiling work per display.
 - [x] Actually handle destroying windows.
