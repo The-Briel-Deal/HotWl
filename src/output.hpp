@@ -23,6 +23,7 @@ struct GfOutput {
   struct wl_listener               destroy;
   void                             set_usable_space(wlr_box box);
   wlr_box                          get_usable_space();
+  std::weak_ptr<GfOutput>          get_output_to_right() const;
 
   wlr_box                          usable_space = {0, 0, 0, 0};
 };

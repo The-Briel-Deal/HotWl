@@ -90,8 +90,14 @@ static bool handle_keybinding(class GfServer* server, xkb_keysym_t sym) {
     tiling_focus_move_in_dir(GFWL_TILING_FOCUS_UP,
                              server->focused_output->tiling_state);
   } else if (sym == server->config.keybinds.tiling_focus_right) {
-    tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT,
-                             server->focused_output->tiling_state);
+    if (!tiling_focus_move_in_dir(GFWL_TILING_FOCUS_RIGHT,
+                                  server->focused_output->tiling_state)) {
+      auto focused_output_to_right =
+          server->focused_output->get_output_to_right();
+      if (!focused_output_to_right.expired()) {
+        server->focused_output = focused_output_to_right.lock();
+      }
+    }
   } else if (sym == server->config.keybinds.flip_split_direction) {
     server->focused_output->tiling_state->flip_split_direction();
   } else if (sym == server->config.keybinds.next_monitor) {

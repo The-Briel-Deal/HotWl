@@ -174,3 +174,18 @@ void server_new_output(struct wl_listener* /*listener*/, void* data) {
                                      output->output_layout_output,
                                      output->scene_output);
 }
+
+std::weak_ptr<GfOutput> GfOutput::get_output_to_right() const {
+  wlr_box this_box{0, 0, 0, 0};
+  this_box.x = this->scene_output->x;
+  this_box.y = this->scene_output->y;
+  std::shared_ptr<GfOutput> closest_output;
+  int                       closest_x_val = 0;
+  for (const auto& output : g_Server.outputs) {
+    if (this_box.x < output->scene_output->x && this_box.x > closest_x_val) {
+      closest_output = output;
+      closest_x_val  = output->scene_output->x;
+    }
+  }
+  return closest_output;
+}
