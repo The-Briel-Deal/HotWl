@@ -22,8 +22,11 @@ public:
 
   ~GfContainerToplevel();
 
-  void              set_container_box(struct wlr_box box_in) final;
-  void              set_focused_toplevel_container();
+  void set_container_box(struct wlr_box box_in) final;
+  void set_focused_toplevel_container();
+
+  std::shared_ptr<GfContainerToplevel>
+                    get_container_in_dir(enum gfwl_tiling_focus_direction dir);
 
   GfToplevel* const toplevel;
 };
