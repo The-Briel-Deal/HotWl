@@ -11,13 +11,7 @@
 class GfContainer;
 class GfContainerToplevel;
 struct GfTilingState;
-
-enum gfwl_tiling_focus_direction {
-  GFWL_TILING_FOCUS_LEFT = 1,
-  GFWL_TILING_FOCUS_DOWN,
-  GFWL_TILING_FOCUS_UP,
-  GFWL_TILING_FOCUS_RIGHT,
-};
+enum gfwl_tiling_focus_direction : char;
 
 struct GfPoint {
   int x;
