@@ -12,7 +12,7 @@ back). I also aim to extend this in the future with automatically assigning
 marks on window creation. And 'branding' a window with a permanent mark that will
 open that application if its closed and bring you to it if its open.
 
-DISCLAIMER: This software has likely has major jank you probably don't want to 
+DISCLAIMER: This software most likely has major jank you probably don't want to 
 use this rn lol. I am mostly making this for fun and learning.
 
 ## Building
